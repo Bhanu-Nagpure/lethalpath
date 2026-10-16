@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lethal Combos — LethalPath</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .metric{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;margin-top:24px}
+  .metric .k{background:var(--surface);padding:16px}
+  .metric .v{font-family:var(--mono);font-size:1.35rem;font-weight:600;letter-spacing:-.02em;line-height:1}
+  .metric .l{font-size:.71rem;color:var(--mute);margin-top:5px}
+  @media (max-width:820px){.metric{grid-template-columns:repeat(2,1fr)}}
+  .paircell{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .legs{display:flex;gap:3px}
+  .leg{width:20px;height:6px;border-radius:2px;background:var(--surface-3)}
+  .leg.on-un{background:var(--untrusted)} .leg.on-pr{background:var(--private)}
+  .leg.on-sk{background:var(--sink)}
+  .rowdetail{background:#050607;border-top:1px solid var(--line);padding:16px 18px;
+    font-family:var(--mono);font-size:.76rem;line-height:2;color:var(--body)}
+</style>
+</head>
+<body>
+
+<div class="mockbar">MOCK · static preview · install counts and ranks are placeholders, not harvested figures</div>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2.4 4.2 6v5.6c0 4.7 3.4 8.4 7.8 9.4 4.4-1 7.8-4.7 7.8-9.4V6L12 2.4z" stroke="#FF8A8A" stroke-width="1.5"/>
+        <path d="M9.1 12.1l2 2 4-4.1" stroke="#59D499" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      LethalPath
+    </a>
+    <span class="spacer"></span>
+    <a class="nb" href="index.html">Home</a>
+    <a class="nb" href="scan.html">Scan</a>
+    <a class="nb" href="combos.html" aria-current="page">Lethal Combos</a>
+    <a class="nb" href="benchmarks.html">Benchmarks</a>
+    <a class="nb" href="threat-model.html">Threat model</a>
+  </div>
+</nav>
+
+<section style="border-top:0">
+  <div class="wrap">
+    <p class="eyebrow" data-reveal>Lethal Combos</p>
+    <div class="split-a mt-xl">
+      <div>
+        <h2>Popular tool <em style="font-style:normal;color:var(--danger)">pairs</em> that make a leak</h2>
+      </div>
+      <div>
+        <p class="lede">Everyone scores servers one at a time. Every server below looks fine on its own &mdash; that is the entire point. Ranked by how many people have installed each pair.</p>
+      </div>
+    </div>
+
+    <div class="metric">
+      <div class="k"><div class="v">20,537</div><div class="l">servers in the catalog</div></div>
+      <div class="k"><div class="v">7,964</div><div class="l">tools read from them</div></div>
+      <div class="k"><div class="v" style="color:var(--danger)">148</div><div class="l">pairs that complete the trifecta</div></div>
+      <div class="k"><div class="v" style="color:var(--untrusted)">0</div><div class="l">servers that declare their own trust level</div></div>
+    </div>
+
+    <div class="panel mt-xl" style="overflow:hidden">
+      <div class="panel-h">
+        <span class="dot" style="background:var(--danger)"></span> top pairs by exposure
+        <span class="spacer"></span><span>server-level · coarse on purpose</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40px">#</th><th>pair</th><th style="width:76px">legs</th>
+            <th>why the pair is lethal</th><th style="width:170px">installs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rank">01</td>
+            <td><div class="paircell"><span class="mono">github</span><span class="muted">+</span><span class="mono">filesystem</span></div></td>
+            <td><div class="legs" title="reads untrusted, reads private, writes public"><i class="leg on-un"></i><i class="leg on-pr"></i><i class="leg on-sk"></i></div></td>
+            <td>reads public issues and private repos, writes to a shared folder</td>
+            <td><span class="bar" style="width:120px"></span> <span class="rank">87.5k</span></td>
+          </tr>
+          <tr>
+            <td class="rank">02</td>
+            <td><div class="paircell"><span class="mono">fetch</span><span class="muted">+</span><span class="mono">slack</span></div></td>
+            <td><div class="legs"><i class="leg on-un"></i><i class="leg"></i><i class="leg on-sk"></i></div></td>
+            <td>reads any web page, posts to a channel other people can read</td>
+            <td><span class="bar" style="width:90px"></span> <span class="rank">64.1k</span></td>
+          </tr>
+          <tr>
+            <td class="rank">03</td>
+            <td><div class="paircell"><span class="mono">github</span><span class="muted">+</span><span class="mono">git</span></div></td>
+            <td><div class="legs"><i class="leg on-un"></i><i class="leg on-pr"></i><i class="leg on-sk"></i></div></td>
+            <td>private read plus an outbound push, in the same agent session</td>
+            <td><span class="bar" style="width:70px"></span> <span class="rank">51.9k</span></td>
+          </tr>
+          <tr>
+            <td class="rank">04</td>
+            <td><div class="paircell"><span class="mono">gmail</span><span class="muted">+</span><span class="mono">postgres</span></div></td>
+            <td><div class="legs"><i class="leg on-un"></i><i class="leg on-pr"></i><i class="leg on-sk"></i></div></td>
+            <td>reads mail, queries customer rows, and can send outward</td>
+            <td><span class="bar" style="width:58px"></span> <span class="rank">43.7k</span></td>
+          </tr>
+          <tr>
+            <td class="rank">05</td>
+            <td><div class="paircell"><span class="mono">puppeteer</span><span class="muted">+</span><span class="mono">filesystem</span></div></td>
+            <td><div class="legs"><i class="leg on-un"></i><i class="leg"></i><i class="leg on-sk"></i></div></td>
+            <td>browses untrusted pages and writes whatever it finds to disk</td>
+            <td><span class="bar" style="width:38px"></span> <span class="rank">28.2k</span></td>
+          </tr>
+          <tr>
+            <td class="rank">06</td>
+            <td><div class="paircell"><span class="mono">slack</span><span class="muted">+</span><span class="mono">github</span></div></td>
+            <td><div class="legs"><i class="leg on-un"></i><i class="leg on-pr"></i><i class="leg on-sk"></i></div></td>
+            <td>reads channel messages, reads private code, can post anywhere</td>
+            <td><span class="bar" style="width:33px"></span> <span class="rank">24.6k</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- one expanded row, to show a click reveals the real path -->
+      <div class="rowdetail">
+        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+          <span style="color:var(--danger)">↳ github + filesystem &mdash; the real path</span>
+          <span class="tag tag-pl">expanded from 01</span>
+        </div>
+        <div class="mt-md">
+<span class="tag tag-un">stranger's words</span> public issue <span style="color:var(--ash)">· github</span><br>
+&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> github.get_issue<br>
+&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> <span style="color:var(--sink)">agent context</span> <span style="color:var(--ash)">· tainted</span><br>
+&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> filesystem.write_file<br>
+&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> <span style="color:var(--private)">/home/me/proj</span> <span style="color:var(--ash)">· private</span><br>
+&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> <span class="tag tag-sk">public sink</span> any tool that pushes from that folder
+        </div>
+      </div>
+    </div>
+
+    <div class="split mt-xl">
+      <div class="card">
+        <h4>How to read this</h4>
+        <ul class="small mt-md" style="color:var(--body);padding-left:18px">
+          <li style="margin:7px 0"><strong style="color:var(--ink)">legs</strong> shows which of the three a pair covers: a stranger's words, your private data, a way out.</li>
+          <li style="margin:7px 0">A pair is only lethal when all three legs are present <em>and</em> the agent's context joins them.</li>
+          <li style="margin:7px 0">This table is <strong style="color:var(--ink)">coarse on purpose</strong>. It finds candidates; clicking one runs the real path query.</li>
+          <li style="margin:7px 0">Colour is never the only signal &mdash; each leg is named in the text too.</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:#3a2a12">
+        <h4 style="color:var(--untrusted)">What this table is not</h4>
+        <ul class="small mt-md" style="color:var(--body);padding-left:18px">
+          <li style="margin:7px 0"><strong style="color:var(--ink)">Not a vulnerability report.</strong> A combination is not a bug in either server. Both behave as documented.</li>
+          <li style="margin:7px 0"><strong style="color:var(--ink)">Not a full exploit.</strong> We describe capabilities only. We never publish payloads.</li>
+          <li style="margin:7px 0"><strong style="color:var(--ink)">Not authoritative.</strong> Labels are inferred. Method and precision are on <a href="benchmarks.html">Benchmarks</a>.</li>
+          <li style="margin:7px 0"><strong style="color:var(--ink)">Disputable.</strong> Maintainers can ask us to correct or remove an entry &mdash; see <a href="disclosure.html">Disclosure</a>.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap cols">
+    <div>
+      <a class="brand" href="index.html" style="font-size:.88rem">
+        <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 2.4 4.2 6v5.6c0 4.7 3.4 8.4 7.8 9.4 4.4-1 7.8-4.7 7.8-9.4V6L12 2.4z" stroke="#FF8A8A" stroke-width="1.5"/>
+          <path d="M9.1 12.1l2 2 4-4.1" stroke="#59D499" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        LethalPath
+      </a>
+      <p class="mt-md" style="max-width:38ch">Built for Graph Hacks by WeMakeDevs × FalkorDB. Tracks 01 and 02.</p>
+    </div>
+    <div class="navlinks">
+      <a href="scan.html">Scan</a>
+      <a href="combos.html">Lethal Combos</a>
+      <a href="benchmarks.html">Benchmarks</a>
+      <a href="threat-model.html">Threat model</a>
+      <a href="disclosure.html">Disclosure</a>
+    </div>
+  </div>
+</footer>
+
+<script src="animate.js"></script>
+</body>
+</html>

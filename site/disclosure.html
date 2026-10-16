@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Disclosure &amp; AI use — LethalPath</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .main{max-width:800px}
+  .learn{border-left:1px solid var(--line);padding-left:17px;margin-top:22px}
+  .learn h3{margin-bottom:7px}
+  .learn p{color:var(--body);font-size:.92rem}
+  .steps{counter-reset:d;margin-top:20px}
+  .dstep{display:grid;grid-template-columns:34px 1fr;gap:13px;align-items:start;
+    padding:15px 0;border-bottom:1px solid var(--line-soft)}
+  .dstep:last-child{border-bottom:0}
+  .dstep .n{counter-increment:d;width:26px;height:26px;border-radius:var(--r-xs);
+    display:grid;place-items:center;font-family:var(--mono);font-size:.75rem;
+    background:var(--surface-3);color:var(--mute)}
+  .dstep .n::before{content:counter(d)}
+  .dstep p{color:var(--body);font-size:.9rem;margin-top:5px}
+  .ai{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;margin-top:20px}
+  .ai .k{background:var(--surface);padding:20px}
+  .ai h4{margin-bottom:11px}
+  .ai ul{margin:0;padding-left:18px;color:var(--body);font-size:.87rem}
+  .ai li{margin:6px 0}
+  @media (max-width:760px){.ai{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="mockbar">MOCK · static preview · wording is illustrative, not legal advice</div>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2.4 4.2 6v5.6c0 4.7 3.4 8.4 7.8 9.4 4.4-1 7.8-4.7 7.8-9.4V6L12 2.4z" stroke="#FF8A8A" stroke-width="1.5"/>
+        <path d="M9.1 12.1l2 2 4-4.1" stroke="#59D499" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      LethalPath
+    </a>
+    <span class="spacer"></span>
+    <a class="nb" href="index.html">Home</a>
+    <a class="nb" href="scan.html">Scan</a>
+    <a class="nb" href="combos.html">Lethal Combos</a>
+    <a class="nb" href="benchmarks.html">Benchmarks</a>
+    <a class="nb" href="threat-model.html">Threat model</a>
+  </div>
+</nav>
+
+<section style="border-top:0">
+  <div class="wrap main">
+    <p class="eyebrow" data-reveal>Disclosure</p>
+    <h2 style="margin-top:14px" data-reveal>AI use, and how we report what we find</h2>
+    <p class="lede mt-md">Two separate obligations: being honest about how this was built, and being careful about what we tell the world.</p>
+
+    <h3 class="mt-sc">01 &mdash; how this was built</h3>
+    <div class="ai">
+      <div class="k">
+        <h4 style="color:var(--sink)">AI assistance was used</h4>
+        <ul>
+          <li>Scaffolding and boilerplate</li>
+          <li>Drafting documentation</li>
+          <li>A JSON-schema classifier that proposes trust labels</li>
+          <li>Suggesting Cypher that a human then reviewed</li>
+        </ul>
+      </div>
+      <div class="k">
+        <h4 style="color:var(--safe)">Human checkpoints</h4>
+        <ul>
+          <li>Every Cypher query run against a live 6.0.2 instance before commit</li>
+          <li>Every benchmark number read by hand from <span class="mono">eval/results/*.json</span></li>
+          <li>The gold label set hand-labelled, with no model input</li>
+          <li>Graph model and architecture decisions are ours</li>
+        </ul>
+      </div>
+    </div>
+    <p class="mt-lg" style="color:var(--body);font-size:.92rem">
+      We can walk through any query, index and parameter choice on request. If a number on this site
+      cannot be traced to a file in the repo, treat it as a bug and tell us.
+    </p>
+
+    <h3 class="mt-sc">02 &mdash; what we learned</h3>
+    <p class="mt-md" style="color:var(--body)">The short version, because it shaped the product more than any feature did.</p>
+
+    <div class="learn">
+      <h3>We started with the wrong idea, and the research killed it</h3>
+      <p>Our first plan was a router that trims MCP tool schemas to save context. The pain is real
+        (definitions can eat 130k tokens), but the fix does not need a graph &mdash; keyword search,
+        embeddings or built-in tool search all work, and Anthropic already ships one. Under this
+        hackathon's rules, a product that survives deleting its graph is disqualified. Ours would
+        have. We dropped it.</p>
+    </div>
+    <div class="learn">
+      <h3>The idea we landed on fails the same test in the other direction</h3>
+      <p>&ldquo;Is there a route from a stranger's words to my public data?&rdquo; has no answer
+        without edges. That is not a marketing line; it is the reason the product exists.</p>
+    </div>
+    <div class="learn">
+      <h3>We found documented behaviour that does not run</h3>
+      <p>The engine's docs describe a shortest-path index absent from the pinned image, and a
+        parameter-passing form that silently fails to bind. We wrote fallbacks and said so, rather
+        than quoting a benchmark we could not reproduce.</p>
+    </div>
+    <div class="learn">
+      <h3>Our first colour palette failed accessibility</h3>
+      <p>The two colours carrying the entire explanation &mdash; private data and the leak path &mdash;
+        measured 4.6:1 and 5.5:1 against the background, below the AAA bar we had claimed. We now
+        measure every pair instead of trusting them.</p>
+    </div>
+    <div class="learn">
+      <h3>A published paper already solved the easy half</h3>
+      <p>We claimed nobody models tool dependencies. Someone does, on a public benchmark. We
+        re-implemented their baseline, scored below it, and printed the gap. Better to lose a row
+        honestly than to be caught overclaiming.</p>
+    </div>
+
+    <h3 class="mt-sc">03 &mdash; reporting findings in other people's servers</h3>
+    <p class="mt-md" style="color:var(--body)">
+      Composition is not a vulnerability. Most of what we surface is a combination of servers that
+      each behave correctly. We treat that distinction as a hard rule, not a courtesy.
+    </p>
+
+    <div class="steps">
+      <div class="dstep">
+        <div class="n"></div>
+        <div>
+          <h4>We file an issue only when it is one server's fault</h4>
+          <p>Either a single server holds all three legs, or its annotations are wrong enough to make
+            clients mislabel it. A pair of correct servers is not reported to either maintainer.</p>
+        </div>
+      </div>
+      <div class="dstep">
+        <div class="n"></div>
+        <div>
+          <h4>Private channel first, always</h4>
+          <p>We read <span class="mono">SECURITY.md</span> before anything else. Where a private
+            channel exists, we use it and wait for a reply before mentioning it publicly.</p>
+        </div>
+      </div>
+      <div class="dstep">
+        <div class="n"></div>
+        <div>
+          <h4>Capabilities, never payloads</h4>
+          <p>Our reports describe what a tool can read or write, suggest annotation fixes and scopes,
+            and never include a working injection or steps against real users.</p>
+        </div>
+      </div>
+      <div class="dstep">
+        <div class="n"></div>
+        <div>
+          <h4>Every leaderboard entry is disputable</h4>
+          <p>A maintainer can ask us to correct or remove their entry, with no argument. The contact
+            line is on every page.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-sc" style="border-left:2px solid var(--safe)">
+      <h4>Found a problem in LethalPath?</h4>
+      <p class="small mt-md" style="color:var(--body)">
+        Please report it privately first, so we can ship a fix before it is public. We aim to
+        acknowledge within 48 hours.
+      </p>
+      <div class="code mt-md"><pre><span class="com"># see SECURITY.md in the repo</span>
+security@example.invalid      <span class="com"># mock address</span></pre></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap cols">
+    <div>
+      <a class="brand" href="index.html" style="font-size:.88rem">
+        <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 2.4 4.2 6v5.6c0 4.7 3.4 8.4 7.8 9.4 4.4-1 7.8-4.7 7.8-9.4V6L12 2.4z" stroke="#FF8A8A" stroke-width="1.5"/>
+          <path d="M9.1 12.1l2 2 4-4.1" stroke="#59D499" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        LethalPath
+      </a>
+      <p class="mt-md" style="max-width:38ch">Built for Graph Hacks by WeMakeDevs × FalkorDB. Tracks 01 and 02.</p>
+    </div>
+    <div class="navlinks">
+      <a href="scan.html">Scan</a>
+      <a href="combos.html">Lethal Combos</a>
+      <a href="benchmarks.html">Benchmarks</a>
+      <a href="threat-model.html">Threat model</a>
+      <a href="disclosure.html">Disclosure</a>
+    </div>
+  </div>
+</footer>
+
+<script src="animate.js"></script>
+</body>
+</html>

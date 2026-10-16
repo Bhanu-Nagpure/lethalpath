@@ -1,0 +1,464 @@
+/* ==========================================================================
+   LethalPath — design system
+
+   Tokens extracted from real premium developer-tool systems (Raycast's
+   published design tokens, read as DATA via Bright Data) and adapted. The
+   point of the exercise: remove the tells that make a site read as machine-made.
+
+   What was wrong before, and what changed:
+     - every heading at 700          -> 500/600, display gets tighter tracking
+     - uniform 12px radius everywhere -> a real scale (4/6/8/10/14/9999)
+     - one border colour              -> hairline / soft / strong tiers
+     - 78px on every section          -> 88px desktop rhythm, varied where it reads better
+     - accent colour on all chrome    -> monochrome chrome; colour ONLY where it
+                                         carries meaning (the four legs + the fix)
+     - -0.02em on body text          -> tracking scales with size; body gets none
+     - four identical cards in a grid -> asymmetric splits and a real hierarchy
+
+   Accessibility (measured, not assumed). Worst-case surface is --surface-2.
+     --ink        #F4F4F6 on --canvas   18.24:1  AAA
+     --body       #CDCDCD on --canvas   12.60:1  AAA
+     --mute       #9C9C9D on --canvas    7.30:1  AAA
+     --untrusted  #FFC533 on --canvas   12.68:1  AAA   chip 9.76:1 AAA
+     --private    #B69EFB on --canvas    7.79:1  AAA   chip 7.09:1 AAA
+     --sink       #57C1FF on --canvas   10.00:1  AAA   chip 7.89:1 AAA
+     --danger     #FF8A8A on --canvas    7.78:1  AAA   chip 7.09:1 AAA
+     --safe       #59D499 on --canvas   10.78:1  AAA   chip 8.52:1 AAA
+     White CTA:   #000000 on #FFFFFF    21.00:1  AAA
+   ========================================================================== */
+
+:root{
+  /* surfaces — a deliberately subtle ladder, the way real systems do it */
+  --canvas:#07080a;
+  --surface:#0d0d0d;
+  --surface-2:#121212;
+  --surface-3:#18191a;
+
+  /* hairlines — three tiers, not one colour for everything */
+  --line:#242728;
+  --line-soft:rgba(255,255,255,.07);
+  --line-strong:rgba(255,255,255,.15);
+
+  /* text */
+  --ink:#F4F4F6;
+  --body:#CDCDCD;
+  --mute:#9C9C9D;
+  --ash:#777879;   /* comments/arrows — AA 4.5:1, not AAA: decorative, not prose */
+
+  /* semantic colour — used ONLY where it means something */
+  --untrusted:#FFC533;  /* a stranger's words  */
+  --private:#B69EFB;    /* your private data   */
+  --sink:#57C1FF;       /* a way out           */
+  --danger:#FF8A8A;     /* the leak path       */
+  --danger-hue:#ff6b6b; /* raw hue for fills   */
+  --safe:#59D499;       /* the fix             */
+
+  /* type */
+  --sans:"Inter","Geist",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Geist Mono","JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --feat:"calt","kern","liga";
+
+  /* radii — a scale, not one value */
+  --r-xs:4px; --r-sm:6px; --r-md:8px; --r-lg:10px; --r-xl:14px; --r-full:9999px;
+
+  /* spacing */
+  --s-xxs:2px; --s-xs:4px; --s-sm:8px; --s-md:12px; --s-lg:16px;
+  --s-xl:24px; --s-xxl:32px; --section:88px;
+
+  --shadow:0 20px 50px -24px #000;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--canvas);color:var(--ink);
+  font-family:var(--sans);font-weight:400;font-size:15px;line-height:1.6;
+  font-feature-settings:var(--feat);letter-spacing:0;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  min-height:100vh;
+}
+/* Atmosphere. A product page is a room, not a flat colour. Grid + two slow
+   blooms, the way Cloudflare's marketing surface reads: depth first, content
+   second. Pure CSS, no image file, so it cannot 404. */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(900px 520px at 78% -10%, rgba(255,138,138,.16), transparent 60%),
+    radial-gradient(700px 480px at 8% 18%, rgba(87,193,255,.10), transparent 55%),
+    radial-gradient(600px 400px at 50% 110%, rgba(89,212,153,.07), transparent 50%),
+    var(--canvas);
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size:72px 72px;
+  mask-image:radial-gradient(ellipse at 50% 20%, #000 20%, transparent 75%);
+  animation:drift 48s linear infinite;
+}
+@keyframes drift{
+  from{background-position:0 0}
+  to{background-position:72px 72px}
+}
+.wrap{max-width:1120px;margin:0 auto;padding:0 var(--s-xl)}
+
+/* ---------- type scale: tracking follows size, weight stays 500/600 ---------- */
+h1,h2,h3,h4{margin:0;font-weight:600;line-height:1.12;letter-spacing:-.021em}
+h1{font-size:clamp(2.15rem,4.6vw,3.15rem);font-weight:600;letter-spacing:-.028em}
+h2{font-size:clamp(1.5rem,2.6vw,1.95rem);font-weight:600;letter-spacing:-.02em;line-height:1.2}
+h3{font-size:1.02rem;font-weight:600;letter-spacing:-.01em;line-height:1.35}
+h4{font-size:.9rem;font-weight:600;letter-spacing:.005em}
+p{margin:0}
+a{color:var(--sink);text-underline-offset:2px;text-decoration-thickness:1px}
+code,kbd{font-family:var(--mono);font-size:.87em;letter-spacing:0}
+hr{border:0;border-top:1px solid var(--line);margin:0}
+
+section{padding:var(--section) 0;border-top:1px solid var(--line)}
+section.tight{padding:56px 0}
+
+/* hero copy: larger body, generous measure */
+.lede{color:var(--body);font-size:1.02rem;line-height:1.65;max-width:60ch}
+.eyebrow{
+  font-family:var(--mono);font-size:.68rem;font-weight:500;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--mute);
+}
+.muted{color:var(--mute)}
+.small{font-size:.85rem;line-height:1.6}
+.mono{font-family:var(--mono)}
+.mt-sm{margin-top:var(--s-sm)}.mt-md{margin-top:var(--s-md)}
+.mt-lg{margin-top:var(--s-lg)}.mt-xl{margin-top:var(--s-xl)}
+.mt-xxl{margin-top:var(--s-xxl)}.mt-sc{margin-top:44px}
+
+/* ---------- mock banner ---------- */
+.mockbar{
+  position:relative;z-index:60;
+  border-bottom:1px solid var(--line);
+  background:rgba(7,8,10,.72);
+  color:var(--mute);
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.04em;
+  padding:7px 0;text-align:center;
+}
+
+/* ---------- nav: monochrome, hairline, generous height ---------- */
+nav{
+  position:sticky;top:0;z-index:50;background:rgba(7,8,10,.82);
+  backdrop-filter:blur(14px) saturate(160%);
+  border-bottom:1px solid var(--line);
+}
+nav .wrap{display:flex;align-items:center;gap:var(--s-xs);height:58px}
+.brand{
+  display:flex;align-items:center;gap:9px;font-weight:600;font-size:.94rem;
+  letter-spacing:-.01em;color:var(--ink);text-decoration:none;
+}
+.brand:hover{text-decoration:none}
+.mark{width:19px;height:19px;flex:0 0 19px}
+nav .spacer{flex:1}
+nav a.nb{
+  color:var(--body);text-decoration:none;font-size:.85rem;font-weight:450;
+  padding:6px 10px;border-radius:var(--r-sm);letter-spacing:-.005em;
+  transition:color .12s,background .12s;
+}
+nav a.nb:hover{color:var(--ink);background:var(--surface-2)}
+nav a.nb[aria-current="page"]{color:var(--ink)}
+
+/* ---------- surfaces ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl)}
+.panel-h{
+  display:flex;align-items:center;gap:var(--s-sm);padding:11px 15px;
+  border-bottom:1px solid var(--line);font-family:var(--mono);font-size:.72rem;
+  color:var(--mute);letter-spacing:.01em;
+}
+.panel-h .spacer{flex:1}
+.panel-b{padding:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);padding:20px}
+
+/* ---------- buttons: white primary (Raycast), hairline ghost ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;font:inherit;font-weight:520;
+  font-size:.88rem;letter-spacing:-.004em;padding:0 15px;height:36px;
+  border-radius:var(--r-md);cursor:pointer;border:1px solid transparent;
+  text-decoration:none;transition:background .12s,color .12s,border-color .12s,transform .1s;
+}
+.btn:hover{text-decoration:none}
+.btn:active{transform:translateY(.5px)}
+.btn:focus-visible{outline:2px solid var(--sink);outline-offset:2px}
+.btn-primary{background:#fff;color:#000}
+.btn-primary:hover{background:#e8e8e8}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+.btn-ghost:hover{background:var(--surface-2);border-color:var(--line-strong)}
+.btn-quiet{background:var(--surface-3);color:var(--ink);border-color:transparent}
+.btn-quiet:hover{background:#1f2022}
+.btn-safe{background:var(--safe);color:#06170f}
+.btn-safe:hover{filter:brightness(1.06)}
+.btn-sm{height:30px;padding:0 11px;font-size:.8rem;border-radius:var(--r-sm)}
+
+/* ---------- pills + tags ---------- */
+.pill{
+  display:inline-flex;align-items:center;font-family:var(--mono);font-size:.68rem;
+  color:var(--mute);border:1px solid var(--line);border-radius:var(--r-full);
+  padding:4px 10px;white-space:nowrap;
+}
+.tag{
+  display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);
+  font-size:.67rem;font-weight:500;padding:2px 8px;border-radius:var(--r-xs);
+  letter-spacing:.01em;white-space:nowrap;border:1px solid transparent;
+}
+/* each pair solved so the label clears 7:1 on the WORST surface (--surface-2) */
+.tag-un{background:rgba(255,197,51,.10);color:#FFC533;border-color:rgba(255,197,51,.18)}
+.tag-pr{background:rgba(167,139,250,.10);color:#B69EFB;border-color:rgba(167,139,250,.18)}
+.tag-sk{background:rgba(87,193,255,.10);color:#57C1FF;border-color:rgba(87,193,255,.18)}
+.tag-le{background:rgba(255,107,107,.10);color:#FF8A8A;border-color:rgba(255,107,107,.18)}
+.tag-sf{background:rgba(89,212,153,.10);color:#59D499;border-color:rgba(89,212,153,.18)}
+.tag-pl{background:var(--surface-3);color:var(--mute);border-color:var(--line)}
+.dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px;display:inline-block}
+
+/* ---------- code ---------- */
+.code{
+  background:#050607;border:1px solid var(--line);border-radius:var(--r-lg);
+  overflow:auto;
+}
+.code pre{
+  margin:0;padding:16px 18px;font-family:var(--mono);font-size:.78rem;
+  line-height:1.72;color:var(--body);white-space:pre;letter-spacing:0;
+}
+.kw{color:#FF9EC4;font-weight:500}
+.fn{color:var(--sink)}
+.rel{color:var(--untrusted)}
+.lbl{color:var(--private)}
+.str{color:var(--safe)}
+.com{color:var(--ash)}
+.num{color:#FFD9A0}
+
+/* ---------- tables: quiet, ruled, no zebra stripes ---------- */
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line-soft)}
+tbody tr:last-child td{border-bottom:0}
+th{
+  font-family:var(--mono);font-size:.67rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--line);
+}
+td{color:var(--body)}
+td strong{color:var(--ink);font-weight:520}
+tbody tr:hover{background:var(--surface)}
+.rank{font-family:var(--mono);color:var(--mute);font-size:.8rem}
+.bar{height:5px;border-radius:3px;background:var(--danger-hue);min-width:5px;
+  display:inline-block;vertical-align:middle}
+.bar-safe{background:var(--safe)}
+
+/* ---------- layout ---------- */
+.grid{display:grid;gap:var(--s-lg)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-xl)}
+.split-hero{display:grid;grid-template-columns:1.06fr .94fr;gap:56px;align-items:center}
+.split-a{display:grid;grid-template-columns:.85fr 1.15fr;gap:48px;align-items:start}
+.split-b{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:start}
+@media (max-width:1000px){
+  .split,.split-hero,.split-a,.split-b,.g3{grid-template-columns:1fr}
+  :root{--section:64px}
+}
+@media (max-width:720px){.g2{grid-template-columns:1fr}}
+
+/* ---------- diagram frame ---------- */
+.diagram{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-xl);padding:16px;box-shadow:var(--shadow);
+}
+.diagram svg{width:100%;height:auto;display:block}
+.dlegend{
+  display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;padding-top:13px;
+  border-top:1px solid var(--line-soft);font-size:.76rem;color:var(--body);
+}
+.dlegend span{display:inline-flex;align-items:center;gap:6px}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line);padding:38px 0;color:var(--mute);font-size:.83rem}
+footer .cols{display:flex;justify-content:space-between;gap:var(--s-xl);flex-wrap:wrap}
+footer a{color:var(--body);text-decoration:none;font-size:.83rem}
+footer a:hover{color:var(--ink)}
+footer .navlinks{display:flex;gap:22px;flex-wrap:wrap}
+
+.note{
+  font-family:var(--mono);font-size:.68rem;color:var(--mute);
+  border:1px dashed var(--line-strong);border-radius:var(--r-sm);
+  padding:6px 11px;display:inline-block;letter-spacing:.01em;
+}
+
+/* ---------- product chrome (Cloudflare/GitHub pattern: the UI is the hero) ---------- */
+.window{
+  background:rgba(13,13,13,.86);
+  border:1px solid var(--line-strong);
+  border-radius:16px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.04) inset,
+    0 40px 80px -32px rgba(0,0,0,.75),
+    0 0 80px -20px rgba(255,138,138,.18);
+  overflow:hidden;
+  backdrop-filter:blur(8px);
+}
+.window-bar{
+  display:flex;align-items:center;gap:8px;height:40px;padding:0 14px;
+  background:rgba(255,255,255,.03);border-bottom:1px solid var(--line);
+}
+.dots{display:flex;gap:6px}
+.dots i{width:8px;height:8px;border-radius:50%;display:block;background:#3a3d42}
+.dots i:nth-child(1){background:#ff5f57}
+.dots i:nth-child(2){background:#febc2e}
+.dots i:nth-child(3){background:#28c840}
+.window-title{
+  flex:1;text-align:center;font-family:var(--mono);font-size:.68rem;color:var(--mute);
+  letter-spacing:.02em;
+}
+.window-body{padding:16px 16px 8px}
+
+/* Designed empty slot. Not a broken image: a composed frame with the aspect
+   ratio, caption, and inner grid the real screenshot will occupy. */
+.shot{
+  position:relative;border-radius:12px;overflow:hidden;
+  border:1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent 40%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 1px, transparent 1px 28px),
+    #0a0c10;
+  aspect-ratio:16/10;
+  display:flex;align-items:flex-end;
+}
+.shot figcaption{
+  width:100%;padding:12px 14px;
+  background:linear-gradient(transparent, rgba(0,0,0,.72));
+  font-family:var(--mono);font-size:.68rem;color:var(--body);letter-spacing:.02em;
+}
+.shot .ghost{
+  position:absolute;inset:18% 12% auto;height:46%;
+  border:1px dashed rgba(255,255,255,.16);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--mute);font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.hero-product{padding:72px 0 24px}
+.hero-copy h1{font-size:clamp(2.6rem, 5.4vw, 4.4rem);letter-spacing:-.038em;line-height:1.02;max-width:14ch}
+.kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:.72rem;color:var(--body);
+  border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;
+  background:rgba(255,255,255,.03);
+}
+.kicker b{color:var(--ink);font-weight:560}
+
+.stage{
+  display:grid;grid-template-columns:1.05fr .95fr 1.05fr;gap:18px;align-items:end;
+  margin-top:28px;
+}
+.stage .window:nth-child(2){transform:translateY(-18px)}
+@media (max-width:980px){
+  .stage{grid-template-columns:1fr}
+  .stage .window:nth-child(2){transform:none}
+}
+
+.statrow{
+  display:grid;grid-template-columns:1.2fr repeat(3,1fr);gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+}
+.statrow > div{background:rgba(13,13,13,.8);padding:22px 20px}
+.statrow .big{font-family:var(--mono);font-size:1.7rem;font-weight:600;letter-spacing:-.03em;line-height:1}
+@media (max-width:800px){.statrow{grid-template-columns:1fr 1fr}}
+
+/* ---------- product chrome end ---------- */
+
+/* ==========================================================================
+   MOTION
+   Two systems. Scroll reveals, and the hero attack scene (see animate.js).
+   Everything degrades to a correct static frame with JS off or reduced motion.
+   ========================================================================== */
+
+/* ---------- scroll reveal ---------- */
+[data-reveal]{
+  opacity:0;transform:translateY(14px);
+  transition:opacity .7s cubic-bezier(.2,.6,.3,1),transform .7s cubic-bezier(.2,.6,.3,1);
+  will-change:opacity,transform;
+}
+[data-reveal].in{opacity:1;transform:none}
+
+/* ---------- hero attack scene ---------- */
+.scene{position:relative}
+.scene svg{width:100%;height:auto;display:block;overflow:visible}
+
+/* graph nodes: quiet by default, activated as the packet reaches them */
+.scene .node{transition:filter .45s ease,opacity .45s ease}
+.scene .node .box{transition:stroke .4s ease,fill .4s ease,stroke-width .4s ease}
+.scene .node .lbl{transition:fill .4s ease}
+.scene .node:not(.lit){opacity:.34}
+.scene .node.lit{opacity:1}
+.scene .node.lit .box{stroke-width:1.6}
+.scene .node.lit.untrusted .box{filter:drop-shadow(0 0 7px rgba(255,197,51,.5))}
+.scene .node.lit.private   .box{filter:drop-shadow(0 0 7px rgba(182,158,251,.5))}
+.scene .node.lit.sink      .box{filter:drop-shadow(0 0 8px rgba(87,193,255,.6))}
+.scene .node.lit.danger    .box{filter:drop-shadow(0 0 8px rgba(255,138,138,.6))}
+.scene .node.lit.safe      .box{filter:drop-shadow(0 0 8px rgba(89,212,153,.55))}
+
+/* the tainted agent context — the visual turn of the whole story */
+.scene .node.tainted .box{fill:#0d2230;stroke:#57C1FF;stroke-width:2}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+.scene .node.tainted .halo{animation:pulse 1.5s ease-in-out infinite}
+
+/* the travelling data packet */
+.scene .packet{z-index:3}
+.scene .packet circle{filter:drop-shadow(0 0 6px rgba(255,138,138,.9))}
+
+/* the trail it leaves */
+.scene .trail{fill:none;stroke:#FF8A8A;stroke-width:2;stroke-linecap:round;
+  stroke-linejoin:round;opacity:.0;transition:opacity .3s ease;
+  filter:drop-shadow(0 0 5px rgba(255,138,138,.55))}
+
+/* the gate that slams shut when the fix lands */
+.scene .gate{transition:opacity .35s ease}
+.scene .gate line{stroke:#59D499;stroke-width:3;stroke-linecap:round}
+
+/* alarm ring on the agent while tainted */
+.scene .alarm{transition:opacity .5s ease}
+
+/* blocked state: everything cools down and the danger routes go grey */
+.scene.blocked .trail{stroke:#4b4f55;filter:none}
+.scene.blocked .node.lit.danger .box{filter:none}
+.scene.blocked .node.lit.danger .box{stroke:#4b4f55}
+.scene.blocked .node.lit.danger .lbl{fill:#777879}
+.scene.blocked .alarm{opacity:0}
+
+/* narration bar */
+.caption{
+  margin-top:14px;padding:12px 15px;border-radius:var(--r-md);
+  background:var(--surface-2);border:1px solid var(--line);
+  font-size:.88rem;color:var(--ink);min-height:44px;
+  display:flex;align-items:center;gap:10px;
+  transition:border-color .3s ease,background .3s ease;
+}
+.caption::before{
+  content:"";width:6px;height:6px;border-radius:50%;flex:0 0 6px;
+  background:var(--mute);transition:background .3s ease;
+}
+.caption[data-tone="untrusted"]{border-color:rgba(255,197,51,.35)}
+.caption[data-tone="untrusted"]::before{background:var(--untrusted)}
+.caption[data-tone="private"]{border-color:rgba(182,158,251,.35)}
+.caption[data-tone="private"]::before{background:var(--private)}
+.caption[data-tone="sink"]{border-color:rgba(87,193,255,.35)}
+.caption[data-tone="sink"]::before{background:var(--sink)}
+.caption[data-tone="danger"]{border-color:rgba(255,138,138,.4)}
+.caption[data-tone="danger"]::before{background:var(--danger)}
+.caption[data-tone="safe"]{border-color:rgba(89,212,153,.4)}
+.caption[data-tone="safe"]::before{background:var(--safe)}
+
+.scene-bar{
+  display:flex;align-items:center;gap:12px;margin-top:10px;
+  font-family:var(--mono);font-size:.7rem;color:var(--mute);
+}
+.scene-bar .spacer{flex:1}
+
+/* reduced motion: no transforms, no autoplay, correct final frame */
+@media (prefers-reduced-motion:reduce){
+  [data-reveal]{opacity:1;transform:none;transition:none}
+  .scene *{transition:none!important;animation:none!important}
+  *{transition:none!important}
+}
