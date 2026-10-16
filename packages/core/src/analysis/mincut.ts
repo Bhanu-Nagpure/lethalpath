@@ -71,3 +71,26 @@ export function minCut(
 
   return { grants, edges: crossing, maxFlow };
 }
+
+/** The shape `algo.maxFlow` returns through the typed FalkorDB client. */
+export interface MaxFlowRow {
+  maxFlow: number;
+  edges: { id: number }[];
+  edgeFlows: number[];
+}
+
+/**
+ * Join a FalkorDB max-flow reply to the graph's edges and return the cut.
+ * This is the only place the product turns a sponsor result into a decision.
+ */
+export function cutFromMaxFlow(
+  sources: number[],
+  allEdges: FlowEdge[],
+  row: MaxFlowRow,
+): Cut {
+  const flowByEdge = new Map<number, number>();
+  row.edges.forEach((edge, i) => {
+    flowByEdge.set(edge.id, row.edgeFlows[i] ?? 0);
+  });
+  return minCut(sources, allEdges, flowByEdge, row.maxFlow);
+}
