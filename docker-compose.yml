@@ -1,0 +1,14 @@
+services:
+  falkordb:
+    # Pinned by tag, never :latest — the tag moved once already during this
+    # event and we do not want a silent engine change under a running demo.
+    image: falkordb/falkordb:6.0.2
+    ports:
+      - "6379:6379"
+      - "3000:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
