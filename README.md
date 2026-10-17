@@ -4,7 +4,7 @@
 
 # LethalPath
 
-*Find the MCP tool combinations that let an agent leak your data, and the one permission that stops it.*
+*Find the MCP tool combinations that let an agent leak your data, and the fewest permissions that stop it.*
 
 [![CI](https://github.com/bhanu-dev82/lethalpath/actions/workflows/ci.yml/badge.svg)](https://github.com/bhanu-dev82/lethalpath/actions/workflows/ci.yml)
 [![license: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-0B6E99?style=flat-square)](./LICENSE)
@@ -17,8 +17,8 @@
 store the answer. It is the answer.
 
 Finds every route by which an AI agent can be tricked into leaking your data
-across its MCP servers, then computes the one permission to revoke that closes
-them all — without breaking your work.
+across its MCP servers, then computes the fewest permissions to revoke that
+close them all — without breaking your work.
 
 Built for [Graph Hacks](https://www.wemakedevs.org/hackathons/falkordb)
 (WeMakeDevs × FalkorDB, 15–18 Oct 2026). Tracks: **T01** Agents That Act on

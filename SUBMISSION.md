@@ -6,8 +6,8 @@ sync with what is actually true at submission time.
 ## One-liner (used verbatim in the portal)
 
 > LethalPath finds every route an AI agent can be tricked into leaking your
-> data through its MCP tools, then computes the one permission to revoke that
-> closes them all — and your workflows keep running.
+> data through its MCP tools, then computes the fewest permissions to revoke
+> that close them all — and your workflows keep running.
 
 ## Fields
 

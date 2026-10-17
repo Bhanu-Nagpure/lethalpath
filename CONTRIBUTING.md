@@ -1,8 +1,8 @@
 # Contributing to LethalPath
 
 LethalPath finds every route by which an AI agent can be tricked into leaking
-your data across its MCP tools, then computes the one permission to revoke that
-closes them all. The graph is the product: if a change still works after you
+your data across its MCP tools, then computes the fewest permissions to revoke
+that close them all. The graph is the product: if a change still works after you
 remove FalkorDB, it is out of scope. This file is the shortest path from a
 clone to a change that can merge.
 

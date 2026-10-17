@@ -2,7 +2,7 @@
   "name": "lethalpath",
   "private": true,
   "version": "0.0.1",
-  "description": "Find the MCP tool combinations that let an agent leak your data, and the one permission that stops it.",
+  "description": "Find the MCP tool combinations that let an agent leak your data, and the fewest permissions that stop it.",
   "license": "Apache-2.0",
   "packageManager": "pnpm@9.15.0",
   "engines": { "node": ">=20" },

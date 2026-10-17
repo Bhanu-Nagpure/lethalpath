@@ -124,8 +124,8 @@ confirm say so.
 
 One-sentence positioning for the README: *other tools tell you the trifecta (or its parts) exists;
 some draw server-level paths; LethalPath draws the cross-server resource-level paths — including
-laundering through shared storage — and computes the cheapest grant to revoke that closes them all
-under a task-preservation cost. "Graph + minimal fix" is the differentiation, and we will say
+laundering through shared storage — and computes the cheapest set of grants to revoke that closes them
+all under a task-preservation cost. "Graph + minimal fix" is the differentiation, and we will say
 exactly that.*
 
 ---
