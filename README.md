@@ -64,6 +64,10 @@ pnpm --filter @lethalpath/eval evaluate  # the 40-case eval the Results section 
 by default. One graph per config: `scan_fs-git`, `scan_clean` — FalkorDB's
 multigraph model is the isolation.
 
+Already running FalkorDB (say, from an earlier `docker compose up -d`)? Skip
+that step — every command here talks to `localhost:6379` and fails loudly if
+nothing answers.
+
 `--mcp mcp.json` puts the labeler (`packages/labeler`) in front of the same
 pipeline: the rules table labels every tool, unmatched tools are **named, not
 hidden**, and secrets never leave the machine. Point it at a real config and the
