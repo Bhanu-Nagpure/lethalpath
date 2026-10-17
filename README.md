@@ -53,6 +53,7 @@ pnpm build                               # every workspace package, in dependenc
 node packages/cli/dist/index.js scan     # builds the graph, names every route
 node packages/cli/dist/index.js fix      # algo.maxFlow → the cheapest grant to revoke
 node packages/cli/dist/index.js scan data/fixtures/clean.json   # the abstention
+node packages/cli/dist/index.js scan --mcp mcp.json            # label a real MCP config, then scan it
 
 pnpm --filter @lethalpath/core test      # the suite, against the live instance
 pnpm --filter @lethalpath/guard demo     # a live MCP session: the poisoned push is blocked, a clean one is not
@@ -62,6 +63,12 @@ pnpm --filter @lethalpath/eval evaluate  # the 40-case eval the Results section 
 `scan` and `fix` accept `--json`; both read the fixture `data/fixtures/fs-git.json`
 by default. One graph per config: `scan_fs-git`, `scan_clean` — FalkorDB's
 multigraph model is the isolation.
+
+`--mcp mcp.json` puts the labeler (`packages/labeler`) in front of the same
+pipeline: the rules table labels every tool, unmatched tools are **named, not
+hidden**, and secrets never leave the machine. Point it at a real config and the
+graph is your own arrangement — the demo config in `data/fixtures/mcp-demo.json`
+prints 567 routes and a nine-grant cut that closes all of them.
 
 ### What `scan` prints
 
@@ -155,6 +162,10 @@ free `*2..10` walk can re-enter the shared hub and enumerates exponentially — 
 twelve-tool config timed the server out; the anchored form answers in hundreds
 of milliseconds at twenty. It also tightens the semantics: the route must pass
 through the tainted context itself, not merely some context.
+
+The list itself is capped at 25 rows so a display never explodes. `LEAK_COUNT`
+runs the same anchored traversal without the cap, and `scan` prints both — a
+capped list must never be mistaken for the count.
 
 **2 — The fix (`MIN_CUT`).** One `CALL`, sources are private stores, targets are
 public sinks:

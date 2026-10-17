@@ -37,6 +37,12 @@ mkdir -p docs/live-evidence
   echo "## fix — clean (the abstention)"
   node packages/cli/dist/index.js fix data/fixtures/clean.json 2>&1
   echo
+  echo "## scan — a real mcp.json (labeler in front)"
+  node packages/cli/dist/index.js scan --mcp data/fixtures/mcp-demo.json 2>&1
+  echo
+  echo "## fix — the same mcp.json"
+  node packages/cli/dist/index.js fix --mcp data/fixtures/mcp-demo.json 2>&1
+  echo
   if [ -f packages/guard/scripts/demo.mjs ]; then
     echo "## guard — poisoned session, then a clean one"
     (cd packages/guard && node scripts/demo.mjs) 2>&1
