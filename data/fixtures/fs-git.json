@@ -1,0 +1,26 @@
+{
+  "id": "fs-git",
+  "title": "A public issue steers the agent through the private folder out to a public repo",
+  "note": "Synthetic. Three servers, three tools. No single tool is dangerous; the arrangement is.",
+  "servers": [
+    { "id": "github", "name": "GitHub MCP", "source": "fixture" },
+    { "id": "fs", "name": "Filesystem MCP", "source": "fixture" },
+    { "id": "git", "name": "Git MCP", "source": "fixture" }
+  ],
+  "resources": [
+    { "id": "issue", "kind": "github issue", "trust": "untrusted", "scope": "github.com/acme/notes/issues/42" },
+    { "id": "files", "kind": "project folder", "sensitivity": "private", "scope": "~/work/stats" },
+    { "id": "repo", "kind": "public repo", "visibility": "public", "scope": "github.com/acme/notes" }
+  ],
+  "tools": [
+    { "name": "github.read", "server": "github", "reads": ["issue"], "writes": [], "labelSource": "declared", "labelConf": 1 },
+    { "name": "filesystem.read", "server": "fs", "reads": ["files"], "writes": [], "labelSource": "declared", "labelConf": 1 },
+    { "name": "git.push", "server": "git", "reads": [], "writes": ["repo"], "labelSource": "declared", "labelConf": 1 }
+  ],
+  "tasks": [
+    { "id": "triage", "name": "triage new issues", "uses": ["github.read"] },
+    { "id": "summarise", "name": "summarise the stats folder", "uses": ["filesystem.read"] },
+    { "id": "writeback", "name": "write back the daily report", "uses": ["filesystem.read"] },
+    { "id": "changelog", "name": "publish the changelog", "uses": ["git.push"] }
+  ]
+}

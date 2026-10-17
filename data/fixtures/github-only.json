@@ -1,0 +1,15 @@
+{
+  "id": "github-only",
+  "title": "An agent that reads everything but can publish nowhere",
+  "note": "Untrusted input and private data both reach the context, but no tool writes to a public sink. There is no route. The honest answer is: nothing to revoke.",
+  "servers": [{ "id": "github", "name": "GitHub MCP", "source": "fixture" }],
+  "resources": [
+    { "id": "issue", "kind": "github issue", "trust": "untrusted", "scope": "github.com/acme/notes/issues/7" },
+    { "id": "notes", "kind": "private notes", "sensitivity": "private", "scope": "~/notes/private.md" }
+  ],
+  "tools": [
+    { "name": "github.read", "server": "github", "reads": ["issue"], "writes": [], "labelSource": "declared", "labelConf": 1 },
+    { "name": "github.readPrivate", "server": "github", "reads": ["notes"], "writes": [], "labelSource": "declared", "labelConf": 1 }
+  ],
+  "tasks": [{ "id": "triage", "name": "triage issues", "uses": ["github.read", "github.readPrivate"] }]
+}

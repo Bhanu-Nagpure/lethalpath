@@ -1,0 +1,15 @@
+{
+  "id": "clean",
+  "title": "A docs bot with nothing worth stealing",
+  "note": "Public in, public out. The scan must find zero routes and say so — a false positive here would be a bug.",
+  "servers": [{ "id": "docs", "name": "Docs MCP", "source": "fixture" }],
+  "resources": [
+    { "id": "handbook", "kind": "public handbook", "trust": "trusted", "visibility": "public", "scope": "docs.acme.test/handbook" },
+    { "id": "changelog", "kind": "public changelog", "visibility": "public", "scope": "docs.acme.test/changelog" }
+  ],
+  "tools": [
+    { "name": "docs.read", "server": "docs", "reads": ["handbook"], "writes": [], "labelSource": "declared", "labelConf": 1 },
+    { "name": "docs.publish", "server": "docs", "reads": [], "writes": ["changelog"], "labelSource": "declared", "labelConf": 1 }
+  ],
+  "tasks": [{ "id": "post", "name": "post the changelog", "uses": ["docs.publish"] }]
+}
