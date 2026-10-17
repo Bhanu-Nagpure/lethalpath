@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Scan — LethalPath</title>
-<meta name="description" content="Paste your MCP config and see the exact leak path your agent's tools can walk — secrets stripped in the browser, the route named tool by tool, and the one grant that closes it.">
+<title>Example scan — LethalPath</title>
+<meta name="description" content="An example scan from a committed CLI run: a GitHub, filesystem and git config from the official MCP server READMEs, the leak routes it contains, and the grants that close them.">
 <meta name="theme-color" content="#07080a">
 <link rel="canonical" href="https://www.devanshustudios.com/lethalpath/scan.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="LethalPath">
-<meta property="og:title" content="Scan — LethalPath">
-<meta property="og:description" content="Paste your MCP config and see the exact leak path your agent's tools can walk — secrets stripped in the browser, the route named tool by tool, and the one grant that closes it.">
+<meta property="og:title" content="Example scan — LethalPath">
+<meta property="og:description" content="An example scan from a committed CLI run: a GitHub, filesystem and git config from the official MCP server READMEs, the leak routes it contains, and the grants that close them.">
 <!-- canonical host: https://www.devanshustudios.com/lethalpath/ -->
 <meta property="og:url" content="https://www.devanshustudios.com/lethalpath/scan.html">
 <meta property="og:image" content="https://www.devanshustudios.com/lethalpath/og.png">
@@ -87,12 +87,12 @@
     <p class="eyebrow" data-reveal>Scan</p>
     <div class="split-a mt-xl">
       <div>
-        <h1 class="page-title">Paste your agent's config</h1>
-        <p class="lede mt-md">Your keys are stripped <strong style="color:var(--ink)">in your browser</strong> before anything is sent. The preview is exactly what leaves your machine.</p>
+        <h1 class="page-title">Example scan: GitHub, files and git</h1>
+        <p class="lede mt-md">This page shows output from a committed CLI run, not a live scanner. The config is built from the official MCP server READMEs. Nothing is pasted or sent from here; to scan your own config, run the CLI on your machine.</p>
       </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
-        <span class="pill">Claude Code · Claude Desktop · Cursor · VS Code</span>
-        <span class="pill">or run <span class="mono">node packages/cli/dist/index.js scan</span></span>
+        <span class="pill">run log: <span class="mono">docs/live-evidence/public-readmes-*.log</span></span>
+        <span class="pill">your config: <span class="mono">node packages/cli/dist/index.js scan --mcp &lt;file&gt;</span></span>
       </div>
     </div>
 
@@ -106,34 +106,28 @@
 
     <div class="split mt-xl">
       <div>
-        <h2 class="sr-only">Config preview</h2>
+        <h2 class="sr-only">The config that was scanned</h2>
         <div class="panel">
-          <div class="panel-h"><span class="dot" style="background:var(--mute)"></span> your config <span class="spacer"></span><span>~/.claude.json</span></div>
-<pre class="paste" tabindex="0" role="region" aria-label="Your config, with the token stripped">{
+          <div class="panel-h"><span class="dot" style="background:var(--mute)"></span> input config <span class="spacer"></span><span>mcp-public-readmes.json</span></div>
+<pre class="paste" tabindex="0" role="region" aria-label="The scanned config, copied from the official MCP server READMEs">{
   <span class="lbl">"mcpServers"</span>: {
     <span class="lbl">"github"</span>: {
       "command": "npx",
-      "env": { <span class="com">"GITHUB_TOKEN"</span>: <span class="str">"ghp_••••••••••••"</span> }
+      "args": [<span class="str">"-y"</span>, <span class="str">"@modelcontextprotocol/server-github"</span>],
+      "env": { <span class="com">"GITHUB_PERSONAL_ACCESS_TOKEN"</span>: <span class="str">"&lt;YOUR_TOKEN&gt;"</span> }
     },
     <span class="lbl">"filesystem"</span>: {
       "command": "npx",
-      "args": [<span class="str">"/home/me/proj"</span>]
+      "args": [<span class="str">"-y"</span>, <span class="str">"@modelcontextprotocol/server-filesystem"</span>,
+               <span class="str">"/Users/username/Desktop"</span>, <span class="str">"/path/to/other/allowed/dir"</span>]
     },
-    <span class="lbl">"git"</span>: { "command": "npx" }
+    <span class="lbl">"git"</span>: {
+      "command": "uvx",
+      "args": [<span class="str">"mcp-server-git"</span>, <span class="str">"--repository"</span>, <span class="str">"path/to/git/repo"</span>]
+    }
   }
 }</pre>
-          <div style="padding:0 16px 16px"><div class="strip">✓ 1 secret stripped locally &mdash; never transmitted</div></div>
-        </div>
-
-        <div class="panel mt-lg">
-          <div class="panel-h"><span class="dot" style="background:var(--safe)"></span> what will be sent</div>
-<pre class="paste" tabindex="0" role="region" aria-label="The config as sent to the scanner">{
-  <span class="lbl">"mcpServers"</span>: {
-    <span class="lbl">"github"</span>:     { "command": "npx" },
-    <span class="lbl">"filesystem"</span>: { "command": "npx", "args": [<span class="str">"/home/me/proj"</span>] },
-    <span class="lbl">"git"</span>:        { "command": "npx" }
-  }
-}</pre>
+          <div style="padding:0 16px 16px"><div class="strip">CLI log: redacted 1 value before the graph &middot; 40 tools labelled by rule &middot; 0 unlabelled</div></div>
         </div>
       </div>
 
@@ -165,7 +159,7 @@
               keeps its read and loses only the publish.
             </p>
             <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-              <button type="button" class="btn btn-safe btn-sm" data-applycut>Apply cut</button>
+              <button type="button" class="btn btn-safe btn-sm" data-applycut>Preview cut</button>
               <button type="button" class="btn btn-ghost btn-sm" data-copy="#policydiff">Copy policy diff</button>
               <a class="btn btn-ghost btn-sm" href="#cut">Why this edge?</a>
             </div>

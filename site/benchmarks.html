@@ -61,12 +61,12 @@
     <div class="split-a mt-xl">
       <div>
         <h1 class="page-title">What we measured &mdash; including where we lose</h1>
-        <p class="lede mt-md">A number is only worth reading if you can reproduce it. Every row names the committed file that produced it.</p>
+        <p class="lede mt-md">Every row names the committed file that produced it, so you can re-run it. The eval suites use synthetic configs; the label gold set is 50 rows we wrote ourselves.</p>
       </div>
       <div>
         <div class="legend">
           <span><i class="dot" style="background:var(--safe)"></i> measured, reproducible</span>
-          <span><i class="dot" style="background:var(--untrusted)"></i> our losses &mdash; reported, not hidden</span>
+          <span><i class="dot" style="background:var(--untrusted)"></i> where we lose or have no result</span>
           <span><i class="dot" style="background:var(--mute)"></i> not measured</span>
         </div>
       </div>
@@ -94,7 +94,7 @@
         </table>
         </div>
         <p class="foot">
-          <strong style="color:var(--ink)">The honest half.</strong> A single-server trifecta check
+          <strong style="color:var(--ink)">What this does not show.</strong> A single-server trifecta check
           is solved work, and we publish no head-to-head table: we did not run Snyk Agent Scan,
           triflow or mcptrustchecker ourselves, so any comparison row would be invented. The
           qualitative comparison, with citations, is in
@@ -167,7 +167,7 @@
 
     <!-- ---------- 4 · runtime ---------- -->
     <div class="grp">
-      <h2 class="subhead"><span class="idx">04</span> Runtime guard &mdash; live MCP session</h2>
+      <h2 class="subhead"><span class="idx">04</span> Runtime guard &mdash; demo session, simulated tool results</h2>
       <div class="panel mt-lg" style="overflow:hidden">
         <div class="tw">
         <table>
@@ -181,8 +181,9 @@
         </table>
         </div>
         <p class="foot">
-          <strong style="color:var(--ink)">The arrangement is what makes it lethal.</strong> The
-          same push is blocked in a tainted session and allowed in a clean one. The guard's own
+          <strong style="color:var(--ink)">This is a demo.</strong> The guard speaks real MCP over
+          stdio, but allowed calls return simulated results; no real GitHub, filesystem or git
+          server sits behind it yet. The same push is blocked in a tainted session and allowed in a clean one. The guard's own
           suite runs eight tests, including the stdio end-to-end. Added latency:
           <strong style="color:var(--ink)">not measured</strong>, so no milliseconds appear here.
           The audit log stores tool, decision, reason and a short argument hash &mdash; never
@@ -194,7 +195,7 @@
     <!-- ---------- 5 · not measured ---------- -->
     <div class="grp">
       <h2 class="subhead"><span class="idx">05</span> What we did not measure</h2>
-      <p class="lede mt-md" style="max-width:70ch">A number we did not measure is a number we will not print.</p>
+      <p class="lede mt-md" style="max-width:70ch">These have no number yet, so none is printed.</p>
       <div class="panel mt-lg">
         <ul class="small" style="color:var(--body);padding:18px 18px 18px 36px;list-style:disc">
           <li style="margin:8px 0">Head-to-head against other scanners &mdash; <strong style="color:var(--ink)">not run</strong>. Positioning is qualitative and cited in <span class="mono">docs/RELATED-WORK.md</span>, including where MSCC and CaMeL are ahead of us.</li>

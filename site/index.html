@@ -39,7 +39,7 @@
     <a class="nb" href="index.html" aria-current="page">Product</a>
     <a class="nb" href="scan.html">Scan</a>
     <a class="nb" href="combos.html">Combos</a>
-    <a class="nb" href="benchmarks.html">Proof</a>
+    <a class="nb" href="benchmarks.html">Benchmarks</a>
     <a class="nb" href="threat-model.html">Limits</a>
     <a class="btn btn-primary btn-sm" href="#install">Install</a>
   </div>
@@ -48,18 +48,18 @@
 
 <div class="hero-product">
   <div class="wrap">
-    <p class="kicker"><b>Open source</b> · one command · powered by FalkorDB</p>
+    <p class="kicker"><b>Open source</b> · runs locally · powered by FalkorDB</p>
     <h1 style="margin-top:22px">The leak is a path.<br>Close it with the fewest permissions.</h1>
     <p class="lede" style="margin-top:20px;font-size:1.12rem;max-width:46ch">
-      GitHub, your files, and a way to publish. Three tools nobody would question,
-      arranged so a stranger’s sentence walks your private data out the door.
-      LethalPath finds the route, then the fewest grants to revoke — and your work still runs.
+      An agent that reads a public GitHub issue, can read your private files, and can push
+      to a public repo can be steered into publishing those files. LethalPath finds that
+      route in your MCP config, then the smallest set of permissions to remove, weighted by
+      the workflows you tell it you need.
     </p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:28px">
       <a class="btn btn-primary" href="#install">Install the CLI</a>
-      <a class="btn btn-ghost" href="scan.html">Scan a config</a>
+      <a class="btn btn-ghost" href="scan.html">See an example scan</a>
     </div>
-    <p class="muted small" style="margin-top:16px">Built to be used on Monday. Not a poster for Sunday.</p>
 
     <h2 id="problem" style="margin-top:56px">What goes wrong</h2>
     <div class="explain">
@@ -219,8 +219,8 @@
   <div class="wrap">
     <div class="split-a" style="align-items:end;margin-bottom:28px">
       <div>
-        <p class="eyebrow">The surface</p>
-        <h2 style="margin-top:10px">Three screens. One decision.</h2>
+        <p class="eyebrow">One run</p>
+        <h2 style="margin-top:10px">Config in, route out, grant revoked.</h2>
       </div>
       <p class="lede">One run, end to end: the config goes in, the query names the route tool by tool, and one revoked grant closes it. Every line below is copied from the committed run in <span class="mono">docs/live-evidence/</span>.</p>
     </div>
@@ -270,13 +270,89 @@
   </div>
 </section>
 
+<section id="why">
+  <div class="wrap">
+    <p class="eyebrow">Why this matters</p>
+    <div class="split-a" style="margin-top:22px;align-items:start">
+      <div>
+        <h2>The leak needs no bug, only the arrangement.</h2>
+      </div>
+      <div>
+        <p class="lede">
+          When an AI agent can read text a stranger wrote, read your private data, and send data
+          somewhere public, a hidden instruction can make it leak that data. Simon Willison calls
+          this the <a href="https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/">lethal trifecta</a>.
+        </p>
+        <p class="small mt-md" style="color:var(--body);max-width:68ch">
+          It has happened with real tools. A malicious GitHub issue made an agent copy private-repo
+          contents into a public pull request
+          (<a href="https://invariantlabs.ai/blog/mcp-github-vulnerability">Invariant Labs, May 2025</a>),
+          and a support ticket made a Cursor agent paste database tokens back into the ticket
+          (<a href="https://generalanalysis.com/blog/supabase-mcp-blog">General Analysis, July 2025</a>).
+          Neither needed a bug in the server; Invariant notes GitHub &ldquo;cannot resolve this
+          vulnerability through server-side patches.&rdquo;
+        </p>
+        <p class="small mt-md" style="color:var(--body);max-width:68ch">
+          The same pattern appears without an attacker. In a controlled study of multi-server MCP
+          agents, depending on the model, 11.5&ndash;41.3% of runs passed credentials across server
+          boundaries even when the task left room to redact them
+          (<a href="https://arxiv.org/abs/2604.27819">MCPHunt, arXiv 2604.27819</a>).
+          Meta&rsquo;s <a href="https://ai.meta.com/blog/practical-ai-agent-security/">Agents Rule of Two</a>
+          and OWASP&rsquo;s <a href="https://genai.owasp.org/llmrisk/llm062025-excessive-agency/">LLM06 Excessive Agency</a>
+          point to the same remedy: don&rsquo;t give one agent session all three abilities, and remove
+          permissions it doesn&rsquo;t need.
+        </p>
+      </div>
+    </div>
+
+    <div class="panel mt-lg" style="overflow:hidden">
+      <div class="tw">
+      <table>
+        <caption class="sr-only">Four published incidents, replayed as fixtures</caption>
+        <thead><tr><th>published incident</th><th>routes found</th><th>computed cut (revoke)</th><th>tasks kept</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://invariantlabs.ai/blog/mcp-github-vulnerability">GitHub MCP, 2025-05-26</a></td><td>1</td><td class="mono">github.create_pull_request</td><td>2 of 3</td></tr>
+          <tr><td><a href="https://generalanalysis.com/blog/supabase-mcp-blog">Supabase MCP, 2025-07-08</a></td><td>2</td><td class="mono">supabase.execute_sql</td><td>0 of 1</td></tr>
+          <tr><td><a href="https://invariantlabs.ai/blog/whatsapp-mcp-exploited">WhatsApp MCP, 2025-04-07</a></td><td>1</td><td class="mono">whatsapp.send_message</td><td>2 of 3</td></tr>
+          <tr><td><a href="https://www.bleepingcomputer.com/news/security/unofficial-postmark-mcp-npm-silently-stole-users-emails/">Postmark npm, 2025-09-25</a></td><td colspan="3">Out of scope: a malicious package that copied every email with no injection involved. A scan does not detect it; the fix is removing the package.</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="foot">Reconstructions from the write-ups, not reproductions. Each fixture is in <span class="mono">data/fixtures/incidents/</span>, with commands and limits in <span class="mono">docs/incident-replay.md</span>. Tasks kept counts workflows declared in each fixture.</p>
+    </div>
+
+    <div class="split-a mt-lg" style="align-items:start">
+      <div>
+        <p class="eyebrow">How it works</p>
+        <p class="small mt-md" style="color:var(--body);max-width:60ch">
+          LethalPath turns your MCP config into a graph of tools, data and the agent&rsquo;s context.
+          One Cypher query lists every route from untrusted input, through the context, from private
+          data to a public destination. FalkorDB&rsquo;s max-flow then picks the cheapest permissions
+          to remove, weighted by the workflows you declare, and the same query is re-run to confirm
+          zero routes are left. You get a list of grants to revoke, not a score.
+        </p>
+      </div>
+      <div>
+        <p class="eyebrow">Limitations</p>
+        <ul class="small" style="color:var(--body);padding-left:18px;margin-top:12px;list-style:disc">
+          <li>Tool labels come from 35 name-based rules and built-in tool lists for 11 common servers. They are not verified against server code; unknown tools are named as unlabelled, not trusted.</li>
+          <li>The test results below are on synthetic configs we generated. Accuracy on real users&rsquo; setups is not measured yet.</li>
+          <li>The runtime guard is a demo: it answers with simulated tool results and does not sit in front of real servers yet.</li>
+          <li>It finds structural routes. It does not detect malicious packages or predict whether a model will be fooled.</li>
+          <li>Prior work: MSCC also maps cross-server paths, Snyk Agent Scan flags each risky capability, and <a href="https://arxiv.org/abs/2503.18813">CaMeL</a> gives stronger guarantees by redesigning the agent. LethalPath adds the computed, verified minimum fix. See <a href="threat-model.html">Limits</a>.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section>
   <div class="wrap">
-    <p class="eyebrow">Proof, not adjectives</p>
+    <p class="eyebrow">Test results (synthetic)</p>
     <div class="statrow" style="margin-top:22px" data-reveal>
       <div>
-        <h3>Every figure names the file that produced it.</h3>
-        <p class="small muted" style="margin-top:8px">Both eval suites ran live on FalkorDB 6.0.2. The JSON is committed at <span class="mono">packages/eval/results/*.json</span>, and one command regenerates it.</p>
+        <h3>40 configs from a seeded generator, ground truth known by construction.</h3>
+        <p class="small muted" style="margin-top:8px">Both suites ran against FalkorDB 6.0.2. The JSON is committed at <span class="mono">packages/eval/results/*.json</span>. This shows the engine is consistent, not that it is accurate on real setups.</p>
       </div>
       <div>
         <div class="big" style="color:var(--danger)"><span class="sr-only">40 of 40 seeded scan cases passed</span><span aria-hidden="true" data-count>40/40</span></div>
@@ -290,7 +366,7 @@
       </div>
       <div>
         <div class="big" style="color:var(--sink)"><span class="sr-only">8 of 8 clean configs answered with zero routes</span><span aria-hidden="true" data-count>8/8</span></div>
-        <p class="small muted" style="margin-top:8px">clean configs answered with zero routes &mdash; no false alarms</p>
+        <p class="small muted" style="margin-top:8px">clean synthetic configs answered with zero routes</p>
         <p class="mono small muted" style="margin-top:10px;font-size:.68rem">detection.json</p>
       </div>
     </div>
@@ -301,27 +377,29 @@
   <div class="wrap split" style="align-items:center;gap:48px">
     <div data-reveal>
       <p class="eyebrow">Install</p>
-      <h2 style="margin-top:10px">Use it on Monday.</h2>
+      <h2 style="margin-top:10px">Run it locally.</h2>
       <p class="lede" style="margin-top:14px">
-        A hackathon demo that nobody can run again is a poster. This is a command.
-        FalkorDB does the path and the cut. The CLI is what you keep.
+        The packages are not on npm. You need a clone of the repo, Docker (for FalkorDB),
+        Node 20 or newer, and pnpm 9. Build once, then scan.
       </p>
-      <p class="small muted" style="margin-top:16px">Apache-2.0 · pinned to falkordb/falkordb:6.0.2 · no signup</p>
+      <p class="small muted" style="margin-top:16px">Apache-2.0 · pinned to falkordb/falkordb:6.0.2 · the guard is a demo with simulated tool calls</p>
     </div>
     <div class="window" data-reveal>
       <div class="window-bar">
         <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="window-title">terminal</span>
       </div>
-      <div class="code" style="border:0;border-radius:0"><pre><span class="com"># from a clone &mdash; the packages are not on npm</span>
-<span class="com"># find every leak path</span>
-node packages/cli/dist/index.js scan
+      <div class="code" style="border:0;border-radius:0"><pre><span class="com"># clone, start FalkorDB, build</span>
+git clone https://github.com/bhanu-dev82/lethalpath &amp;&amp; cd lethalpath
+docker compose up -d
+pnpm install &amp;&amp; pnpm build
 
-<span class="com"># the grant that closes them</span>
+<span class="com"># find every leak path, then the grants that close them</span>
+node packages/cli/dist/index.js scan
 node packages/cli/dist/index.js fix
 
-<span class="com"># enforce it while you work</span>
-node packages/guard/dist/server.js --config mcp.json</pre></div>
+<span class="com"># guard demo: simulated tool calls, no real servers behind it</span>
+pnpm --filter @lethalpath/guard demo</pre></div>
     </div>
   </div>
 </section>
@@ -336,7 +414,7 @@ node packages/guard/dist/server.js --config mcp.json</pre></div>
     <div class="navlinks">
       <a href="scan.html">Scan</a>
       <a href="combos.html">Combos</a>
-      <a href="benchmarks.html">Proof</a>
+      <a href="benchmarks.html">Benchmarks</a>
       <a href="threat-model.html">Limits</a>
       <a href="disclosure.html">Disclosure</a>
     </div>
