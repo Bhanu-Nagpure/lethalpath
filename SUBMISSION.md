@@ -14,9 +14,9 @@ sync with what is actually true at submission time.
 | field | value |
 |---|---|
 | Project name | LethalPath |
-| Public repo | TODO — public GitHub URL (only `lethalpath/` is tracked) |
-| Demo video | TODO — public YouTube link, ≤4 min, human voice |
-| Live URL / setup | TODO — hosted site URL, plus `docker compose up -d && pnpm build && node packages/cli/dist/index.js scan` |
+| Public repo | https://github.com/bhanu-dev82/lethalpath |
+| Demo video | TODO — public YouTube link, ≤4 min, human voice; script in `docs/DEMO-SCRIPT.md` |
+| Live URL / setup | TODO — hosted site URL; local: `docker compose up -d && pnpm build && node packages/cli/dist/index.js scan` |
 | Tracks | T01 — Agents That Act on Connected Data (primary); T02 — Agent Memory and Coordination (the guard's session graph) |
 | AI disclosure | `AI_DISCLOSURE.md` in the repo (rule 18) |
 | Blog post | TODO — link if published same week |
@@ -35,18 +35,38 @@ agent context — the "laundering" hop per-server scanners cannot see — and
 computes the fix with `CALL algo.maxFlow`, deriving the cheaper of the two
 canonical minimum cuts from the residual graph. `fix` then proves itself by
 re-running the leak query with the revoked grants excluded: zero rows is the
-receipt. A runtime guard (`packages/guard`) blocks the poisoned call in a live
-session and allows the same call on a clean one; the guard's session memory is
-a second FalkorDB graph (`sessions_*`) that stores decisions and argument
-hashes, never content.
+receipt. `scan --mcp mcp.json` puts the labeler in front of the same pipeline —
+a real Claude Desktop config is labelled by rule (unmatched tools named, not
+hidden; secrets redacted in values and token-shaped server names alike), then
+scanned: the committed demo config yields 567 routes closed by nine
+revocations. The 40-case eval (`packages/eval/results/`) passes 40/40 on both
+detection and fix quality. A runtime guard (`packages/guard`) blocks the
+poisoned call in a live session and allows the same call on a clean one; the
+guard's session memory is a second FalkorDB graph (`sessions_*`) that stores
+decisions and argument hashes, never content.
+
+## Verify in five minutes
+
+```bash
+docker compose up -d && pnpm install && pnpm build && pnpm test   # 53 pass
+node packages/cli/dist/index.js scan          # 1 route → fix → 0 of 1
+node packages/cli/dist/index.js scan --mcp data/fixtures/mcp-demo.json   # 567 routes
+node packages/cli/dist/index.js scan data/fixtures/many-tools.json       # the fallback note
+pnpm --filter @lethalpath/guard demo          # blocked call, then an allowed one
+pnpm --filter @lethalpath/eval evaluate       # 40/40 both suites
+```
+
+Every printed number traces to `packages/eval/results/*.json`, the uncut run in
+`docs/live-evidence/`, or the fixture named beside it; the full browser capture
+recipe lives in `docs/browser-shots.md`.
 
 ## Checklist before hitting submit
 
-- [ ] Repo is public and only the product is in it
-- [ ] README numbers match `packages/eval/results/*.json`
+- [x] Repo is public and only the product is in it — github.com/bhanu-dev82/lethalpath, full incremental history (no squash)
+- [x] README numbers match `packages/eval/results/*.json` and the evidence log
 - [ ] Video is public, not-for-kids, 2–4 minutes, numbers match
 - [ ] Site is deployed and the numbers on it match the same JSON files
-- [ ] `docs/live-evidence/` has a fresh uncut run
-- [ ] AI disclosure present and accurate
-- [ ] Tracks named in the portal exactly as in the README
+- [x] `docs/live-evidence/` has a fresh uncut run (2026-10-17T13:52:42Z)
+- [x] AI disclosure present and accurate
+- [x] Tracks named in the portal exactly as in the README
 - [ ] Screenshot the submission confirmation
