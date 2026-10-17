@@ -13,7 +13,7 @@ import type { ScanConfig } from "@lethalpath/schema";
 
 import { GraphDB } from "./db.js";
 import { ingest, scanStatus } from "./ingest.js";
-import { LEAK_PATH, MIN_CUT, VERIFY_FIX, parseLeakPaths } from "./analysis/paths.js";
+import { LEAK_COUNT, LEAK_PATH, MIN_CUT, VERIFY_FIX, parseLeakPaths } from "./analysis/paths.js";
 import { cutFromMaxFlow, type FlowEdge, type MaxFlowRow } from "./analysis/mincut.js";
 
 function fixture(name: string): ScanConfig {
@@ -41,6 +41,8 @@ test("the leak query names the route tool by tool, on a graph ingest built", asy
   t.after(() => db.close());
   const paths = parseLeakPaths((await db.read(LEAK_PATH)).rows);
   assert.equal(paths.length, 1);
+  const counted = await db.read(LEAK_COUNT);
+  assert.equal(Number(counted.rows[0]?.["routes"]), 1, "the uncapped count agrees with the listed rows");
   const [found] = paths;
   assert.ok(found, "path present");
   assert.deepEqual(found.chain, ["project folder", "filesystem.read", "context", "git.push", "public repo"]);

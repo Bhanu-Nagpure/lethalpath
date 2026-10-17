@@ -1,7 +1,8 @@
 /**
- * The two queries LethalPath exists to run.
+ * The queries LethalPath exists to run: find every route, count them without
+ * a display cap, compute the minimal revocation, and prove the fix.
  *
- * Both were executed against FalkorDB 6.0.2 before being committed. The leak
+ * All of them ran against FalkorDB 6.0.2 before being committed. The leak
  * query returned the laundering path on the fs+git fixture; the fix query
  * returned a real max-flow. See the test for the expected shape.
  *
@@ -29,6 +30,19 @@ RETURN u.kind AS injected_from,
        length(leak) AS hops
 ORDER BY hops ASC
 LIMIT 25
+`.trim();
+
+/**
+ * The same traversal, counted instead of listed. LEAK_PATH is capped at 25
+ * rows so a display never explodes; this one is not capped, so the CLI can
+ * say "25 of 108" instead of quietly meaning it.
+ */
+export const LEAK_COUNT = `
+MATCH (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)
+MATCH leak = (p:Resource {sensitivity:'private'})
+             -[:FLOWS*1..5]->(ctx)
+             -[:FLOWS*1..5]->(s:Resource {visibility:'public'})
+RETURN count(leak) AS routes
 `.trim();
 
 export const MIN_CUT = `
