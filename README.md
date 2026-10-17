@@ -9,10 +9,11 @@ them all — without breaking your work.
 
 Built for [Graph Hacks](https://www.wemakedevs.org/hackathons/falkordb)
 (WeMakeDevs × FalkorDB, 15–18 Oct 2026). Tracks: **T01** Agents That Act on
-Connected Data, **T02** Agent Memory and Coordination.
+Connected Data, and **T02** Agent Memory and Coordination — the guard's session
+memory is a graph of its own.
 
-> This README describes what is built. Sections marked *(planned)* are not yet
-> implemented. Numbers appear only once `eval/results/*.json` contains them.
+> Numbers appear in this README only once `packages/eval/results/*.json`
+> contains them. No exceptions.
 
 ---
 
@@ -23,12 +24,14 @@ decoration and the entry is ineligible. LethalPath fails that test on purpose.
 
 | What the product does | What runs it | What happens if FalkorDB is removed |
 |---|---|---|
-| Find the leak path | `MATCH … -[:FLOWS*2..10]->` | There is no path. A list of tools cannot express "through this folder". |
-| Choose the permission to revoke | `CALL algo.maxFlow` then a residual cut | There is no flow, so there is no cut. The test `mincut.live.test.ts` cannot run. |
+| Find the leak route | `MATCH … -[:FLOWS*2..10]->` through the shared context | There is no path. A list of tools cannot express "through this folder". |
+| Choose the permission to revoke | `CALL algo.maxFlow` then a residual cut | There is no flow, so there is no cut. `cutFromMaxFlow` has nothing to consume. |
+| Prove the fix closed it | `VERIFY_FIX`, the same traversal with `$revoked` excluded | There is no second query to re-run. The promise has no receipt. |
+| Remember what a session absorbed | the `sessions_*` graph | The guard forgets between processes and stops blocking. |
 | Refuse a write from the agent | `GRAPH.RO_QUERY` | The server-side rejection is gone. An application regex is not the same guarantee. |
 
 `packages/core/src/analysis/mincut.live.test.ts` is the executable version of
-that table. It opens FalkorDB 6.0.2, runs `algo.maxFlow`, and checks the cut.
+this table: it opens FalkorDB 6.0.2, runs `algo.maxFlow`, and checks the cut.
 
 ## The problem
 
@@ -40,52 +43,114 @@ this the [lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trif
 The arrangement is a path: `untrusted → private → public`. Paths are what graphs
 answer, and a vector index cannot.
 
-## Why FalkorDB
-
-Remove it and three things stop existing rather than degrade:
-
-1. **Leak-path discovery** — variable-length traversal over a mixed graph of
-   resources, tools and the agent's context, including "laundering" hops through
-   a shared folder that per-server scanners cannot see.
-2. **The fix** — `CALL algo.maxFlow` on that graph, with grant edges weighted by
-   how many tasks they would break, yielding the cheapest cut.
-3. **Cross-agent taint** — a traversal over session state, shared across
-   processes, so a subagent inherits what its parent has read.
-
-Every read runs on `GRAPH.RO_QUERY`, which the server enforces as read-only.
-
 ## Quick start
 
 ```bash
-docker compose up -d          # FalkorDB 6.0.2, pinned by tag
+docker compose up -d                     # FalkorDB 6.0.2, pinned by tag — not :latest
 pnpm install
-pnpm --filter core test       # the graph queries, against the live instance
+pnpm build                               # schema → core → cli, in dependency order
+
+node packages/cli/dist/index.js scan     # builds the graph, names every route
+node packages/cli/dist/index.js fix      # algo.maxFlow → the cheapest grant to revoke
+node packages/cli/dist/index.js scan data/fixtures/clean.json   # the abstention
+
+pnpm --filter @lethalpath/core test      # the suite, against the live instance
 ```
 
-*(The scan/fix/guard CLI is planned — see Status.)*
+`scan` and `fix` accept `--json`; both read the fixture `data/fixtures/fs-git.json`
+by default. One graph per config: `scan_fs-git`, `scan_clean` — FalkorDB's
+multigraph model is the isolation.
+
+### What `scan` prints
+
+```
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+config    fs-git · A public issue steers the agent through the private folder out to a public repo
+graph     scan_fs-git · 11 nodes · 9 edges · ready
+guard     GRAPH.RO_QUERY · LIMIT 100 · 3 s timeout · write keywords refused
+engine    leak MATCH -[:FLOWS*2..10]->  ·  fix CALL algo.maxFlow + residual min-cut
+
+LEAK PATHS
+  1  4 hops  project folder → filesystem.read → context → git.push → public repo
+     injection  github issue → github.read → context
+     in         project folder · ~/work/stats
+     out        public repo · github.com/acme/notes
+
+1 route found — every one of them is a permission you granted.
+  next  lethalpath fix
+```
+
+### What `fix` prints
+
+```
+max-flow   2
+cut        write side · git.push → public repo
+revoke     git.push
+verified   0 of 1 routes remain (leak query re-run without git.push)
+tasks      3 of 4 keep working
+           loses: publish the changelog
+```
+
+The cost model is `capacity = 1 + declared tasks that use the grant`, so the
+min-cut prefers the permission that breaks the fewest workflows. The fix is
+then *verified* by re-running the leak query with the revoked grants excluded —
+zero rows is the receipt.
 
 ## The graph
+
+| node | holds |
+|---|---|
+| `Server` | which MCP server supplies which tools |
+| `Resource` | data, by label only: `kind`, `scope`, `trust`, `sensitivity`, `visibility` |
+| `Tool` | `name`, `server`, `labelSource`, `labelConf` |
+| `Context` | one hub per agent: what the context window can absorb |
+| `Meta` | config id, counts, and the `ready` flag — the last write of ingest |
 
 One relationship type, because `algo.maxFlow` on 6.0.2 accepts exactly one:
 
 ```cypher
-(a)-[:FLOWS {dir: 'feeds'|'emits', capacity, revocable, grant}]->(b)
+(a)-[:FLOWS {dir: 'feeds'|'emits', capacity, revocable, grant, taskCost}]->(b)
 ```
 
-The two queries the product depends on:
+| movement | edge | capacity |
+|---|---|---|
+| tool reads a resource | `(res)-[:FLOWS]->(tool)` | `1 + taskCost` |
+| tool writes a resource | `(tool)-[:FLOWS]->(res)` | `1 + taskCost` |
+| tool fills the context | `(tool)-[:FLOWS]->(context)` | `1000000` (structural) |
+| context feeds a tool | `(context)-[:FLOWS]->(tool)` | `1000000` (structural) |
+
+`grant` is the tool name — the permission you would revoke. Structural hub edges
+can never land in a cut; their capacity dwarfs every real cost. `(:Meta).ready`
+flips only after the whole graph is built, so a scan never reads a half-built
+graph.
+
+### The three queries
+
+**1 — The route (`LEAK_PATH`).** Untrusted input reaches the context through one
+tool; a private store reaches a public sink through a chain that passes through
+the *same* context. That "through the same context" clause is the one a join
+cannot write and a vector index cannot express.
 
 ```cypher
--- the leak path
-MATCH (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)
-MATCH leak = (p:Resource {sensitivity:'private'})-[:FLOWS*2..10]->
-             (s:Resource {visibility:'public'})
+MATCH inj = (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)
+MATCH leak = (p:Resource {sensitivity:'private'})-[:FLOWS*2..10]->(s:Resource {visibility:'public'})
 WHERE ctx IN nodes(leak)
 RETURN u.kind AS injected_from,
+       [n IN nodes(inj) | coalesce(n.kind, n.name, n.id)] AS injection,
+       [n IN nodes(leak) | coalesce(n.kind, n.name, n.id)] AS chain,
        [n IN nodes(leak) WHERE n:Tool | n.name] AS tools,
        length(leak) AS hops
 ORDER BY hops ASC LIMIT 25
+```
 
--- the fix (run twice: exfiltration, then ingress; take the cheaper cut)
+The `chain` and `injection` columns exist so citations resolve to `kind` and
+`scope` ("project folder · ~/work/stats"), never to internal node ids.
+
+**2 — The fix (`MIN_CUT`).** One `CALL`, sources are private stores, targets are
+public sinks:
+
+```cypher
 MATCH (p:Resource {sensitivity:'private'}) WITH collect(p) AS src
 MATCH (s:Resource {visibility:'public'})  WITH src, collect(s) AS dst
 CALL algo.maxFlow({sourceNodes: src, targetNodes: dst,
@@ -94,9 +159,25 @@ YIELD maxFlow, edges, edgeFlows
 RETURN maxFlow, edges, edgeFlows
 ```
 
-`algo.maxFlow` returns flows, not the cut. The cut is computed from the residual
-graph in `packages/core/src/analysis/mincut.ts`, and a live test checks that the
-grant it returns came from FalkorDB.
+`algo.maxFlow` returns flows, not the cut. The cut is derived from the residual
+graph in `packages/core/src/analysis/mincut.ts`. A max-flow admits two canonical
+minimum cuts — one hugged to the sources, one to the sinks. Both close every
+route; the product picks the one that costs you less: fewer distinct grants
+first, fewer broken tasks second, and on a full tie the **write** side, so the
+agent keeps its ability to read and loses only the publish.
+
+**3 — The receipt (`VERIFY_FIX`).** The same traversal, with the revoked grants'
+edges excluded through a list parameter (`$revoked` binds via the `CYPHER k=v`
+prefix, like every parameter here):
+
+```cypher
+MATCH leak = (p:Resource {sensitivity:'private'})-[:FLOWS*2..10]->(s:Resource {visibility:'public'})
+WHERE … AND all(rel IN relationships(leak) WHERE rel.grant IS NULL OR NOT (rel.grant IN $revoked))
+RETURN count(leak) AS remaining
+```
+
+Zero rows is the receipt. The CLI runs it on every `fix`; the test suite proves
+both directions (1 route before the revoke, 0 after).
 
 ## FalkorDB features this product calls
 
@@ -105,9 +186,10 @@ Not a list of what the database can do. A list of what this repository executes.
 | Feature | Where | Why it has to be FalkorDB |
 |---|---|---|
 | `algo.maxFlow` | `MIN_CUT` in `paths.ts`, consumed by `cutFromMaxFlow` | The fix. One relationship type, verified on 6.0.2. |
-| Variable-length `FLOWS*2..10` | `LEAK_PATH` | The laundering hop. A join cannot name "through the context". |
-| `GRAPH.RO_QUERY` | `GraphDB.read` | The guard's own reads cannot write, enforced by the server. |
-| `id()` | the live cut test | Edge identity for joining flow back onto grants. |
+| Variable-length `FLOWS*2..10` + `relationships(path)` | `LEAK_PATH`, `VERIFY_FIX` | The laundering hop, and the receipt. |
+| `GRAPH.RO_QUERY` | `GraphDB.read` — analysis, CLI and guard reads | Cannot write, enforced by the server. |
+| `id()` | joining `edgeFlows` back onto grants | Edge identity across two queries. |
+| Multigraph (`select_graph`) | one `scan_*` per config, `sessions_*` per session | Tenant isolation without extra infrastructure. |
 | Pinned image `falkordb/falkordb:6.0.2` | `docker-compose.yml` | The engine we verified, not whatever `:latest` is tomorrow. |
 
 We do **not** claim CCH. It is documented and it is not in 6.0.2. Saying so is
@@ -120,14 +202,64 @@ Pinned to `falkordb/falkordb:6.0.2`. Verified on that image, not assumed from do
 - `algo.maxFlow` requires exactly one relationship type and returns flows, not cuts.
 - Parameters bind through the `CYPHER k=v` query prefix; the trailing `PARAMS` form
   does not bind.
+- A relationship list variable cannot be bound alongside a named path in the same
+  pattern; `relationships(path)` works.
 - JavaScript UDFs require `falkor.register()` and are not restored on restart.
 - Shortest-path indexes (CCH) are **not available** in 6.0.2. We do not use them.
+
+## Results
+
+The harness in `packages/eval` generates 40 seeded scan configs with known
+ground truth — planted routes, laundering-only routes, clean configs, and tie
+cases where both canonical cuts are available — then measures the engine and
+writes `packages/eval/results/detection.json` and `fix-quality.json`. This
+section quotes only those files, and they are committed.
+
+```bash
+pnpm --filter @lethalpath/eval build && node packages/eval/dist/run.js
+```
+
+*(Filled from the files once the harness has run — the results are the last
+thing that lands.)*
 
 ## Data
 
 Public and synthetic only. The graph stores capability *labels*, never file
-contents, message bodies or credentials. Usernames, where present, are hashed
-before ingest. Demo runs use throwaway repositories holding fake secrets.
+contents, message bodies or credentials. The sessions graph the guard writes
+holds tool names, decisions and a short hash of the arguments — never the
+arguments. Fixtures and eval configs are synthetic; demo repositories hold fake
+secrets.
+
+## What we learned
+
+- **We planned the wrong product first.** An MCP tool *router* is a real pain,
+  but its fix does not need a graph, and it already ships elsewhere. Under these
+  rules that is a decoration and a disqualification. The replacement makes the
+  graph load-bearing: remove it and the route, the cut, and the receipt all stop
+  existing.
+- **The docs were ahead of the engine.** The shortest-path index (CCH) is
+  documented and does not run on the pinned image; same for the trailing
+  `PARAMS` parameter form. We verified by execution, wrote the fallbacks (a
+  residual min-cut; the `CYPHER k=v` prefix), and recorded both rather than
+  quoting benchmarks we could not reproduce.
+- **A constraint simplified the model.** `algo.maxFlow` accepts exactly one
+  relationship type, so `FEEDS`/`EMITS` collapsed into one `FLOWS` type with a
+  `dir` property. The final schema is simpler than the plan.
+- **The cut is not the flow.** Our first fix query expected `algo.maxFlow` to
+  return a cut. It returns flows; the cut is ours to compute, and the product is
+  better for it — that code is where the "cheapest permission" logic lives.
+- **A guard is only as good as its refusal order.** The first version appended a
+  `LIMIT` to write statements too; the fix was to refuse write keywords *before*
+  dispatch, not to sanitise after. Same lesson at the server: `GRAPH.RO_QUERY`
+  rejects, it does not negotiate.
+- **Contrast is measurable, not a vibe.** The first palette failed AAA on two
+  surfaces; the shipped one was measured pair by pair.
+
+## Credits and prior work
+
+- Simon Willison — the [lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/), the framing this product builds on.
+- Related tools and papers that informed the design are listed with links in
+  [`docs/RELATED-WORK.md`](./docs/RELATED-WORK.md).
 
 ## AI use
 
