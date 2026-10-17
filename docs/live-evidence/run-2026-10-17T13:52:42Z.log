@@ -1,0 +1,364 @@
+# LethalPath live evidence — 2026-10-17T13:52:42Z
+
+## FalkorDB container
+gh-falkor falkordb/falkordb:6.0.2
+
+## Corpus hashes
+ecc8492444ba80f63e78f809011b6cf1c5a562cbcbc7cff99a13049d8a3bd964  data/fixtures/clean.json
+78b15a966d29dd13adcb701896987d57ab603d9ed6854c1f6aa4904b4f974836  data/fixtures/fs-git.json
+e7ced4ab3cba5ff535553a6d48396db877801e00b8a9eeeca319956108aadafd  data/fixtures/github-only.json
+13ea830016b42c587dff3c321462b213eb77995a542e5c55a5a426e8196eeab1  data/fixtures/many-tools.json
+fd4f2a9def71280c22b1122b11deb2d48f8a6e3e67cb10561dca3d39bb8a1a53  data/fixtures/mcp-demo.json
+c6817131d23f0b7b29ed420304700edb3feb1960e20d5b51cf2080b36db9da07  packages/eval/results/detection.json
+c5308fbfb92151d1fa21c2bd837ae922a88b0465e964f68ba68d503f037984ba  packages/eval/results/fix-quality.json
+4ddec1828051ad567bef9fbfb53039a684d4b39118ab5b79a1aa8a2e5123ba9d  packages/labeler/gold/labels.csv
+
+## Tests (packages/core, against the live instance)
+
+> @lethalpath/core@0.0.1 pretest /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/core
+> pnpm --filter @lethalpath/schema build && tsc -p tsconfig.json
+
+
+> @lethalpath/schema@0.0.1 build /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/schema
+> tsc -p tsconfig.json
+
+
+> @lethalpath/core@0.0.1 test /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/core
+> node --test dist/report.test.js dist/ingest.test.js dist/db.test.js dist/analysis/*.test.js
+
+✔ live FalkorDB max-flow yields the grant to revoke (68.688821ms)
+✔ saturated path cuts at the source edge (4.267822ms)
+✔ a structural edge with spare capacity is not the cut (0.401883ms)
+✔ no flow means no cut (0.381056ms)
+✔ both canonical cuts close the route (0.336653ms)
+✔ the tie-break prefers the cut that breaks fewer tasks (0.445119ms)
+✔ on a full tie the write side wins, so the read survives (0.228183ms)
+✔ cutSide names the side from the endpoints (0.274601ms)
+✔ zero flow cuts nothing on either side (0.186586ms)
+✔ a revocable min cut beats one with nothing to revoke (0.566627ms)
+✔ no max-flow row is an empty cut, not a crash (0.504125ms)
+✔ leak path crosses three tools through the shared context (67.407923ms)
+✔ max-flow returns a real flow, not an error (9.635762ms)
+✔ a write statement is refused before it reaches the server (4.952236ms)
+✔ data that contains write words is not refused (69.708412ms)
+✔ a parameter that names a write tool still reads (16.433085ms)
+✔ a write statement is still refused before dispatch (5.336726ms)
+✔ a hostile parameter key is refused, not concatenated (4.145167ms)
+✔ the cap does not corrupt literals and still bounds rows (6.948775ms)
+✔ ingest builds the fs-git graph and raises the ready flag (85.000993ms)
+✔ the leak query names the route tool by tool, on a graph ingest built (18.487305ms)
+✔ a live max-flow cuts the write side: revoke git.push, cost one task (24.502242ms)
+✔ an agent that can read but not publish gets the abstention, not a guess (19.353486ms)
+✔ a hostile config id never reaches a Cypher string (4.176059ms)
+✔ hostile shapes are refused by name, never by TypeError (5.78127ms)
+✔ a tool that names the same resource twice still cuts (12.954812ms)
+✔ the leak query stays inside the server budget on a labeler-sized graph (192.903261ms)
+✔ LEAK_PATH_FAST returns the same routes as the ordered query (11.879625ms)
+✔ the run output names FalkorDB before it names the fix (1.291059ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 703.933827
+
+## scan — fs-git
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+config    fs-git · A public issue steers the agent through the private folder out to a public repo
+graph     scan_fs-git · 11 nodes · 9 edges · ready
+guard     GRAPH.RO_QUERY · LIMIT 100 · 3 s timeout · write keywords refused
+engine    leak two anchored segments through the tainted context · fix CALL algo.maxFlow + residual min-cut
+
+LEAK PATHS
+  1  4 hops  project folder → filesystem.read → context → git.push → public repo
+     injection  github issue → github.read → context
+     in         project folder · ~/work/stats
+     out        public repo · github.com/acme/notes
+
+1 route found — every one of them is a permission you granted.
+  next  lethalpath fix
+
+## fix — fs-git
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+FIX  ·  CALL algo.maxFlow on FalkorDB
+
+max-flow   2
+cut        write side · git.push → public repo
+revoke     git.push
+verified   0 of 1 routes remain (leak query re-run without git.push)
+tasks      3 of 4 keep working
+           loses: publish the changelog
+
+cost = 1 + declared tasks that use the grant; the max-flow value proves
+this cut is minimal. The verification re-runs the same query, not a promise.
+
+## fix — clean (the abstention)
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+FIX
+
+nothing to revoke — no route was found to close.
+
+## scan — 40 tools chaining through the shared context (the fallback)
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+config    many-tools · Forty tools chaining through one shared context
+graph     scan_many-tools · 47 nodes · 201 edges · ready
+guard     GRAPH.RO_QUERY · LIMIT 100 · 3 s timeout · write keywords refused
+engine    leak two anchored segments through the tainted context · fix CALL algo.maxFlow + residual min-cut
+
+LEAK PATHS
+  1  6 hops  private store → t1 → context → t40 → context → t40 → public sink
+     injection  untrusted feed → t1 → context
+
+  2  8 hops  private store → t1 → context → t40 → context → t40 → context → t39 → public sink
+     injection  untrusted feed → t1 → context
+
+  3  8 hops  private store → t1 → context → t40 → context → t40 → context → t38 → public sink
+     injection  untrusted feed → t1 → context
+
+  4  8 hops  private store → t1 → context → t40 → context → t40 → context → t37 → public sink
+     injection  untrusted feed → t1 → context
+
+  5  8 hops  private store → t1 → context → t40 → context → t40 → context → t36 → public sink
+     injection  untrusted feed → t1 → context
+
+  6  8 hops  private store → t1 → context → t40 → context → t40 → context → t35 → public sink
+     injection  untrusted feed → t1 → context
+
+  7  8 hops  private store → t1 → context → t40 → context → t40 → context → t34 → public sink
+     injection  untrusted feed → t1 → context
+
+  8  8 hops  private store → t1 → context → t40 → context → t40 → context → t33 → public sink
+     injection  untrusted feed → t1 → context
+
+  9  8 hops  private store → t1 → context → t40 → context → t40 → context → t32 → public sink
+     injection  untrusted feed → t1 → context
+
+  10  8 hops  private store → t1 → context → t40 → context → t40 → context → t31 → public sink
+     injection  untrusted feed → t1 → context
+
+  11  8 hops  private store → t1 → context → t40 → context → t40 → context → t30 → public sink
+     injection  untrusted feed → t1 → context
+
+  12  8 hops  private store → t1 → context → t40 → context → t40 → context → t29 → public sink
+     injection  untrusted feed → t1 → context
+
+  13  8 hops  private store → t1 → context → t40 → context → t40 → context → t28 → public sink
+     injection  untrusted feed → t1 → context
+
+  14  8 hops  private store → t1 → context → t40 → context → t40 → context → t27 → public sink
+     injection  untrusted feed → t1 → context
+
+  15  8 hops  private store → t1 → context → t40 → context → t40 → context → t26 → public sink
+     injection  untrusted feed → t1 → context
+
+  16  8 hops  private store → t1 → context → t40 → context → t40 → context → t25 → public sink
+     injection  untrusted feed → t1 → context
+
+  17  8 hops  private store → t1 → context → t40 → context → t40 → context → t24 → public sink
+     injection  untrusted feed → t1 → context
+
+  18  8 hops  private store → t1 → context → t40 → context → t40 → context → t23 → public sink
+     injection  untrusted feed → t1 → context
+
+  19  8 hops  private store → t1 → context → t40 → context → t40 → context → t22 → public sink
+     injection  untrusted feed → t1 → context
+
+  20  8 hops  private store → t1 → context → t40 → context → t40 → context → t21 → public sink
+     injection  untrusted feed → t1 → context
+
+  21  8 hops  private store → t1 → context → t40 → context → t40 → context → t20 → public sink
+     injection  untrusted feed → t1 → context
+
+  22  8 hops  private store → t1 → context → t40 → context → t40 → context → t19 → public sink
+     injection  untrusted feed → t1 → context
+
+  23  8 hops  private store → t1 → context → t40 → context → t40 → context → t18 → public sink
+     injection  untrusted feed → t1 → context
+
+  24  8 hops  private store → t1 → context → t40 → context → t40 → context → t17 → public sink
+     injection  untrusted feed → t1 → context
+
+  25  8 hops  private store → t1 → context → t40 → context → t40 → context → t16 → public sink
+     injection  untrusted feed → t1 → context
+
+126321 routes found — every one of them is a permission you granted.
+  note   route enumeration exceeded the server budget on this graph; showing 25 routes in arbitrary order — the count is exact, and fix is unaffected
+  next  lethalpath fix
+
+## fix — the same 40-tool config
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+FIX  ·  CALL algo.maxFlow on FalkorDB
+
+max-flow   2
+cut        read side · private store → t1
+revoke     t1
+verified   0 of 126321 routes remain (leak query re-run without t1)
+tasks      39 of 40 keep working
+           loses: uses t1
+
+cost = 1 + declared tasks that use the grant; the max-flow value proves
+this cut is minimal. The verification re-runs the same query, not a promise.
+
+## scan — a real mcp.json (labeler in front)
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+config    mcp-github-filesystem-git · MCP config · github, filesystem, git
+graph     scan_mcp-github-filesystem-git · 49 nodes · 120 edges · ready
+guard     GRAPH.RO_QUERY · LIMIT 100 · 3 s timeout · write keywords refused
+engine    leak two anchored segments through the tainted context · fix CALL algo.maxFlow + residual min-cut
+labelled  40 tools by rule · 0 unlabelled
+
+LEAK PATHS
+  1  4 hops  local repo → git.diff → context → git.push → public repo
+     injection  github issue → github.get_issue → context
+
+  2  4 hops  local repo → git.diff → context → github.add_issue_comment → github issue
+     injection  github issue → github.get_issue → context
+
+  3  4 hops  local repo → git.diff → context → github.create_issue → github issue
+     injection  github issue → github.get_issue → context
+
+  4  4 hops  local repo → git.diff → context → github.create_or_update_file → public repo
+     injection  github issue → github.get_issue → context
+
+  5  4 hops  local repo → git.diff → context → github.create_pull_request → public repo
+     injection  github issue → github.get_issue → context
+
+  6  4 hops  local repo → git.diff → context → github.create_pull_request_review → github issue
+     injection  github issue → github.get_issue → context
+
+  7  4 hops  local repo → git.diff → context → github.merge_pull_request → public repo
+     injection  github issue → github.get_issue → context
+
+  8  4 hops  local repo → git.diff → context → github.push_files → public repo
+     injection  github issue → github.get_issue → context
+
+  9  4 hops  local repo → git.diff → context → github.update_issue → github issue
+     injection  github issue → github.get_issue → context
+
+  10  4 hops  local repo → git.log → context → git.push → public repo
+     injection  github issue → github.get_issue → context
+
+  11  4 hops  local repo → git.log → context → github.add_issue_comment → github issue
+     injection  github issue → github.get_issue → context
+
+  12  4 hops  local repo → git.log → context → github.create_issue → github issue
+     injection  github issue → github.get_issue → context
+
+  13  4 hops  local repo → git.log → context → github.create_or_update_file → public repo
+     injection  github issue → github.get_issue → context
+
+  14  4 hops  local repo → git.log → context → github.create_pull_request → public repo
+     injection  github issue → github.get_issue → context
+
+  15  4 hops  local repo → git.log → context → github.create_pull_request_review → github issue
+     injection  github issue → github.get_issue → context
+
+  16  4 hops  local repo → git.log → context → github.merge_pull_request → public repo
+     injection  github issue → github.get_issue → context
+
+  17  4 hops  local repo → git.log → context → github.push_files → public repo
+     injection  github issue → github.get_issue → context
+
+  18  4 hops  local repo → git.log → context → github.update_issue → github issue
+     injection  github issue → github.get_issue → context
+
+  19  4 hops  local repo → git.show → context → git.push → public repo
+     injection  github issue → github.get_issue → context
+
+  20  4 hops  local repo → git.show → context → github.add_issue_comment → github issue
+     injection  github issue → github.get_issue → context
+
+  21  4 hops  local repo → git.show → context → github.create_issue → github issue
+     injection  github issue → github.get_issue → context
+
+  22  4 hops  local repo → git.show → context → github.create_or_update_file → public repo
+     injection  github issue → github.get_issue → context
+
+  23  4 hops  local repo → git.show → context → github.create_pull_request → public repo
+     injection  github issue → github.get_issue → context
+
+  24  4 hops  local repo → git.show → context → github.create_pull_request_review → github issue
+     injection  github issue → github.get_issue → context
+
+  25  4 hops  local repo → git.show → context → github.merge_pull_request → public repo
+     injection  github issue → github.get_issue → context
+
+567 routes found — every one of them is a permission you granted.
+  note   showing the 25 shortest by hops; the graph has 567 in total
+  next  lethalpath fix
+
+## fix — the same mcp.json
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+FIX  ·  CALL algo.maxFlow on FalkorDB
+
+max-flow   9
+cut        write side · github.create_issue → github issue, github.add_issue_comment → github issue, github.update_issue → github issue, github.create_pull_request → public repo, github.create_pull_request_review → github issue, github.create_or_update_file → public repo, github.push_files → public repo, github.merge_pull_request → public repo, git.push → public repo
+revoke     github.create_issue, github.add_issue_comment, github.update_issue, github.create_pull_request, github.create_pull_request_review, github.create_or_update_file, github.push_files, github.merge_pull_request, git.push
+verified   0 of 567 routes remain (leak query re-run without github.create_issue, github.add_issue_comment, github.update_issue, github.create_pull_request, github.create_pull_request_review, github.create_or_update_file, github.push_files, github.merge_pull_request, git.push)
+
+cost = 1 + declared tasks that use the grant; the max-flow value proves
+this cut is minimal. The verification re-runs the same query, not a promise.
+
+## guard — poisoned session, then a clean one
+guard       stdio MCP server · scan_fs-git · sessions_demo · policy: 0 pre-denied
+call 1      github.read(issue#42)             ALLOWED · taint: untrusted
+call 2      filesystem.read(~/work/stats)     ALLOWED · taint: untrusted + private
+call 3      git.push(main)                    BLOCKED
+            route  github issue → github.read → context → git.push → public repo
+            why    a write to a public sink while the session holds untrusted input and private data
+call 4      git.push(main) [fresh session]    ALLOWED · taint: none
+
+## labeler — gold set agreement
+
+> @lethalpath/labeler@0.0.1 build /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/labeler
+> tsc -p tsconfig.json
+
+
+> @lethalpath/labeler@0.0.1 test /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/labeler
+> node --test dist/rules.test.js
+
+gold 50/50
+✔ gold set: every row resolves to its expected resources (9.300861ms)
+✔ unknown tool: unlabelled, conf <= 0.2, config still valid (0.647111ms)
+✔ hostile mcp.json: env values and tokens never survive (1.418786ms)
+✔ known server expansions are fully labelled (2.485231ms)
+✔ ScanConfig input passes through labelled (0.535935ms)
+✔ a token-shaped server name is redacted in key position too (0.351068ms)
+✔ a malformed server entry fails loudly, by name (0.568759ms)
+✔ a declared ScanConfig that fails validation is refused, not passed through (0.24268ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 81.38448
+
+## eval — 40 seeded cases, both suites
+
+> @lethalpath/eval@0.0.1 build /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/eval
+> tsc -p tsconfig.json
+
+
+> @lethalpath/eval@0.0.1 evaluate /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/eval
+> node dist/run.js
+
+LethalPath eval — seeded generator (mulberry32, seed 20261017), 40 cases (16 leak / 8 laundering / 8 clean / 8 tie)
+run id 1792245174757-32040 · FalkorDB localhost:6379
+detection    cases  40  passed  40  failed   0  0.5s  ok
+             leak 16/16 · laundering 8/8 · clean 8/8 · tie 8/8
+fix-quality  cases  40  passed  40  failed   0  0.4s  ok
+             leak 16/16 · laundering 8/8 · clean 8/8 · tie 8/8
+results written to /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/eval/results/detection.json and fix-quality.json
+cleanup: deleted 80 eval_* graph(s) via GRAPH.LIST
+total wall time: 0.9s

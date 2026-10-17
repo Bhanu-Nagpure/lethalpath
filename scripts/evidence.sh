@@ -37,6 +37,12 @@ mkdir -p docs/live-evidence
   echo "## fix — clean (the abstention)"
   node packages/cli/dist/index.js fix data/fixtures/clean.json 2>&1
   echo
+  echo "## scan — 40 tools chaining through the shared context (the fallback)"
+  node packages/cli/dist/index.js scan data/fixtures/many-tools.json 2>&1
+  echo
+  echo "## fix — the same 40-tool config"
+  node packages/cli/dist/index.js fix data/fixtures/many-tools.json 2>&1
+  echo
   echo "## scan — a real mcp.json (labeler in front)"
   node packages/cli/dist/index.js scan --mcp data/fixtures/mcp-demo.json 2>&1
   echo
