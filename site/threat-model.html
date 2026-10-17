@@ -66,8 +66,8 @@
     <p class="eyebrow" data-reveal>Threat model</p>
     <h1 class="page-title" style="margin-top:14px" data-reveal>What we catch, what we miss, and what we refuse to claim</h1>
     <p class="lede mt-md">
-      A security tool is judged by the honesty of its limits. These are ours,
-      stated precisely enough for anyone to hold us to.
+      What LethalPath checks, what it does not, and which claims it does not make.
+      Each limit below is specific enough to test.
     </p>
     <div class="toc">
       <a class="pill" href="#problem">the problem</a>
@@ -114,8 +114,8 @@
     <div class="qa">
       <h3>Static analysis has a ceiling</h3>
       <p>We reason about what tools <em>can</em> do, not what a particular model will do with them. The
-        runtime guard closes part of that gap by tracking what actually entered the context, but it
-        sees only the calls routed through it.</p>
+        runtime guard demo shows how to close part of that gap by tracking what entered the context;
+        today it answers with simulated tool results and sees only the calls routed through it.</p>
     </div>
 
     <h2 class="subhead mt-sc" id="data">Your data</h2>
@@ -144,8 +144,8 @@
 
     <h2 class="subhead mt-sc" id="limits">Hard limits, stated plainly</h2>
     <ul class="limits">
-      <li><strong style="color:var(--ink)">Not a substitute for scoped tokens.</strong> Locking a door
-        is not the same as issuing a smaller key. Do both.</li>
+      <li><strong style="color:var(--ink)">Not a substitute for scoped tokens.</strong> Revoking a
+        grant in the agent does not shrink what the token itself can do. Scope the token too.</li>
       <li><strong style="color:var(--ink)">Not a scanner for server vulnerabilities.</strong> CVEs,
         missing OAuth and shell-exec exposure are real problems covered by other tools
         (<a href="benchmarks.html">credited on Benchmarks</a>). We cover combinations.</li>

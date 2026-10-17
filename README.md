@@ -13,8 +13,8 @@
 [![pnpm 9](https://img.shields.io/badge/pnpm-9-B45309?style=flat-square)](https://pnpm.io)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](./CONTRIBUTING.md)
 
-**Powered by [FalkorDB](https://www.falkordb.com).** The graph is not a place we
-store the answer. It is the answer.
+**Powered by [FalkorDB](https://www.falkordb.com).** Both the leak search and the
+fix run as queries on a FalkorDB graph.
 
 Finds every route by which an AI agent can be tricked into leaking your data
 across its MCP servers, then computes the fewest permissions to revoke that
@@ -28,7 +28,7 @@ Tracks: **T01** Agents That Act on Connected Data, and **T02** Agent Memory and
 Coordination — the guard's session memory is a graph of its own.
 
 **Sponsor, and how the sponsor is used.** FalkorDB sponsors the hackathon.
-This repository does not treat that as a badge. Every scan is a FalkorDB graph
+Every scan is a FalkorDB graph
 (`scan_<name>`). The leak query is Cypher. The fix is `CALL algo.maxFlow` on
 that graph. Reads go through `GRAPH.RO_QUERY`, so a generated query cannot
 write. The guard remembers a session in a second graph (`sessions_<id>`), one
@@ -99,7 +99,7 @@ node packages/cli/dist/index.js scan data/fixtures/clean.json   # the abstention
 node packages/cli/dist/index.js scan --mcp data/fixtures/mcp-demo.json   # label a real MCP config, then scan it
 
 pnpm --filter @lethalpath/core test      # the suite, against the live instance
-pnpm --filter @lethalpath/guard demo     # a live MCP session: the poisoned push is blocked, a clean one is not
+pnpm --filter @lethalpath/guard demo     # demo MCP session with simulated tool results: the poisoned push is blocked, a clean one is not
 pnpm --filter @lethalpath/eval evaluate  # the 40-case eval the Results section quotes
 ```
 
@@ -289,7 +289,7 @@ both directions (1 route before the revoke, 0 after).
 
 ## FalkorDB features this product calls
 
-Not a list of what the database can do. A list of what this repository executes.
+Every FalkorDB call this repository makes:
 
 | Feature | Where | Why it has to be FalkorDB |
 |---|---|---|
@@ -300,8 +300,7 @@ Not a list of what the database can do. A list of what this repository executes.
 | Multigraph (`select_graph`) | one `scan_*` per config, `sessions_*` per session | Tenant isolation without extra infrastructure. |
 | Pinned image `falkordb/falkordb:6.0.2` | `docker-compose.yml` | The engine we verified, not whatever `:latest` is tomorrow. |
 
-We do **not** claim CCH. It is documented and it is not in 6.0.2. Saying so is
-part of using the sponsor honestly.
+We do **not** use CCH. It is documented but not present in 6.0.2.
 
 ## Engine facts
 
@@ -343,6 +342,15 @@ constructed answer, whether `VERIFY_FIX` takes the route count to zero, and
 how many declared tasks keep working. The tie cases are the ones where both
 canonical cuts close every route; they exercise the documented write-side
 tie-break.
+
+These are synthetic configs from our own generator, so they show the engine is
+consistent with its spec, not that it is accurate on real users' setups.
+
+One run on a config that is not ours: `data/fixtures/mcp-public-readmes.json`
+copies the GitHub, filesystem and git entries from the official MCP server
+READMEs. `scan --mcp` on it finds 567 routes; `fix` revokes the 9 write grants
+(every github write plus `git.push`) and the re-run finds 0. The full output is
+in `docs/live-evidence/public-readmes-2026-10-17T18:54:57Z.log`.
 
 ## Data
 

@@ -536,13 +536,13 @@
     countUp();
     copyButtons();
 
-    // the scan page's Apply cut: flips the finding to its resolved state
+    // the scan page's Preview cut: flips the finding to its resolved state
     document.querySelectorAll("[data-applycut]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var finding = btn.closest("[data-finding]");
         if (!finding) return;
         var on = finding.classList.toggle("resolved");
-        btn.textContent = on ? "Cut applied" : "Apply cut";
+        btn.textContent = on ? "Showing cut" : "Preview cut";
         btn.classList.toggle("btn-safe", !on);
         btn.classList.toggle("btn-quiet", on);
       });

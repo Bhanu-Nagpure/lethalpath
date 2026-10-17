@@ -25,7 +25,7 @@ pnpm --filter @lethalpath/labeler build
 pnpm --filter @lethalpath/labeler test    # the 50-row gold set: 50/50
 ```
 
-## The honest part
+## Known weaknesses
 
 The gold set (`gold/labels.csv`, 50 hand-written rows) is self-authored
 alongside the rules: it proves internal consistency and catches regressions,
@@ -41,7 +41,7 @@ not external ground truth. The rules we trust least, in public:
 - `tracker.read` / `tracker.write` — direction comes from veto-verb lists; a
   tool named `jira_sync` reads as a read.
 - Three of the 50 gold rows pass by expecting the fallback resource. They are
-  honest misses, counted as agreements.
+  misses, counted as agreements.
 - Scope is unknowable from a name: rules cannot say *which* folder, bucket or
   channel a tool points at, nor whether a remote is actually world-readable.
 
