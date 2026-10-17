@@ -1,0 +1,137 @@
+# LethalPath on a config built from the official MCP server READMEs — 2026-10-17T18:54:57Z
+
+## Engine
+Local run without Docker: redis-server 8.0.2 with the FalkorDB module 60001 (the v6.0.1 release .so; no .so is published for v6.0.2).
+The CLI banner prints 'FalkorDB 6.0.2' as a fixed label; the engine here was 6.0.1.
+
+## Config provenance
+data/fixtures/mcp-public-readmes.json joins three Claude Desktop snippets, copied verbatim (placeholders included):
+- github:     modelcontextprotocol/servers-archived src/github/README.md (Claude Desktop config, NPX variant)
+- filesystem: modelcontextprotocol/servers src/filesystem/README.md (Claude Desktop config, NPX variant)
+- git:        modelcontextprotocol/servers src/git/README.md (Claude Desktop config, uvx variant)
+No tasks are declared, so every grant costs 1 and the cut minimises the number of grants.
+
+## Corpus hash
+a115273e569573a2e7eca41aa86c60ca4400dfc68fa6acd2ad6c7935ae488b25  data/fixtures/mcp-public-readmes.json
+
+## $ node packages/cli/dist/index.js scan --mcp data/fixtures/mcp-public-readmes.json
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+config    mcp-github-filesystem-git · MCP config · github, filesystem, git
+graph     scan_mcp-github-filesystem-git · 49 nodes · 120 edges · ready
+guard     GRAPH.RO_QUERY · LIMIT 100 · 3 s timeout · write keywords refused
+engine    leak two anchored segments through the tainted context · fix CALL algo.maxFlow + residual min-cut
+labelled  40 tools by rule · 0 unlabelled
+redacted  1 value, 0 token-shaped names — stripped before the graph
+
+567 routes found — every one of them is a permission you granted.
+
+LEAK PATHS
+  1  4 hops  local repo → git.diff → context → git.push → public repo
+     injection  github issue → github.get_issue → context
+
+  2  4 hops  local repo → git.diff → context → github.add_issue_comment → github issue
+     injection  github issue → github.get_issue → context
+
+  3  4 hops  local repo → git.diff → context → github.create_issue → github issue
+     injection  github issue → github.get_issue → context
+
+  4  4 hops  local repo → git.diff → context → github.create_or_update_file → public repo
+     injection  github issue → github.get_issue → context
+
+  5  4 hops  local repo → git.diff → context → github.create_pull_request → public repo
+     injection  github issue → github.get_issue → context
+
+  6  4 hops  local repo → git.diff → context → github.create_pull_request_review → github issue
+     injection  github issue → github.get_issue → context
+
+  7  4 hops  local repo → git.diff → context → github.merge_pull_request → public repo
+     injection  github issue → github.get_issue → context
+
+  8  4 hops  local repo → git.diff → context → github.push_files → public repo
+     injection  github issue → github.get_issue → context
+
+  9  4 hops  local repo → git.diff → context → github.update_issue → github issue
+     injection  github issue → github.get_issue → context
+
+  10  4 hops  local repo → git.log → context → git.push → public repo
+     injection  github issue → github.get_issue → context
+
+  11  4 hops  local repo → git.log → context → github.add_issue_comment → github issue
+     injection  github issue → github.get_issue → context
+
+  12  4 hops  local repo → git.log → context → github.create_issue → github issue
+     injection  github issue → github.get_issue → context
+
+  13  4 hops  local repo → git.log → context → github.create_or_update_file → public repo
+     injection  github issue → github.get_issue → context
+
+  14  4 hops  local repo → git.log → context → github.create_pull_request → public repo
+     injection  github issue → github.get_issue → context
+
+  15  4 hops  local repo → git.log → context → github.create_pull_request_review → github issue
+     injection  github issue → github.get_issue → context
+
+  16  4 hops  local repo → git.log → context → github.merge_pull_request → public repo
+     injection  github issue → github.get_issue → context
+
+  17  4 hops  local repo → git.log → context → github.push_files → public repo
+     injection  github issue → github.get_issue → context
+
+  18  4 hops  local repo → git.log → context → github.update_issue → github issue
+     injection  github issue → github.get_issue → context
+
+  19  4 hops  local repo → git.show → context → git.push → public repo
+     injection  github issue → github.get_issue → context
+
+  20  4 hops  local repo → git.show → context → github.add_issue_comment → github issue
+     injection  github issue → github.get_issue → context
+
+  21  4 hops  local repo → git.show → context → github.create_issue → github issue
+     injection  github issue → github.get_issue → context
+
+  22  4 hops  local repo → git.show → context → github.create_or_update_file → public repo
+     injection  github issue → github.get_issue → context
+
+  23  4 hops  local repo → git.show → context → github.create_pull_request → public repo
+     injection  github issue → github.get_issue → context
+
+  24  4 hops  local repo → git.show → context → github.create_pull_request_review → github issue
+     injection  github issue → github.get_issue → context
+
+  25  4 hops  local repo → git.show → context → github.merge_pull_request → public repo
+     injection  github issue → github.get_issue → context
+
+  note   showing the 25 shortest by hops; the graph has 567 in total
+  next  lethalpath fix
+
+## $ node packages/cli/dist/index.js fix --mcp data/fixtures/mcp-public-readmes.json
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+FIX  ·  CALL algo.maxFlow on FalkorDB
+
+max-flow   9
+cut        write side
+           github.create_issue → github issue
+           github.add_issue_comment → github issue
+           github.update_issue → github issue
+           github.create_pull_request → public repo
+           github.create_pull_request_review → github issue
+           github.create_or_update_file → public repo
+           github.push_files → public repo
+           github.merge_pull_request → public repo
+           git.push → public repo
+revoke     github.create_issue
+           github.add_issue_comment
+           github.update_issue
+           github.create_pull_request
+           github.create_pull_request_review
+           github.create_or_update_file
+           github.push_files
+           github.merge_pull_request
+           git.push
+verified   0 of 567 routes remain
+           leak query re-run without the revoked grants
+
+cost = 1 + declared tasks that use the grant; the max-flow value proves
+this cut is minimal. The verification re-runs the same query, not a promise.
