@@ -1,0 +1,59 @@
+name: Bug report
+description: A scan, a fix, the guard, or a test misbehaves.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. LethalPath reads real `mcp.json` files, so
+        **redact all config content before pasting**: drop `env` values,
+        tokens, and URLs with query strings. Never attach a `.env`.
+        If the bug is a possible data leak, report it privately — see
+        `SECURITY.md` — not in a public issue.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you run, and what came back?
+      placeholder: "`fix` printed `verified 3 of 5 routes remain`."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command run and output
+      description: The exact command, then the output (redacted). If you used `--mcp`, name the input file — do not paste its contents.
+      render: shell
+    validations:
+      required: true
+
+  - type: dropdown
+    id: falkordb
+    attributes:
+      label: Was FalkorDB running?
+      description: Everything in this repo talks to a live instance on `localhost:6379` (`docker compose up -d`).
+      options:
+        - "Yes — docker compose up -d, falkordb/falkordb:6.0.2"
+        - "No — the command failed to connect"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Node version, pnpm version, and OS.
+      placeholder: "node 22 · pnpm 9.15 · Ubuntu 24.04"
+    validations:
+      required: true
