@@ -42,9 +42,11 @@ Hand-written, synthetic, no real secrets.
 ## CLI output (authoritative — the demo transcript matches this)
 
 ```
-lethalpath scan [config]
-lethalpath fix  [config]
-lethalpath guard --config <config> [--policy policy.json]
+node packages/cli/dist/index.js scan [config]   # run from a clone; not on npm
+node packages/cli/dist/index.js fix  [config]
+
+# the guard is a separate MCP stdio server, not a CLI verb:
+# node packages/guard/dist/server.js --config <config> [--policy policy.json]
 ```
 
 The authoritative transcripts live in the README ("What scan prints" / "What
@@ -64,12 +66,12 @@ No content is ever stored — `argsHash` only. Decisions are `allowed` or `block
 
 ## Eval results (`packages/eval/results/*.json`)
 
-`detection.json`, `fix-quality.json`, `runtime.json`. Shape:
+`detection.json`, `fix-quality.json`. Shape:
 
 ```json
-{ "suite": "detection", "cases": 40, "passed": 38, "failed": 2,
+{ "suite": "detection", "cases": 40, "passed": 40, "failed": 0, "failures": [],
   "generatedBy": "packages/eval", "note": "one line on the method" }
 ```
 
 Every number shown on the site or in the README must appear in one of these
-files first.
+files, in `docs/live-evidence/`, or in the fixture it comes from, first.

@@ -14,8 +14,10 @@ The following were done by a human, and can be walked through on request:
 
 - every Cypher query was executed against a live FalkorDB 6.0.2 instance before
   it was committed, and corrected where the documented syntax did not run;
-- every reported metric comes from a file under `packages/eval/results/` and
-  was read before it was quoted;
+- every number we call a benchmark comes from a file under
+  `packages/eval/results/` and was read before it was quoted; transcript
+  numbers come from the uncut run log in `docs/live-evidence/`, labeler figures
+  from `packages/labeler/gold/labels.csv` and `rules.ts`;
 - the gold set under `packages/labeler/gold/labels.csv` was drafted during this
   build to measure the rules table; it is a reviewable fixture for rule quality,
   not a learned model's output, and it is not claimed as independent human

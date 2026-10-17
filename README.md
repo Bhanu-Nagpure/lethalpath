@@ -12,8 +12,9 @@ Built for [Graph Hacks](https://www.wemakedevs.org/hackathons/falkordb)
 Connected Data, and **T02** Agent Memory and Coordination — the guard's session
 memory is a graph of its own.
 
-> Numbers appear in this README only once `packages/eval/results/*.json`
-> contains them. No exceptions.
+> Numbers appear in this README only with the file that contains them named
+> beside them — the eval results, the live-evidence log, or the fixture itself.
+> No exceptions.
 
 ---
 
@@ -71,7 +72,7 @@ nothing answers.
 `--mcp mcp.json` puts the labeler (`packages/labeler`) in front of the same
 pipeline: the rules table labels every tool, unmatched tools are **named, not
 hidden**, and secrets never leave the machine. Point it at a real config and the
-graph is your own arrangement — the demo config in `data/fixtures/mcp-demo.json`
+graph is your own arrangement — the committed `data/fixtures/mcp-demo.json`
 prints 567 routes and a nine-grant cut that closes all of them.
 
 ### What `scan` prints
@@ -138,7 +139,7 @@ can never land in a cut; their capacity dwarfs every real cost. `(:Meta).ready`
 flips only after the whole graph is built, so a scan never reads a half-built
 graph.
 
-### The three queries
+### The queries
 
 **1 — The route (`LEAK_PATH`).** Untrusted input reaches the context through one
 tool; a private store reaches a public sink through a chain that passes through
