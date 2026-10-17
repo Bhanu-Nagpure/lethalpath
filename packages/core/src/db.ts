@@ -16,8 +16,9 @@
  * The keyword check and the cap read the query with literals and comments
  * blanked out, so `RETURN 'the set of tools'` is not mistaken for a write and
  * a LIMIT inside a string is not mistaken for a cap. Parameter values are
- * never scanned: they are escaped by `literal()` and cannot change the shape
- * of the query. Parameter keys are validated, because those are concatenated.
+ * never scanned: they are escaped by `literal()`, and object keys inside a
+ * parameter are validated as identifiers — a parameter cannot add query text.
+ * Parameter keys are validated because those are concatenated.
  *
  * The model never receives a handle to this module. Cypher decides; the model
  * only ever sees its results.
@@ -174,15 +175,23 @@ export class GraphDB {
   }
 
   /**
-   * A LIMIT above the cap is clamped; a parameterised limit is the caller's to
-   * keep; no limit at all gets one appended on its own line (so a trailing
-   * `//` comment cannot swallow it). Matching runs on the masked query, so
-   * "limit 2" inside a string is not a limit.
+   * The cap is about the rows that leave here, so it looks at LIMIT clauses
+   * AFTER the final RETURN: a limit above the cap is clamped to it, a
+   * parameterised limit is the caller's to keep, and a RETURN with no limit
+   * after it gets one appended on its own line (so a trailing `//` comment
+   * cannot swallow it). A query with no RETURN at all — a bare procedure CALL,
+   * say — is left alone, because appending LIMIT there is a syntax error.
+   * Matching runs on the masked query, so "limit 2" inside a string is not a
+   * limit.
    */
   private capLimit(cypher: string): string {
     const masked = maskLiterals(cypher);
-    const matches = [...masked.matchAll(/\blimit\s+(\d+|\$[A-Za-z_][A-Za-z0-9_]*)\b/gi)];
-    const last = matches[matches.length - 1];
+    let lastReturn = -1;
+    for (const m of masked.matchAll(/\breturn\b/gi)) lastReturn = m.index ?? -1;
+    if (lastReturn === -1) return cypher;
+    const limitRe = /\blimit\s+(-?[\d.]+(?:e[+-]?\d+)?|\$[A-Za-z_][A-Za-z0-9_]*)/gi;
+    const after = [...masked.matchAll(limitRe)].filter((m) => (m.index ?? 0) > lastReturn);
+    const last = after[after.length - 1];
     if (!last) return `${cypher.replace(/\s+$/, "")}\nLIMIT ${LIMIT_CAP}`;
     const value = last[1] ?? "";
     if (value.startsWith("$")) return cypher;
@@ -200,7 +209,14 @@ function literal(v: unknown): string {
   if (Array.isArray(v)) return `[${v.map(literal).join(",")}]`;
   if (typeof v === "object") {
     const entries = Object.entries(v as Record<string, unknown>);
-    return `{${entries.map(([k, val]) => `${k}:${literal(val)}`).join(",")}}`;
+    return `{${entries
+      .map(([k, val]) => {
+        if (!PARAM_KEY.test(k)) {
+          throw new Error(`read-only guard: parameter object key '${k}' is not a valid identifier`);
+        }
+        return `${k}:${literal(val)}`;
+      })
+      .join(",")}}`;
   }
   return `"${String(v).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
