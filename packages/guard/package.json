@@ -1,0 +1,25 @@
+{
+  "name": "@lethalpath/guard",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Runtime half of LethalPath: an MCP stdio guard that taints a session's context and blocks the call that would exfiltrate.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretest": "pnpm --filter @lethalpath/schema build && pnpm --filter @lethalpath/core build && tsc -p tsconfig.json",
+    "test": "node --test dist/decide.test.js dist/server.test.js",
+    "demo": "node scripts/demo.mjs"
+  },
+  "dependencies": {
+    "@lethalpath/core": "workspace:*",
+    "@lethalpath/schema": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.32.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
