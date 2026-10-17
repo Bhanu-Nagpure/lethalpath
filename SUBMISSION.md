@@ -63,7 +63,7 @@ recipe lives in `docs/browser-shots.md`.
 ## Checklist before hitting submit
 
 - [x] Repo is public and only the product is in it — github.com/bhanu-dev82/lethalpath, full incremental history (no squash)
-- [ ] CI green on main (`.github/workflows/ci.yml`: build, 53 tests, 40/40 eval, CLI smoke, against a pinned 6.0.2 service container)
+- [x] CI green on main (`.github/workflows/ci.yml`: build, 53 tests, 40/40 eval, CLI smoke, against a pinned 6.0.2 service container)
 - [x] README numbers match `packages/eval/results/*.json` and the evidence log
 - [ ] Video is public, not-for-kids, 2–4 minutes, numbers match
 - [ ] Site is deployed and the numbers on it match the same JSON files
