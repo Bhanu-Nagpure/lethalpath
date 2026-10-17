@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Benchmarks — LethalPath</title>
+<meta name="description" content="Every number LethalPath publishes, and the committed file that produced it: the eval suites, the label gold set, and the live guard transcript — including what we did not measure.">
 <link rel="stylesheet" href="style.css">
 <style>
   .win{color:var(--safe);font-weight:520}
@@ -18,7 +19,9 @@
 </head>
 <body>
 
-<div class="mockbar">MOCK · static preview · every figure is a placeholder until eval/results/*.json exists</div>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="mockbar">MOCK · static preview · every figure quotes a committed file: packages/eval/results/*.json and docs/live-evidence/</div>
 
 <nav>
   <div class="wrap">
@@ -38,45 +41,52 @@
   </div>
 </nav>
 
-<section style="border-top:0">
+<section id="main" style="border-top:0">
   <div class="wrap">
     <p class="eyebrow" data-reveal>Benchmarks</p>
     <div class="split-a mt-xl">
       <div>
         <h2>What we measured &mdash; including where we lose</h2>
-        <p class="lede mt-md">A number is only worth reading if you can reproduce it. Every row names the JSON that produced it.</p>
+        <p class="lede mt-md">A number is only worth reading if you can reproduce it. Every row names the committed file that produced it.</p>
       </div>
       <div>
         <div class="legend">
-          <span><i class="dot" style="background:var(--safe)"></i> we do better</span>
-          <span><i class="dot" style="background:var(--untrusted)"></i> we do worse &mdash; reported, not hidden</span>
-          <span><i class="dot" style="background:var(--mute)"></i> not comparable</span>
+          <span><i class="dot" style="background:var(--safe)"></i> measured, reproducible</span>
+          <span><i class="dot" style="background:var(--untrusted)"></i> our losses &mdash; reported, not hidden</span>
+          <span><i class="dot" style="background:var(--mute)"></i> not measured</span>
         </div>
-        <p class="mt-lg"><span class="note">frozen at checkpoint E · reported as-is after</span></p>
       </div>
     </div>
 
     <!-- ---------- 1 · detection ---------- -->
     <div class="grp">
-      <h3><span class="idx">01</span> Detection &mdash; against tools that already exist</h3>
+      <h3><span class="idx">01</span> Detection &mdash; 40 seeded configs</h3>
       <p class="lede mt-md" style="max-width:70ch">
-        40 seeded configs with ground truth known by construction, run through the nearest
-        public scanners at pinned versions, so the comparison is fair.
+        Ground truth known by construction: planted routes, laundering-only routes, clean
+        configs, and tie cases. Each case is ingested into its own graph and scanned with the
+        committed query, live against FalkorDB 6.0.2 on 2026-10-17.
       </p>
       <div class="panel mt-lg" style="overflow:hidden">
+        <div class="tw">
         <table>
-          <thead><tr><th>suite</th><th>LethalPath</th><th>Snyk Agent Scan</th><th>triflow</th><th>mcptrustchecker</th><th>source</th></tr></thead>
+          <thead><tr><th>case kind</th><th>cases</th><th>found</th><th>failed</th><th>source</th></tr></thead>
           <tbody>
-            <tr><td><strong>all leak paths</strong></td><td class="win">30/30</td><td class="neutral">19/30</td><td class="neutral">22/30</td><td class="neutral">18/30</td><td class="rank">detection.json</td></tr>
-            <tr><td>plain trifecta, one server</td><td class="win">20/20</td><td class="win">20/20</td><td class="win">20/20</td><td class="win">19/20</td><td class="rank">detection.json</td></tr>
-            <tr><td><strong>laundering hops</strong></td><td class="win">10/10</td><td class="lose">0/10</td><td class="lose">2/10</td><td class="lose">0/10</td><td class="rank">detection.json</td></tr>
-            <tr><td>false positives</td><td class="win">1</td><td class="lose">6</td><td class="lose">4</td><td class="neutral">2</td><td class="rank">detection.json</td></tr>
+            <tr><td><strong>planted route</strong></td><td>16</td><td class="win">16</td><td>0</td><td class="rank">detection.json</td></tr>
+            <tr><td>laundering-only route</td><td>8</td><td class="win">8</td><td>0</td><td class="rank">detection.json</td></tr>
+            <tr><td>clean &mdash; expected silent</td><td>8</td><td class="win">8</td><td>0</td><td class="rank">detection.json</td></tr>
+            <tr><td>tie &mdash; both cuts close it</td><td>8</td><td class="win">8</td><td>0</td><td class="rank">detection.json</td></tr>
+            <tr><td><strong>total</strong></td><td><strong>40</strong></td><td class="win"><strong>40</strong></td><td><strong>0</strong></td><td class="rank">detection.json</td></tr>
           </tbody>
         </table>
+        </div>
         <p class="foot">
-          <strong style="color:var(--ink)">The honest half.</strong> On the plain single-server
-          trifecta we are <em>tied</em>, not better &mdash; that check is already solved and we say so.
-          Our entire edge on this table is the 10 laundering paths that cross servers through a shared resource.
+          <strong style="color:var(--ink)">The honest half.</strong> A single-server trifecta check
+          is solved work, and we publish no head-to-head table: we did not run Snyk Agent Scan,
+          triflow or mcptrustchecker ourselves, so any comparison row would be invented. The
+          qualitative comparison, with citations, is in
+          <span class="mono">docs/RELATED-WORK.md</span>. What this table claims is narrower and
+          reproducible: the committed query found every planted route, and all eight clean
+          configs produced zero rows.
         </p>
       </div>
     </div>
@@ -85,107 +95,115 @@
     <div class="grp">
       <h3><span class="idx">02</span> The fix &mdash; the part nobody else ships</h3>
       <p class="lede mt-md" style="max-width:70ch">
-        Our min-cut against the obvious alternative: delete a tool until the path breaks.
-        &ldquo;Workflows kept&rdquo; counts the 30 tasks whose required tools still resolve.
+        One <span class="mono">CALL algo.maxFlow</span>, two canonical cuts, the cheaper one chosen
+        by grant count, then task cost, then the write side. Each case proves itself by re-running
+        the leak query with the revoked grants excluded.
       </p>
       <div class="panel mt-lg" style="overflow:hidden">
+        <div class="tw">
         <table>
-          <thead><tr><th>strategy</th><th>paths broken</th><th>workflows kept</th><th>grants revoked</th><th>source</th></tr></thead>
+          <thead><tr><th>what the pass condition checks</th><th>cases</th><th>passed</th><th>failed</th><th>source</th></tr></thead>
           <tbody>
-            <tr><td><strong>min-cut · two max-flow calls</strong></td><td class="win">30/30</td><td class="win">27/30</td><td class="win">1.4 avg</td><td class="rank">fix-quality.json</td></tr>
-            <tr><td>delete the sink tool</td><td class="win">30/30</td><td class="lose">11/30</td><td class="neutral">1.0 avg</td><td class="rank">fix-quality.json</td></tr>
-            <tr><td>delete any tool on the path</td><td class="neutral">26/30</td><td class="lose">9/30</td><td class="neutral">1.0 avg</td><td class="rank">fix-quality.json</td></tr>
-            <tr><td>revoke every grant</td><td class="win">30/30</td><td class="lose">0/30</td><td class="lose">9.7 avg</td><td class="rank">fix-quality.json</td></tr>
+            <tr><td>cut matches the constructed answer</td><td>40</td><td class="win">40</td><td>0</td><td class="rank">fix-quality.json</td></tr>
+            <tr><td>route closes &mdash; <span class="mono">VERIFY_FIX</span> returns zero</td><td>40</td><td class="win">40</td><td>0</td><td class="rank">fix-quality.json</td></tr>
+            <tr><td>expected tasks keep working</td><td>40</td><td class="win">40</td><td>0</td><td class="rank">fix-quality.json</td></tr>
+            <tr><td>clean config &rarr; empty cut, nothing revoked</td><td>8</td><td class="win">8</td><td>0</td><td class="rank">fix-quality.json</td></tr>
           </tbody>
         </table>
+        </div>
         <p class="foot">
-          Revoking every grant is perfectly secure and perfectly useless &mdash; 0/30, because it
-          breaks everything. That trade-off is the whole reason the fix needs a cost model
-          rather than a rule.
+          The first three rows are the three parts of the same pass condition over the same 40
+          cases, eight clean ones among them; the file's <span class="mono">failures</span> array
+          is empty. On the demo config the same code path printed one route,
+          <span class="mono">max-flow 2</span>, revoke <span class="mono">git.push</span>,
+          <span class="mono">0 of 1</span> routes remain, <span class="mono">3 of 4</span> tasks
+          keep working &mdash; verbatim in <span class="mono">docs/live-evidence/</span>.
         </p>
       </div>
     </div>
 
     <!-- ---------- 3 · labels ---------- -->
     <div class="grp">
-      <h3><span class="idx">03</span> Label quality</h3>
+      <h3><span class="idx">03</span> Label quality &mdash; the honest accounting</h3>
       <p class="lede mt-md" style="max-width:70ch">
-        Trust labels are the foundation; if they are wrong, every path is wrong. Scored against
-        300 hand-labelled tools.
+        Labels come from a 35-row rules table aided by tool-set expansions for 11 known servers.
+        The gold set is 50 hand-written rows, run in the package's own test.
       </p>
       <div class="panel mt-lg" style="overflow:hidden">
+        <div class="tw">
         <table>
-          <thead><tr><th>label</th><th>precision</th><th>recall</th><th>n</th><th>source</th></tr></thead>
+          <thead><tr><th>artefact</th><th>count</th><th>result</th><th>source</th></tr></thead>
           <tbody>
-            <tr><td><span class="tag tag-un">untrusted read</span></td><td class="win">0.93</td><td class="win">0.96</td><td class="rank">108</td><td class="rank">labeler.json</td></tr>
-            <tr><td><span class="tag tag-pr">private read</span></td><td class="win">0.91</td><td class="neutral">0.86</td><td class="rank">97</td><td class="rank">labeler.json</td></tr>
-            <tr><td><span class="tag tag-sk">public sink</span></td><td class="win">0.88</td><td class="lose">0.79</td><td class="rank">62</td><td class="rank">labeler.json</td></tr>
+            <tr><td>labelling rules</td><td>35</td><td class="neutral">&mdash;</td><td class="rank">packages/labeler/src/rules.ts</td></tr>
+            <tr><td>server tool-set expansions</td><td>11</td><td class="neutral">&mdash;</td><td class="rank">packages/labeler/src/rules.ts</td></tr>
+            <tr><td>gold-set rows</td><td>50</td><td class="win">50/50 match</td><td class="rank">pnpm --filter @lethalpath/labeler test</td></tr>
           </tbody>
         </table>
+        </div>
         <p class="foot">
-          <strong style="color:var(--ink)">Weakest: sink recall at 0.79.</strong> We miss about one in
-          five writing tools, mostly generically-named ones (<span class="mono">execute</span>,
-          <span class="mono">process</span>). That direction of error makes us <em>quieter</em> than we
-          should be, never noisier.
+          <strong style="color:var(--ink)">We publish no precision/recall table.</strong> The gold
+          set is self-authored alongside the rules: it proves internal consistency and catches
+          regressions, not external ground truth. The rules we trust least are named in the
+          labeler README &mdash; the sink end (tools named generically, like
+          <span class="mono">execute</span> or <span class="mono">process</span>) is the weak one,
+          which makes a scan quieter, never noisier.
         </p>
       </div>
     </div>
 
     <!-- ---------- 4 · runtime ---------- -->
     <div class="grp">
-      <h3><span class="idx">04</span> Runtime guard</h3>
+      <h3><span class="idx">04</span> Runtime guard &mdash; live MCP session</h3>
       <div class="panel mt-lg" style="overflow:hidden">
+        <div class="tw">
         <table>
-          <thead><tr><th>scenario</th><th>unguarded</th><th>guarded</th><th>added latency</th><th>source</th></tr></thead>
+          <thead><tr><th>call</th><th>result</th><th>source</th></tr></thead>
           <tbody>
-            <tr><td>injected issue → public push</td><td class="lose">leaked 7/10 runs</td><td class="win">blocked 10/10</td><td class="neutral">+38 ms</td><td class="rank">runtime.json</td></tr>
-            <tr><td>same, via a subagent</td><td class="lose">leaked 6/10 runs</td><td class="win">blocked 10/10</td><td class="neutral">+41 ms</td><td class="rank">runtime.json</td></tr>
-            <tr><td>legitimate push, clean context</td><td class="neutral">allowed 10/10</td><td class="win">allowed 10/10</td><td class="neutral">+38 ms</td><td class="rank">runtime.json</td></tr>
+            <tr><td><span class="mono">github.read(issue#42)</span></td><td class="neutral">allowed &middot; taint: untrusted</td><td class="rank">live-evidence</td></tr>
+            <tr><td><span class="mono">filesystem.read(~/work/stats)</span></td><td class="neutral">allowed &middot; taint: untrusted + private</td><td class="rank">live-evidence</td></tr>
+            <tr><td><span class="mono">git.push(main)</span></td><td class="lose">blocked &middot; route named in the error</td><td class="rank">live-evidence</td></tr>
+            <tr><td><span class="mono">git.push(main)</span>, fresh session</td><td class="win">allowed &middot; taint: none</td><td class="rank">live-evidence</td></tr>
           </tbody>
         </table>
+        </div>
         <p class="foot">
-          Row one's unguarded rate is <strong style="color:var(--ink)">not 10/10</strong>. A real model
-          does not always take the bait, so we record ten runs and report what happened rather than
-          replaying the run that worked. Row three matters most: the guard must not block honest work.
+          <strong style="color:var(--ink)">The arrangement is what makes it lethal.</strong> The
+          same push is blocked in a tainted session and allowed in a clean one. The guard's own
+          suite runs seven tests, including the stdio end-to-end. Added latency:
+          <strong style="color:var(--ink)">not measured</strong>, so no milliseconds appear here.
+          The audit log stores tool, decision, reason and a short argument hash &mdash; never
+          argument contents.
         </p>
       </div>
     </div>
 
-    <!-- ---------- 5 · where we lose ---------- -->
+    <!-- ---------- 5 · not measured ---------- -->
     <div class="grp">
-      <h3><span class="idx">05</span> Where we lose to published work</h3>
-      <p class="lede mt-md" style="max-width:70ch">
-        We re-implemented the baseline from <em>Graph RAG-Tool Fusion</em> (arXiv 2502.07223) on
-        their public ToolLinkOS dataset, so our retrieval number can be compared to a real one.
-      </p>
-      <div class="panel mt-lg" style="overflow:hidden">
-        <table>
-          <thead><tr><th>setup</th><th>Recall@5</th><th>mAP@10</th><th>vs naive</th><th>source</th></tr></thead>
-          <tbody>
-            <tr><td>all tools loaded</td><td class="neutral">0.31</td><td class="neutral">0.244</td><td class="neutral">baseline</td><td class="rank">retrieval.json</td></tr>
-            <tr><td>embedding search only</td><td class="neutral">0.58</td><td class="neutral">0.418</td><td class="neutral">ref</td><td class="rank">retrieval.json</td></tr>
-            <tr><td>embeddings + dependency closure <span class="muted">(ours)</span></td><td class="win">0.74</td><td class="win">0.507</td><td class="win">+8.9</td><td class="rank">retrieval.json</td></tr>
-            <tr><td><em>paper's reported figure</em></td><td class="neutral">&mdash;</td><td class="neutral">0.635</td><td class="neutral">+71.7%</td><td class="rank">arXiv 2502.07223</td></tr>
-          </tbody>
-        </table>
-        <p class="foot">
-          <strong style="color:var(--ink)">We are below the paper.</strong> +8.9 mAP@10, not +71.7%.
-          They tuned the retrieval task; we did not, because retrieval is not our product &mdash;
-          we use it only to match a config to the catalog. We print the gap instead of dropping the row.
-        </p>
+      <h3><span class="idx">05</span> What we did not measure</h3>
+      <p class="lede mt-md" style="max-width:70ch">A benchmarks page without this list would be a lie by omission.</p>
+      <div class="panel mt-lg">
+        <ul class="small" style="color:var(--body);padding:18px 18px 18px 36px;list-style:disc">
+          <li style="margin:8px 0">Head-to-head against other scanners &mdash; <strong style="color:var(--ink)">not run</strong>. Positioning is qualitative and cited in <span class="mono">docs/RELATED-WORK.md</span>, including where MSCC and CaMeL are ahead of us.</li>
+          <li style="margin:8px 0">Retrieval accuracy on tool-selection datasets &mdash; <strong style="color:var(--ink)">not attempted</strong>. Retrieval is not the product; the path and the cut are.</li>
+          <li style="margin:8px 0">External label ground truth &mdash; <strong style="color:var(--ink)">none exists yet</strong>. The 50-row gold set is self-authored, and says so.</li>
+          <li style="margin:8px 0">Guard latency overhead &mdash; <strong style="color:var(--ink)">not measured</strong>. We print no milliseconds we did not time.</li>
+        </ul>
       </div>
     </div>
 
     <div class="card mt-sc" style="border-left:2px solid var(--untrusted)">
       <h4 style="color:var(--untrusted)">Reproduce any of it</h4>
-      <div class="code mt-md"><pre><span class="com"># every figure on this page</span>
-pnpm --filter eval run all
+      <div class="code mt-md"><pre><span class="com"># both eval suites, live — rewrites the JSON these tables read</span>
+pnpm --filter @lethalpath/eval build &amp;&amp; pnpm --filter @lethalpath/eval evaluate
 
-<span class="com"># one suite, to see where a number comes from</span>
-pnpm --filter eval run detection
+<span class="com"># the labeler gold run (section 03)</span>
+pnpm --filter @lethalpath/labeler test
 
-<span class="com"># the files these tables read</span>
-ls eval/results/</pre></div>
+<span class="com"># the guard transcript (section 04)</span>
+pnpm --filter @lethalpath/guard demo
+
+<span class="com"># the committed files themselves</span>
+cat packages/eval/results/detection.json packages/eval/results/fix-quality.json</pre></div>
     </div>
   </div>
 </section>

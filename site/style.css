@@ -15,16 +15,19 @@
      - -0.02em on body text          -> tracking scales with size; body gets none
      - four identical cards in a grid -> asymmetric splits and a real hierarchy
 
-   Accessibility (measured, not assumed). Worst-case surface is --surface-2.
-     --ink        #F4F4F6 on --canvas   18.24:1  AAA
-     --body       #CDCDCD on --canvas   12.60:1  AAA
-     --mute       #9C9C9D on --canvas    7.30:1  AAA
-     --untrusted  #FFC533 on --canvas   12.68:1  AAA   chip 9.76:1 AAA
-     --private    #B69EFB on --canvas    7.79:1  AAA   chip 7.09:1 AAA
-     --sink       #57C1FF on --canvas   10.00:1  AAA   chip 7.89:1 AAA
-     --danger     #FF8A8A on --canvas    7.78:1  AAA   chip 7.09:1 AAA
-     --safe       #59D499 on --canvas   10.78:1  AAA   chip 8.52:1 AAA
-     White CTA:   #000000 on #FFFFFF    21.00:1  AAA
+   Accessibility (measured, not assumed). Ratios are against --canvas; the
+   parenthetical is the worst surface each colour is actually painted on.
+     --ink        #F4F4F6 on --canvas   18.24:1  AAA   (16.03:1 on --surface-3)
+     --body       #CDCDCD on --canvas   12.60:1  AAA   (11.07:1 on --surface-3)
+     --mute       #A9A9AB on --canvas    8.54:1  AAA   ( 7.50:1 on --surface-3)
+     --ash        #A3A4A6 on --canvas    8.03:1  AAA   ( 7.51:1 on a #121212 node rect)
+     --untrusted  #FFC533 on --canvas   12.68:1  AAA   (11.14:1 on --surface-3)
+     --private    #B69EFB on --canvas    8.85:1  AAA   ( 7.77:1 on --surface-3)
+     --sink       #57C1FF on --canvas   10.00:1  AAA   ( 8.78:1 on --surface-3)
+     --danger     #FF8A8A on --canvas    8.83:1  AAA   ( 7.76:1 on --surface-3)
+     --safe       #59D499 on --canvas   10.78:1  AAA   ( 9.48:1 on --surface-3)
+     Status chips (.tag-*) clear 7:1 on their tint over --surface-2; the worst
+     is .tag-pr at 7.23:1. White CTA: #000000 on #FFFFFF 21.00:1 AAA.
    ========================================================================== */
 
 :root{
@@ -42,8 +45,8 @@
   /* text */
   --ink:#F4F4F6;
   --body:#CDCDCD;
-  --mute:#9C9C9D;
-  --ash:#777879;   /* comments/arrows — AA 4.5:1, not AAA: decorative, not prose */
+  --mute:#A9A9AB;
+  --ash:#A3A4A6;   /* comments/arrows — the dimmest tier, still AAA */
 
   /* semantic colour — used ONLY where it means something */
   --untrusted:#FFC533;  /* a stranger's words  */
@@ -102,6 +105,18 @@ body::after{
   to{background-position:72px 72px}
 }
 .wrap{max-width:1120px;margin:0 auto;padding:0 var(--s-xl)}
+/* first tab stop: jump straight past the nav */
+.skip-link{
+  position:fixed;top:-60px;left:var(--s-xl);z-index:70;
+  background:#fff;color:#000;font-weight:520;font-size:.85rem;
+  padding:9px 14px;border-radius:0 0 var(--r-md) var(--r-md);
+  transition:top .12s ease;
+}
+.skip-link:focus{top:0}
+.sr-only{
+  position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
 
 /* ---------- type scale: tracking follows size, weight stays 500/600 ---------- */
 h1,h2,h3,h4{margin:0;font-weight:600;line-height:1.12;letter-spacing:-.021em}
@@ -111,11 +126,12 @@ h3{font-size:1.02rem;font-weight:600;letter-spacing:-.01em;line-height:1.35}
 h4{font-size:.9rem;font-weight:600;letter-spacing:.005em}
 p{margin:0}
 a{color:var(--sink);text-underline-offset:2px;text-decoration-thickness:1px}
+/* keyboard: one visible ring everywhere */
+:focus-visible{outline:2px solid var(--sink);outline-offset:2px}
 code,kbd{font-family:var(--mono);font-size:.87em;letter-spacing:0}
 hr{border:0;border-top:1px solid var(--line);margin:0}
 
 section{padding:var(--section) 0;border-top:1px solid var(--line)}
-section.tight{padding:56px 0}
 
 /* hero copy: larger body, generous measure */
 .lede{color:var(--body);font-size:1.02rem;line-height:1.65;max-width:60ch}
@@ -128,7 +144,7 @@ section.tight{padding:56px 0}
 .mono{font-family:var(--mono)}
 .mt-sm{margin-top:var(--s-sm)}.mt-md{margin-top:var(--s-md)}
 .mt-lg{margin-top:var(--s-lg)}.mt-xl{margin-top:var(--s-xl)}
-.mt-xxl{margin-top:var(--s-xxl)}.mt-sc{margin-top:44px}
+.mt-sc{margin-top:44px}
 
 /* ---------- mock banner ---------- */
 .mockbar{
@@ -161,6 +177,11 @@ nav a.nb{
 }
 nav a.nb:hover{color:var(--ink);background:var(--surface-2)}
 nav a.nb[aria-current="page"]{color:var(--ink)}
+/* small screens: the link row wraps instead of pushing the page wide */
+@media (max-width:760px){
+  nav .wrap{flex-wrap:wrap;height:auto;padding-top:9px;padding-bottom:9px;row-gap:2px}
+  nav a.nb{padding:5px 8px}
+}
 
 /* ---------- surfaces ---------- */
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl)}
@@ -182,7 +203,6 @@ nav a.nb[aria-current="page"]{color:var(--ink)}
 }
 .btn:hover{text-decoration:none}
 .btn:active{transform:translateY(.5px)}
-.btn:focus-visible{outline:2px solid var(--sink);outline-offset:2px}
 .btn-primary{background:#fff;color:#000}
 .btn-primary:hover{background:#e8e8e8}
 .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
@@ -246,31 +266,16 @@ tbody tr:hover{background:var(--surface)}
   display:inline-block;vertical-align:middle}
 .bar-safe{background:var(--safe)}
 
+/* long tables scroll inside their panel instead of widening the page */
+.tw{overflow-x:auto}
+
 /* ---------- layout ---------- */
-.grid{display:grid;gap:var(--s-lg)}
-.g2{grid-template-columns:repeat(2,1fr)}
-.g3{grid-template-columns:repeat(3,1fr)}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-xl)}
-.split-hero{display:grid;grid-template-columns:1.06fr .94fr;gap:56px;align-items:center}
 .split-a{display:grid;grid-template-columns:.85fr 1.15fr;gap:48px;align-items:start}
-.split-b{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:start}
 @media (max-width:1000px){
-  .split,.split-hero,.split-a,.split-b,.g3{grid-template-columns:1fr}
+  .split,.split-a{grid-template-columns:1fr}
   :root{--section:64px}
 }
-@media (max-width:720px){.g2{grid-template-columns:1fr}}
-
-/* ---------- diagram frame ---------- */
-.diagram{
-  background:var(--surface);border:1px solid var(--line);
-  border-radius:var(--r-xl);padding:16px;box-shadow:var(--shadow);
-}
-.diagram svg{width:100%;height:auto;display:block}
-.dlegend{
-  display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;padding-top:13px;
-  border-top:1px solid var(--line-soft);font-size:.76rem;color:var(--body);
-}
-.dlegend span{display:inline-flex;align-items:center;gap:6px}
 
 /* ---------- footer ---------- */
 footer{border-top:1px solid var(--line);padding:38px 0;color:var(--mute);font-size:.83rem}
@@ -325,7 +330,7 @@ footer .navlinks{display:flex;gap:22px;flex-wrap:wrap}
   aspect-ratio:16/10;
   display:flex;align-items:flex-end;
 }
-.shot figcaption{
+.shot .figcap{
   width:100%;padding:12px 14px;
   background:linear-gradient(transparent, rgba(0,0,0,.72));
   font-family:var(--mono);font-size:.68rem;color:var(--body);letter-spacing:.02em;
@@ -339,7 +344,6 @@ footer .navlinks{display:flex;gap:22px;flex-wrap:wrap}
 }
 
 .hero-product{padding:72px 0 24px}
-.hero-copy h1{font-size:clamp(2.6rem, 5.4vw, 4.4rem);letter-spacing:-.038em;line-height:1.02;max-width:14ch}
 .kicker{
   display:inline-flex;align-items:center;gap:8px;
   font-family:var(--mono);font-size:.72rem;color:var(--body);
@@ -374,13 +378,14 @@ footer .navlinks{display:flex;gap:22px;flex-wrap:wrap}
    Everything degrades to a correct static frame with JS off or reduced motion.
    ========================================================================== */
 
-/* ---------- scroll reveal ---------- */
-[data-reveal]{
+/* ---------- scroll reveal — only armed when JS is running, so a
+   no-JS/offline load shows a correct static page instead of hidden sections */
+html.js [data-reveal]{
   opacity:0;transform:translateY(14px);
   transition:opacity .7s cubic-bezier(.2,.6,.3,1),transform .7s cubic-bezier(.2,.6,.3,1);
   will-change:opacity,transform;
 }
-[data-reveal].in{opacity:1;transform:none}
+html.js [data-reveal].in{opacity:1;transform:none}
 
 /* ---------- hero attack scene ---------- */
 .scene{position:relative}
@@ -401,8 +406,6 @@ footer .navlinks{display:flex;gap:22px;flex-wrap:wrap}
 
 /* the tainted agent context — the visual turn of the whole story */
 .scene .node.tainted .box{fill:#0d2230;stroke:#57C1FF;stroke-width:2}
-@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
-.scene .node.tainted .halo{animation:pulse 1.5s ease-in-out infinite}
 
 /* the travelling data packet */
 .scene .packet{z-index:3}
@@ -424,7 +427,7 @@ footer .navlinks{display:flex;gap:22px;flex-wrap:wrap}
 .scene.blocked .trail{stroke:#4b4f55;filter:none}
 .scene.blocked .node.lit.danger .box{filter:none}
 .scene.blocked .node.lit.danger .box{stroke:#4b4f55}
-.scene.blocked .node.lit.danger .lbl{fill:#777879}
+.scene.blocked .node.lit.danger .lbl{fill:var(--ash)}
 .scene.blocked .alarm{opacity:0}
 
 /* narration bar */
@@ -456,9 +459,12 @@ footer .navlinks{display:flex;gap:22px;flex-wrap:wrap}
 }
 .scene-bar .spacer{flex:1}
 
-/* reduced motion: no transforms, no autoplay, correct final frame */
+/* reduced motion: no transforms, no drifting backdrop, no autoplay, correct
+   final frame */
 @media (prefers-reduced-motion:reduce){
-  [data-reveal]{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+  body::after{animation:none}
+  html.js [data-reveal]{opacity:1;transform:none;transition:none}
   .scene *{transition:none!important;animation:none!important}
   *{transition:none!important}
 }

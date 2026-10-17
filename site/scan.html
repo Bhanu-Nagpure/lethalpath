@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scan — LethalPath</title>
+<meta name="description" content="Paste your MCP config and see the exact leak path your agent's tools can walk — secrets stripped in the browser, the route named tool by tool, and the one grant that closes it.">
 <link rel="stylesheet" href="style.css">
 <style>
   .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
@@ -43,6 +44,8 @@
 </head>
 <body>
 
+<a class="skip-link" href="#main">Skip to content</a>
+
 <div class="mockbar">MOCK · static preview · “Apply cut” is a visual state, not live logic</div>
 
 <nav>
@@ -63,7 +66,7 @@
   </div>
 </nav>
 
-<section style="border-top:0">
+<section id="main" style="border-top:0">
   <div class="wrap">
     <p class="eyebrow" data-reveal>Scan</p>
     <div class="split-a mt-xl">
@@ -72,10 +75,10 @@
         <p class="lede mt-md">Your keys are stripped <strong style="color:var(--ink)">in your browser</strong> before anything is sent. The preview is exactly what leaves your machine.</p>
       </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
-        <button class="btn btn-quiet btn-sm">Claude Code</button>
-        <button class="btn btn-quiet btn-sm">Claude Desktop</button>
-        <button class="btn btn-quiet btn-sm">Cursor</button>
-        <button class="btn btn-quiet btn-sm">VS Code</button>
+        <button type="button" class="btn btn-quiet btn-sm">Claude Code</button>
+        <button type="button" class="btn btn-quiet btn-sm">Claude Desktop</button>
+        <button type="button" class="btn btn-quiet btn-sm">Cursor</button>
+        <button type="button" class="btn btn-quiet btn-sm">VS Code</button>
         <span class="pill">or run <span class="mono">npx lethalpath scan</span></span>
       </div>
     </div>
@@ -104,7 +107,7 @@
     <span class="lbl">"git"</span>: { "command": "npx" }
   }
 }</pre>
-          <div style="padding:0 16px 16px"><div class="strip">✓ 2 secrets stripped locally &mdash; never transmitted</div></div>
+          <div style="padding:0 16px 16px"><div class="strip">✓ 1 secret stripped locally &mdash; never transmitted</div></div>
         </div>
 
         <div class="panel mt-lg">
@@ -126,26 +129,27 @@
             <span class="spacer"></span><span>severity · high</span>
           </div>
           <div class="path">
-<span class="tag tag-un">stranger's words</span> public issue<br>
-<span class="arrow">&nbsp;&nbsp;↓</span> github.get_issue <span style="color:var(--ash)">· reads untrusted</span><br>
+<span class="tag tag-un">stranger's words</span> github issue<br>
+<span class="arrow">&nbsp;&nbsp;↓</span> github.read <span style="color:var(--ash)">· reads untrusted</span><br>
 <span class="arrow">&nbsp;&nbsp;↓</span> <span style="color:var(--sink)">agent context</span> <span style="color:var(--ash)">· now tainted</span><br>
-<span class="arrow">&nbsp;&nbsp;↓</span> filesystem.write_file <span style="color:var(--ash)">· writes disk</span><br>
-<span class="arrow">&nbsp;&nbsp;↓</span> <span style="color:var(--private)">/home/me/proj</span> <span style="color:var(--ash)">· private</span><br>
+<span class="tag tag-pr">private</span> project folder <span style="color:var(--ash)">· ~/work/stats</span><br>
+<span class="arrow">&nbsp;&nbsp;↓</span> filesystem.read <span style="color:var(--ash)">· reads private</span><br>
+<span class="arrow">&nbsp;&nbsp;↓</span> <span style="color:var(--sink)">agent context</span><br>
 <span class="arrow">&nbsp;&nbsp;↓</span> git.push <span style="color:var(--ash)">· writes remote</span><br>
-<span class="arrow">&nbsp;&nbsp;↓</span> <span class="tag tag-sk">public sink</span> <span style="color:var(--body)">origin/main</span>
+<span class="arrow">&nbsp;&nbsp;↓</span> <span class="tag tag-sk">public sink</span> <span style="color:var(--body)">public repo · origin/main</span>
           </div>
           <div class="fixbox">
             <div class="mono" style="font-size:.78rem;color:var(--safe)">THE FIX &mdash; revoke <strong>git.push</strong></div>
             <p class="small mt-sm" style="color:var(--body)">
               Breaks <strong style="color:var(--ink)">1 of 1</strong> paths · keeps
-              <strong style="color:var(--ink)">27 of 30</strong> workflows.
-              The alternative, revoking <span class="mono">github.get_issue</span>, also works
-              but keeps only 21/30.
+              <strong style="color:var(--ink)">3 of 4</strong> tasks working.
+              On a full tie the cut prefers the write side &mdash; the agent keeps its read
+              and loses only the publish.
             </p>
             <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-              <button class="btn btn-safe btn-sm" data-applycut>Apply cut</button>
-              <button class="btn btn-ghost btn-sm">Copy policy diff</button>
-              <button class="btn btn-ghost btn-sm">Why this edge?</button>
+              <button type="button" class="btn btn-safe btn-sm" data-applycut>Apply cut</button>
+              <button type="button" class="btn btn-ghost btn-sm">Copy policy diff</button>
+              <button type="button" class="btn btn-ghost btn-sm">Why this edge?</button>
             </div>
           </div>
           <div style="border-top:1px solid var(--line);padding:16px 18px">
@@ -158,35 +162,41 @@
         </div>
 
         <div class="panel mt-lg">
-          <div class="panel-h"><span class="dot" style="background:var(--untrusted)"></span> label confidence <span class="spacer"></span><span>inferred · override any</span></div>
+          <div class="panel-h"><span class="dot" style="background:var(--untrusted)"></span> label confidence <span class="spacer"></span><span>from the rulebook · override any</span></div>
+          <div class="tw">
           <table>
             <thead><tr><th>tool</th><th>label</th><th>source</th><th>conf</th></tr></thead>
             <tbody>
-              <tr><td><span class="mono">github.get_issue</span></td><td><span class="tag tag-un">untrusted</span></td><td class="rank">rule</td><td class="rank">0.97</td></tr>
-              <tr><td><span class="mono">filesystem.write_file</span></td><td><span class="tag tag-pr">private</span></td><td class="rank">rule</td><td class="rank">0.94</td></tr>
-              <tr><td><span class="mono">git.push</span></td><td><span class="tag tag-sk">sink</span></td><td class="rank">llm</td><td class="rank">0.88</td></tr>
+              <tr><td><span class="mono">github.get_issue</span></td><td><span class="tag tag-un">untrusted</span></td><td class="rank">rule</td><td class="rank">0.70</td></tr>
+              <tr><td><span class="mono">filesystem.write_file</span></td><td><span class="tag tag-pr">private</span></td><td class="rank">rule</td><td class="rank">0.60</td></tr>
+              <tr><td><span class="mono">git.push</span></td><td><span class="tag tag-sk">sink</span></td><td class="rank">rule</td><td class="rank">0.70</td></tr>
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>
 
     <details>
       <summary>Cypher executed &mdash; leak-path query · read-only · 3 s timeout · LIMIT capped at 100</summary>
-      <div class="code"><pre><span class="kw">MATCH</span> (u:<span class="lbl">Resource</span> {trust:<span class="str">'untrusted'</span>})-[:<span class="rel">FEEDS</span>]->(:<span class="lbl">Tool</span>)-[:<span class="rel">EMITS</span>]->(ctx:<span class="lbl">Context</span>)
+      <div class="code"><pre><span class="kw">MATCH</span> (u:<span class="lbl">Resource</span> {trust:<span class="str">'untrusted'</span>})-[:<span class="rel">FLOWS</span>]->(:<span class="lbl">Tool</span>)-[:<span class="rel">FLOWS</span>]->(ctx:<span class="lbl">Context</span>)
 <span class="kw">MATCH</span> leak = (p:<span class="lbl">Resource</span> {sensitivity:<span class="str">'private'</span>})
-              -[:<span class="rel">FLOWS</span>*2..10]->(s:<span class="lbl">Resource</span> {visibility:<span class="str">'public'</span>})
-<span class="kw">WHERE</span> ctx <span class="kw">IN</span> nodes(leak)
+              -[:<span class="rel">FLOWS</span>*1..5]->(ctx)
+              -[:<span class="rel">FLOWS</span>*1..5]->(s:<span class="lbl">Resource</span> {visibility:<span class="str">'public'</span>})
 <span class="kw">RETURN</span> u.kind <span class="kw">AS</span> injected_from,
-       [n <span class="kw">IN</span> nodes(leak) <span class="kw">WHERE</span> n:<span class="lbl">Tool</span> | n.id] <span class="kw">AS</span> tools,
+       [n <span class="kw">IN</span> nodes(leak) <span class="kw">WHERE</span> n:<span class="lbl">Tool</span> | n.name] <span class="kw">AS</span> tools,
        length(leak) <span class="kw">AS</span> hops
 <span class="kw">ORDER BY</span> hops <span class="kw">ASC</span> <span class="kw">LIMIT</span> 25</pre></div>
     </details>
 
     <details>
       <summary>Cypher executed &mdash; min-cut · <span class="mono">algo.maxFlow</span>, run twice: exfiltration and ingress</summary>
-      <div class="code"><pre><span class="kw">MATCH</span> (p:<span class="lbl">Resource</span> {sensitivity:<span class="str">'private'</span>}) <span class="kw">WITH</span> collect(p) <span class="kw">AS</span> src
-<span class="kw">MATCH</span> (s:<span class="lbl">Resource</span> {visibility:<span class="str">'public'</span>})  <span class="kw">WITH</span> src, collect(s) <span class="kw">AS</span> dst
+      <div class="code"><pre><span class="kw">MATCH</span> (p:<span class="lbl">Resource</span> {sensitivity:<span class="str">'private'</span>})
+<span class="kw">WHERE</span> p.visibility <span class="kw">IS NULL OR</span> p.visibility &lt;&gt; <span class="str">'public'</span>
+<span class="kw">WITH</span> collect(p) <span class="kw">AS</span> src
+<span class="kw">MATCH</span> (s:<span class="lbl">Resource</span> {visibility:<span class="str">'public'</span>})
+<span class="kw">WHERE</span> s.sensitivity <span class="kw">IS NULL OR</span> s.sensitivity &lt;&gt; <span class="str">'private'</span>
+<span class="kw">WITH</span> src, collect(s) <span class="kw">AS</span> dst
 <span class="kw">CALL</span> <span class="fn">algo.maxFlow</span>({
   sourceNodes: src, targetNodes: dst,
   relationshipTypes: [<span class="str">'FLOWS'</span>],        <span class="com">// exactly one type on 6.0.2</span>
@@ -224,5 +234,6 @@
   </div>
 </footer>
 
+<script src="animate.js"></script>
 </body>
 </html>

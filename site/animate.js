@@ -14,6 +14,9 @@
 (function () {
   "use strict";
 
+  // arm the CSS reveal system only when JS is actually running
+  document.documentElement.classList.add("js");
+
   var reduced = window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -70,7 +73,6 @@
 
     var packet   = root.querySelector("[data-packet]");
     var trail    = root.querySelector("[data-trail]");
-    var ctx      = root.querySelector("[data-ctx]");
     var gate     = root.querySelector("[data-gate]");
     var alarm    = root.querySelector("[data-alarm]");
     var caption  = root.querySelector("[data-caption]");
@@ -80,6 +82,8 @@
     root.querySelectorAll("[data-node]").forEach(function (n) {
       nodes[n.getAttribute("data-node")] = n;
     });
+    // the tainted-context hook: explicit data-ctx if present, else the context node
+    var ctx = root.querySelector("[data-ctx]") || nodes["context"];
 
     var timers = [];
     var done = false;

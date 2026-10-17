@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lethal Combos — LethalPath</title>
+<meta name="description" content="Popular MCP server pairs that add up to a lethal trifecta: which server classes read untrusted text, touch private data, and can publish — coarse on purpose, with the honest caveats.">
 <link rel="stylesheet" href="style.css">
 <style>
   .metric{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
@@ -23,7 +24,9 @@
 </head>
 <body>
 
-<div class="mockbar">MOCK · static preview · install counts and ranks are placeholders, not harvested figures</div>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="mockbar">MOCK · static preview · pair classes come from the labeler's rulebook; no popularity data is harvested</div>
 
 <nav>
   <div class="wrap">
@@ -43,7 +46,7 @@
   </div>
 </nav>
 
-<section style="border-top:0">
+<section id="main" style="border-top:0">
   <div class="wrap">
     <p class="eyebrow" data-reveal>Lethal Combos</p>
     <div class="split-a mt-xl">
@@ -51,14 +54,14 @@
         <h2>Popular tool <em style="font-style:normal;color:var(--danger)">pairs</em> that make a leak</h2>
       </div>
       <div>
-        <p class="lede">Everyone scores servers one at a time. Every server below looks fine on its own &mdash; that is the entire point. Ranked by how many people have installed each pair.</p>
+        <p class="lede">Everyone scores servers one at a time. Every server below looks fine on its own &mdash; that is the entire point. Candidate pairs from the rulebook; the real path query is what settles it.</p>
       </div>
     </div>
 
     <div class="metric">
-      <div class="k"><div class="v">20,537</div><div class="l">servers in the catalog</div></div>
-      <div class="k"><div class="v">7,964</div><div class="l">tools read from them</div></div>
-      <div class="k"><div class="v" style="color:var(--danger)">148</div><div class="l">pairs that complete the trifecta</div></div>
+      <div class="k"><div class="v">35</div><div class="l">labelling rules in the rulebook</div></div>
+      <div class="k"><div class="v">11</div><div class="l">server tool-sets expanded</div></div>
+      <div class="k"><div class="v">50/50</div><div class="l">gold-set rows matched</div></div>
       <div class="k"><div class="v" style="color:var(--untrusted)">0</div><div class="l">servers that declare their own trust level</div></div>
     </div>
 
@@ -67,11 +70,12 @@
         <span class="dot" style="background:var(--danger)"></span> top pairs by exposure
         <span class="spacer"></span><span>server-level · coarse on purpose</span>
       </div>
+      <div class="tw">
       <table>
         <thead>
           <tr>
             <th style="width:40px">#</th><th>pair</th><th style="width:76px">legs</th>
-            <th>why the pair is lethal</th><th style="width:170px">installs</th>
+            <th>why the pair is lethal</th>
           </tr>
         </thead>
         <tbody>
@@ -80,59 +84,54 @@
             <td><div class="paircell"><span class="mono">github</span><span class="muted">+</span><span class="mono">filesystem</span></div></td>
             <td><div class="legs" title="reads untrusted, reads private, writes public"><i class="leg on-un"></i><i class="leg on-pr"></i><i class="leg on-sk"></i></div></td>
             <td>reads public issues and private repos, writes to a shared folder</td>
-            <td><span class="bar" style="width:120px"></span> <span class="rank">87.5k</span></td>
           </tr>
           <tr>
             <td class="rank">02</td>
-            <td><div class="paircell"><span class="mono">fetch</span><span class="muted">+</span><span class="mono">slack</span></div></td>
+            <td><div class="paircell"><span class="mono">browser</span><span class="muted">+</span><span class="mono">slack</span></div></td>
             <td><div class="legs"><i class="leg on-un"></i><i class="leg"></i><i class="leg on-sk"></i></div></td>
             <td>reads any web page, posts to a channel other people can read</td>
-            <td><span class="bar" style="width:90px"></span> <span class="rank">64.1k</span></td>
           </tr>
           <tr>
             <td class="rank">03</td>
             <td><div class="paircell"><span class="mono">github</span><span class="muted">+</span><span class="mono">git</span></div></td>
             <td><div class="legs"><i class="leg on-un"></i><i class="leg on-pr"></i><i class="leg on-sk"></i></div></td>
             <td>private read plus an outbound push, in the same agent session</td>
-            <td><span class="bar" style="width:70px"></span> <span class="rank">51.9k</span></td>
           </tr>
           <tr>
             <td class="rank">04</td>
             <td><div class="paircell"><span class="mono">gmail</span><span class="muted">+</span><span class="mono">postgres</span></div></td>
             <td><div class="legs"><i class="leg on-un"></i><i class="leg on-pr"></i><i class="leg on-sk"></i></div></td>
             <td>reads mail, queries customer rows, and can send outward</td>
-            <td><span class="bar" style="width:58px"></span> <span class="rank">43.7k</span></td>
           </tr>
           <tr>
             <td class="rank">05</td>
             <td><div class="paircell"><span class="mono">puppeteer</span><span class="muted">+</span><span class="mono">filesystem</span></div></td>
             <td><div class="legs"><i class="leg on-un"></i><i class="leg"></i><i class="leg on-sk"></i></div></td>
             <td>browses untrusted pages and writes whatever it finds to disk</td>
-            <td><span class="bar" style="width:38px"></span> <span class="rank">28.2k</span></td>
           </tr>
           <tr>
             <td class="rank">06</td>
             <td><div class="paircell"><span class="mono">slack</span><span class="muted">+</span><span class="mono">github</span></div></td>
             <td><div class="legs"><i class="leg on-un"></i><i class="leg on-pr"></i><i class="leg on-sk"></i></div></td>
             <td>reads channel messages, reads private code, can post anywhere</td>
-            <td><span class="bar" style="width:33px"></span> <span class="rank">24.6k</span></td>
           </tr>
         </tbody>
       </table>
+      </div>
 
-      <!-- one expanded row, to show a click reveals the real path -->
+      <!-- one expanded row, to show what the real path looks like -->
       <div class="rowdetail">
         <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
-          <span style="color:var(--danger)">↳ github + filesystem &mdash; the real path</span>
-          <span class="tag tag-pl">expanded from 01</span>
+          <span style="color:var(--danger)">↳ the demo config &mdash; the real path, from the committed fixture</span>
+          <span class="tag tag-pl">chain</span>
         </div>
         <div class="mt-md">
-<span class="tag tag-un">stranger's words</span> public issue <span style="color:var(--ash)">· github</span><br>
-&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> github.get_issue<br>
+<span class="tag tag-un">stranger's words</span> github issue <span style="color:var(--ash)">· github.read</span><br>
 &nbsp;&nbsp;<span style="color:var(--ash)">↓</span> <span style="color:var(--sink)">agent context</span> <span style="color:var(--ash)">· tainted</span><br>
-&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> filesystem.write_file<br>
-&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> <span style="color:var(--private)">/home/me/proj</span> <span style="color:var(--ash)">· private</span><br>
-&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> <span class="tag tag-sk">public sink</span> any tool that pushes from that folder
+&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> project folder <span style="color:var(--ash)">· ~/work/stats · private</span><br>
+&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> filesystem.read<br>
+&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> git.push<br>
+&nbsp;&nbsp;<span style="color:var(--ash)">↓</span> <span class="tag tag-sk">public sink</span> <span style="color:var(--body)">public repo · github.com/acme/notes</span>
         </div>
       </div>
     </div>
@@ -152,7 +151,7 @@
         <ul class="small mt-md" style="color:var(--body);padding-left:18px">
           <li style="margin:7px 0"><strong style="color:var(--ink)">Not a vulnerability report.</strong> A combination is not a bug in either server. Both behave as documented.</li>
           <li style="margin:7px 0"><strong style="color:var(--ink)">Not a full exploit.</strong> We describe capabilities only. We never publish payloads.</li>
-          <li style="margin:7px 0"><strong style="color:var(--ink)">Not authoritative.</strong> Labels are inferred. Method and precision are on <a href="benchmarks.html">Benchmarks</a>.</li>
+          <li style="margin:7px 0"><strong style="color:var(--ink)">Not authoritative.</strong> Labels are inferred. Method is on <a href="benchmarks.html">Benchmarks</a>.</li>
           <li style="margin:7px 0"><strong style="color:var(--ink)">Disputable.</strong> Maintainers can ask us to correct or remove an entry &mdash; see <a href="disclosure.html">Disclosure</a>.</li>
         </ul>
       </div>

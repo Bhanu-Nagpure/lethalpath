@@ -9,7 +9,9 @@
 </head>
 <body>
 
-<div class="mockbar">Preview build · numbers fill in from eval/results · the product is the install, not the poster</div>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="mockbar">Preview build · every figure quotes packages/eval/results · the product is the install, not the poster</div>
 
 <nav>
   <div class="wrap">
@@ -47,7 +49,7 @@
   </div>
 </header>
 
-<section style="border-top:0;padding-top:8px">
+<section id="main" style="border-top:0;padding-top:8px">
   <div class="wrap">
     <div class="window" data-reveal>
       <div class="window-bar">
@@ -59,15 +61,15 @@
         <div class="scene" data-attack>
           <svg data-scene viewBox="0 0 620 250" role="img"
                aria-label="A leak path playing out, then one grant closing it.">
-            <text x="16" y="18" fill="#777879" font-size="9.5" font-family="monospace" letter-spacing="1.2">1 · A STRANGER</text>
-            <text x="252" y="18" fill="#777879" font-size="9.5" font-family="monospace" letter-spacing="1.2">2 · YOUR AGENT</text>
-            <text x="486" y="18" fill="#777879" font-size="9.5" font-family="monospace" letter-spacing="1.2">3 · YOUR DATA</text>
+            <text x="16" y="18" fill="#A3A4A6" font-size="9.5" font-family="monospace" letter-spacing="1.2">1 · A STRANGER</text>
+            <text x="252" y="18" fill="#A3A4A6" font-size="9.5" font-family="monospace" letter-spacing="1.2">2 · YOUR AGENT</text>
+            <text x="486" y="18" fill="#A3A4A6" font-size="9.5" font-family="monospace" letter-spacing="1.2">3 · YOUR DATA</text>
             <path d="M92 70 H160" stroke="#2a2b2e" stroke-width="1.5" fill="none"/>
             <path d="M244 70 H292" stroke="#2a2b2e" stroke-width="1.5" fill="none"/>
             <path d="M366 70 H414" stroke="#2a2b2e" stroke-width="1.5" fill="none"/>
             <path d="M244 168 H306" stroke="#2a2b2e" stroke-width="1.5" fill="none"/>
             <path d="M567 92 V140 H188 V150" stroke="#2a2b2e" stroke-width="1.3" fill="none" stroke-dasharray="3 4"/>
-            <text x="392" y="134" fill="#777879" font-size="9.5" font-family="monospace">through your own folder</text>
+            <text x="392" y="134" fill="#A3A4A6" font-size="9.5" font-family="monospace">through your own folder</text>
             <path class="trail" data-trail d=""/>
             <g class="packet" data-packet transform="translate(56,70)" opacity="0">
               <circle r="9" fill="none" stroke="#FF8A8A" stroke-width="1" opacity=".45"/>
@@ -81,9 +83,9 @@
             <g class="node" data-node="github">
               <rect class="box" x="160" y="48" width="84" height="44" rx="7" fill="#121212" stroke="#242728"/>
               <text class="lbl" x="202" y="68" fill="#CDCDCD" font-size="10" font-family="monospace" text-anchor="middle">github</text>
-              <text class="lbl" x="202" y="82" fill="#777879" font-size="9.5" font-family="monospace" text-anchor="middle">read</text>
+              <text class="lbl" x="202" y="82" fill="#A3A4A6" font-size="9.5" font-family="monospace" text-anchor="middle">read</text>
             </g>
-            <g class="node sink" data-node="context">
+            <g class="node sink" data-node="context" data-ctx>
               <rect class="box" x="292" y="42" width="74" height="56" rx="8" fill="#0b1418" stroke="#57C1FF"/>
               <text class="lbl" x="329" y="66" fill="#57C1FF" font-size="10.5" font-family="monospace" text-anchor="middle">agent</text>
               <text class="lbl" x="329" y="80" fill="#57C1FF" font-size="10.5" font-family="monospace" text-anchor="middle">context</text>
@@ -91,7 +93,7 @@
             <g class="node" data-node="fs">
               <rect class="box" x="414" y="48" width="88" height="44" rx="7" fill="#121212" stroke="#242728"/>
               <text class="lbl" x="458" y="68" fill="#CDCDCD" font-size="9.5" font-family="monospace" text-anchor="middle">filesystem</text>
-              <text class="lbl" x="458" y="82" fill="#777879" font-size="9.5" font-family="monospace" text-anchor="middle">write</text>
+              <text class="lbl" x="458" y="82" fill="#A3A4A6" font-size="9.5" font-family="monospace" text-anchor="middle">write</text>
             </g>
             <g class="node private" data-node="priv">
               <rect class="box" x="530" y="48" width="74" height="44" rx="7" fill="#16121f" stroke="#B69EFB"/>
@@ -101,7 +103,7 @@
             <g class="node danger" data-node="git">
               <rect class="box" x="160" y="148" width="84" height="42" rx="7" fill="#121212" stroke="#242728"/>
               <text class="lbl" x="202" y="167" fill="#CDCDCD" font-size="10" font-family="monospace" text-anchor="middle">git</text>
-              <text class="lbl" x="202" y="180" fill="#777879" font-size="9.5" font-family="monospace" text-anchor="middle">push</text>
+              <text class="lbl" x="202" y="180" fill="#A3A4A6" font-size="9.5" font-family="monospace" text-anchor="middle">push</text>
             </g>
             <g class="node sink" data-node="pub">
               <rect class="box" x="306" y="148" width="88" height="42" rx="7" fill="#0b1418" stroke="#57C1FF"/>
@@ -120,7 +122,7 @@
           <div class="scene-bar">
             <span data-step>0 / 7</span>
             <span class="spacer"></span>
-            <button class="btn btn-quiet btn-sm" data-replay disabled>Replay</button>
+            <button type="button" class="btn btn-quiet btn-sm" data-replay disabled>Replay</button>
           </div>
         </div>
       </div>
@@ -140,29 +142,29 @@
     </div>
     <div class="stage">
       <figure class="window" data-reveal>
-        <div class="window-bar"><span class="dots"><i></i><i></i><i></i></span><span class="window-title">scan</span></div>
+        <div class="window-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">scan</span></div>
         <div class="window-body">
           <div class="shot">
             <div class="ghost">config in · secrets stripped</div>
-            <figcaption>01 · paste mcp.json · keys never leave the browser</figcaption>
+            <p class="figcap">01 · paste mcp.json · keys never leave the browser</p>
           </div>
         </div>
       </figure>
       <figure class="window" data-reveal>
-        <div class="window-bar"><span class="dots"><i></i><i></i><i></i></span><span class="window-title">path</span></div>
+        <div class="window-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">path</span></div>
         <div class="window-body">
           <div class="shot" style="aspect-ratio:4/5">
             <div class="ghost">graph · FalkorDB</div>
-            <figcaption>02 · the route, named tool by tool</figcaption>
+            <p class="figcap">02 · the route, named tool by tool</p>
           </div>
         </div>
       </figure>
       <figure class="window" data-reveal>
-        <div class="window-bar"><span class="dots"><i></i><i></i><i></i></span><span class="window-title">fix</span></div>
+        <div class="window-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">fix</span></div>
         <div class="window-body">
           <div class="shot">
             <div class="ghost">one grant · diff</div>
-            <figcaption>03 · revoke git.push · workflows kept</figcaption>
+            <p class="figcap">03 · revoke git.push · workflows kept</p>
           </div>
         </div>
       </figure>
@@ -176,22 +178,22 @@
     <div class="statrow" style="margin-top:22px" data-reveal>
       <div>
         <h3>Every figure names the file that produced it.</h3>
-        <p class="small muted" style="margin-top:8px">If it is not in eval/results, it is not on this page. These three are the slots.</p>
+        <p class="small muted" style="margin-top:8px">Both eval suites ran live on FalkorDB 6.0.2. The JSON is committed at <span class="mono">packages/eval/results/*.json</span>, and one command regenerates it.</p>
       </div>
       <div>
-        <div class="big" style="color:var(--danger)">100%</div>
-        <p class="small muted" style="margin-top:8px">leak paths found, including laundering hops</p>
+        <div class="big" style="color:var(--danger)"><span class="sr-only">40 of 40 seeded scan cases passed</span><span aria-hidden="true">40/40</span></div>
+        <p class="small muted" style="margin-top:8px">seeded scan cases &mdash; every planted route found</p>
         <p class="mono small muted" style="margin-top:10px;font-size:.68rem">detection.json</p>
       </div>
       <div>
-        <div class="big" style="color:var(--safe)">27/30</div>
-        <p class="small muted" style="margin-top:8px">workflows still working after the cut</p>
+        <div class="big" style="color:var(--safe)"><span class="sr-only">40 of 40 fixes verified</span><span aria-hidden="true">40/40</span></div>
+        <p class="small muted" style="margin-top:8px">fixes verified &mdash; route closed, expected tasks kept</p>
         <p class="mono small muted" style="margin-top:10px;font-size:.68rem">fix-quality.json</p>
       </div>
       <div>
-        <div class="big" style="color:var(--sink)">10/10</div>
-        <p class="small muted" style="margin-top:8px">runtime leaks blocked, fake secrets only</p>
-        <p class="mono small muted" style="margin-top:10px;font-size:.68rem">runtime.json</p>
+        <div class="big" style="color:var(--sink)"><span class="sr-only">8 of 8 clean configs answered with zero routes</span><span aria-hidden="true">8/8</span></div>
+        <p class="small muted" style="margin-top:8px">clean configs answered with zero routes &mdash; no false alarms</p>
+        <p class="mono small muted" style="margin-top:10px;font-size:.68rem">detection.json</p>
       </div>
     </div>
   </div>
@@ -210,7 +212,7 @@
     </div>
     <div class="window" data-reveal>
       <div class="window-bar">
-        <span class="dots"><i></i><i></i><i></i></span>
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="window-title">terminal</span>
       </div>
       <div class="code" style="border:0;border-radius:0"><pre><span class="com"># find every leak path</span>
