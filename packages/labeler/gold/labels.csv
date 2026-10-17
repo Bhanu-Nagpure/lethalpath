@@ -1,0 +1,51 @@
+toolName,expectedResources,note
+read_file,project-folder,canonical filesystem read; folder is private
+readFile,project-folder,camelCase variant must match case-insensitively
+write_file,project-folder,mutates the folder the server was pointed at
+edit_file,project-folder,patch-style edit is still a write to the folder
+filesystem.write,project-folder,namespaced server.tool form
+git.show,local-repo,shows a commit from the local clone
+git_status,local-repo,reads local branch state
+git_log,local-repo,local history is private
+git.push,public-repo,push publishes to the remote; expected public repo sink
+create_pull_request,public-repo,PR body and diff leave the machine
+github.read,github-issue,reads issue text anyone can write
+get_issue,github-issue,attacker sentence can land in an issue body
+list_issues,github-issue,listing issues still pulls untrusted text
+search_issues,github-issue,search results include attacker text
+get_pull_request,github-issue,PR bodies and comments are untrusted
+create_issue,github-issue,writes issue text where the public can read it
+add_comment,github-issue,comment lands in the issue thread
+get_file_contents,public-repo,repo contents are semi-trusted
+create_or_update_file,public-repo,API write to repo contents
+createPR,public-repo,camelCase PR verb
+web.fetch,web-page,anyone can write a page
+fetch,web-page,bare fetch is the web by default
+browser,web-page,browser automation reads the open web
+http_get,web-page,GET pulls a web page into context
+post_message,chat-channel,channel post is visible to the room
+send_message,chat-channel,bare send_message is treated as chat
+conversations_history,chat-channel,channel history is attacker-writable
+gmail.read,inbox,namespaced mailbox read
+read_email,inbox,strangers can email you
+search_email,inbox,search over private mail
+send_email,outbound-email,puts context text on the wire
+postgres.query,database,query result is private data
+sql,database,SQL read pulls from a private store
+sqlite,database,sqlite tools read a local file database
+insert_row,database,clear database write verb
+run_command,local-shell,full-access tool; reads and writes the shell
+execute_bash,local-shell,full-access tool; reads and writes the shell
+read_memory,agent-memory,agent memory often holds pasted secrets
+store_memory,agent-memory,writes into the private memory store
+download_file,cloud-storage,user-owned bucket is private
+upload_file,cloud-storage,writes to the user-owned bucket
+get_page,shared-doc,wiki/notion style document read
+create_page,shared-doc,page write into the shared workspace
+http_post,web-endpoint,POST can carry context text to any endpoint
+jira.get_issue,issue-tracker,tracker issues are untrusted text
+linear_create_issue,issue-tracker,tracker write is a public sink
+query_logs,ops-logs,logs are semi-trusted internal data
+process,unknown-tool-output,honest miss: no rule can know what process does
+deploy,unknown-tool-output,honest miss: deploy could read or write anything
+summarize_text,unknown-tool-output,honest miss: summarizer input source unknown
