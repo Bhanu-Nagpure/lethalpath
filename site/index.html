@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LethalPath — find the permission that stops the leak</title>
 <meta name="description" content="Open-source guard for AI agents. Finds every route your MCP tools can be tricked into leaking data, then the one permission to revoke. Powered by FalkorDB.">
+<meta name="theme-color" content="#07080a">
+<link rel="canonical" href="https://bhanu-dev82.github.io/lethalpath/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LethalPath">
+<meta property="og:title" content="LethalPath — find the permission that stops the leak">
+<meta property="og:description" content="Open-source guard for AI agents. Finds every route your MCP tools can be tricked into leaking data, then the one permission to revoke. Powered by FalkorDB.">
+<!-- og:url + og:image — update these two URLs if hosting moves from GitHub Pages -->
+<meta property="og:url" content="https://bhanu-dev82.github.io/lethalpath/">
+<meta property="og:image" content="https://bhanu-dev82.github.io/lethalpath/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bhanu-dev82.github.io/lethalpath/og.png">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -122,7 +136,7 @@
           <div class="scene-bar">
             <span data-step>0 / 7</span>
             <span class="spacer"></span>
-            <button type="button" class="btn btn-quiet btn-sm" data-replay disabled>Replay</button>
+            <button type="button" class="btn btn-quiet btn-sm" data-replay disabled><svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true"><path d="M13.4 8a5.4 5.4 0 1 1-1.7-3.9M13.4 2.5v3.1h-3.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Replay</button>
           </div>
         </div>
       </div>
@@ -181,17 +195,17 @@
         <p class="small muted" style="margin-top:8px">Both eval suites ran live on FalkorDB 6.0.2. The JSON is committed at <span class="mono">packages/eval/results/*.json</span>, and one command regenerates it.</p>
       </div>
       <div>
-        <div class="big" style="color:var(--danger)"><span class="sr-only">40 of 40 seeded scan cases passed</span><span aria-hidden="true">40/40</span></div>
+        <div class="big" style="color:var(--danger)"><span class="sr-only">40 of 40 seeded scan cases passed</span><span aria-hidden="true" data-count>40/40</span></div>
         <p class="small muted" style="margin-top:8px">seeded scan cases &mdash; every planted route found</p>
         <p class="mono small muted" style="margin-top:10px;font-size:.68rem">detection.json</p>
       </div>
       <div>
-        <div class="big" style="color:var(--safe)"><span class="sr-only">40 of 40 fixes verified</span><span aria-hidden="true">40/40</span></div>
+        <div class="big" style="color:var(--safe)"><span class="sr-only">40 of 40 fixes verified</span><span aria-hidden="true" data-count>40/40</span></div>
         <p class="small muted" style="margin-top:8px">fixes verified &mdash; route closed, expected tasks kept</p>
         <p class="mono small muted" style="margin-top:10px;font-size:.68rem">fix-quality.json</p>
       </div>
       <div>
-        <div class="big" style="color:var(--sink)"><span class="sr-only">8 of 8 clean configs answered with zero routes</span><span aria-hidden="true">8/8</span></div>
+        <div class="big" style="color:var(--sink)"><span class="sr-only">8 of 8 clean configs answered with zero routes</span><span aria-hidden="true" data-count>8/8</span></div>
         <p class="small muted" style="margin-top:8px">clean configs answered with zero routes &mdash; no false alarms</p>
         <p class="mono small muted" style="margin-top:10px;font-size:.68rem">detection.json</p>
       </div>

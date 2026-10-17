@@ -69,10 +69,20 @@
   --s-xl:24px; --s-xxl:32px; --section:88px;
 
   --shadow:0 20px 50px -24px #000;
+
+  /* motion — one curve family, three speeds; every micro-interaction below
+     uses these so hover, press and focus all move at the same rhythm */
+  --ease-out:cubic-bezier(.22,.61,.36,1);
+  --ease-snap:cubic-bezier(.2,.9,.32,1.12);
+  --dur-fast:150ms;--dur:200ms;--dur-slow:250ms;
 }
 
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+/* smooth in-page anchors, with room for the 58px sticky nav — a jumped-to
+   heading can never end up hidden under it */
+html{scroll-behavior:smooth;scroll-padding-top:76px;-webkit-text-size-adjust:100%}
+[id]{scroll-margin-top:76px}
+@media (max-width:760px){[id]{scroll-margin-top:112px}}
 body{
   margin:0;background:var(--canvas);color:var(--ink);
   font-family:var(--sans);font-weight:400;font-size:15px;line-height:1.6;
@@ -107,12 +117,13 @@ body::after{
 .wrap{max-width:1120px;margin:0 auto;padding:0 var(--s-xl)}
 /* first tab stop: jump straight past the nav */
 .skip-link{
-  position:fixed;top:-60px;left:var(--s-xl);z-index:70;
+  position:fixed;top:0;left:var(--s-xl);z-index:70;
   background:#fff;color:#000;font-weight:520;font-size:.85rem;
   padding:9px 14px;border-radius:0 0 var(--r-md) var(--r-md);
-  transition:top .12s ease;
+  transform:translateY(-110%);
+  transition:transform var(--dur) var(--ease-out);
 }
-.skip-link:focus{top:0}
+.skip-link:focus{transform:none}
 .sr-only{
   position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
   clip:rect(0 0 0 0);white-space:nowrap;border:0;
@@ -171,16 +182,27 @@ nav .wrap{display:flex;align-items:center;gap:var(--s-xs);height:58px}
 .mark{width:19px;height:19px;flex:0 0 19px}
 nav .spacer{flex:1}
 nav a.nb{
-  color:var(--body);text-decoration:none;font-size:.85rem;font-weight:450;
+  position:relative;color:var(--body);text-decoration:none;font-size:.85rem;font-weight:450;
   padding:6px 10px;border-radius:var(--r-sm);letter-spacing:-.005em;
-  transition:color .12s,background .12s;
+  transition:color var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out);
+}
+/* the active tick: a quiet underline that also previews on hover */
+nav a.nb::after{
+  content:"";position:absolute;left:10px;right:10px;bottom:3px;height:1.5px;
+  border-radius:2px;background:currentColor;
+  transform:scaleX(0);transform-origin:50% 100%;
+  transition:transform var(--dur) var(--ease-out);
 }
 nav a.nb:hover{color:var(--ink);background:var(--surface-2)}
+nav a.nb:hover::after{transform:scaleX(1)}
+nav a.nb:active{background:var(--surface-3)}
 nav a.nb[aria-current="page"]{color:var(--ink)}
+nav a.nb[aria-current="page"]::after{transform:scaleX(1)}
 /* small screens: the link row wraps instead of pushing the page wide */
 @media (max-width:760px){
   nav .wrap{flex-wrap:wrap;height:auto;padding-top:9px;padding-bottom:9px;row-gap:2px}
   nav a.nb{padding:5px 8px}
+  nav a.nb::after{left:8px;right:8px}
 }
 
 /* ---------- surfaces ---------- */
@@ -193,16 +215,35 @@ nav a.nb[aria-current="page"]{color:var(--ink)}
 .panel-h .spacer{flex:1}
 .panel-b{padding:18px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);padding:20px}
+/* hover elevation: the lift is a transform, the shadow fades in on a
+   pseudo-element — opacity only, so nothing re-lays-out */
+.card{position:relative;transition:transform var(--dur-slow) var(--ease-out)}
+.card::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  box-shadow:var(--shadow);opacity:0;pointer-events:none;
+  transition:opacity var(--dur-slow) var(--ease-out);
+}
+.card:hover{transform:translateY(-2px)}
+.card:hover::after{opacity:1}
+@media (hover:none){
+  .card:hover{transform:none}
+  .card:hover::after{opacity:0}
+}
 
 /* ---------- buttons: white primary (Raycast), hairline ghost ---------- */
 .btn{
   display:inline-flex;align-items:center;gap:7px;font:inherit;font-weight:520;
   font-size:.88rem;letter-spacing:-.004em;padding:0 15px;height:36px;
   border-radius:var(--r-md);cursor:pointer;border:1px solid transparent;
-  text-decoration:none;transition:background .12s,color .12s,border-color .12s,transform .1s;
+  text-decoration:none;
+  transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-out);
 }
 .btn:hover{text-decoration:none}
-.btn:active{transform:translateY(.5px)}
+.btn:active{transform:translateY(1px)}
+/* a control that cannot act yet says so, quietly */
+.btn:disabled{opacity:.5;cursor:default;transform:none}
+.btn svg{flex:0 0 auto}
 .btn-primary{background:#fff;color:#000}
 .btn-primary:hover{background:#e8e8e8}
 .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
@@ -219,6 +260,11 @@ nav a.nb[aria-current="page"]{color:var(--ink)}
   color:var(--mute);border:1px solid var(--line);border-radius:var(--r-full);
   padding:4px 10px;white-space:nowrap;
 }
+/* when a pill is a link (the threat-model table of contents) */
+a.pill{text-decoration:none;
+  transition:color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out)}
+a.pill:hover{color:var(--body);border-color:var(--line-strong);background:var(--surface-2)}
+a.pill:active{background:var(--surface-3)}
 .tag{
   display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);
   font-size:.67rem;font-weight:500;padding:2px 8px;border-radius:var(--r-xs);
@@ -235,9 +281,17 @@ nav a.nb[aria-current="page"]{color:var(--ink)}
 
 /* ---------- code ---------- */
 .code{
+  position:relative;
   background:#050607;border:1px solid var(--line);border-radius:var(--r-lg);
   overflow:auto;
 }
+/* copy affordance — revealed on hover or keyboard focus, injected by animate.js */
+.code .copy-btn{
+  position:absolute;top:8px;right:8px;opacity:0;
+  transition:opacity var(--dur) var(--ease-out);
+}
+.code:hover .copy-btn,.code:focus-within .copy-btn{opacity:1}
+@media (hover:none){.code .copy-btn{opacity:1}}
 .code pre{
   margin:0;padding:16px 18px;font-family:var(--mono);font-size:.78rem;
   line-height:1.72;color:var(--body);white-space:pre;letter-spacing:0;
@@ -280,7 +334,8 @@ tbody tr:hover{background:var(--surface)}
 /* ---------- footer ---------- */
 footer{border-top:1px solid var(--line);padding:38px 0;color:var(--mute);font-size:.83rem}
 footer .cols{display:flex;justify-content:space-between;gap:var(--s-xl);flex-wrap:wrap}
-footer a{color:var(--body);text-decoration:none;font-size:.83rem}
+footer a{color:var(--body);text-decoration:none;font-size:.83rem;
+  transition:color var(--dur-fast) var(--ease-out)}
 footer a:hover{color:var(--ink)}
 footer .navlinks{display:flex;gap:22px;flex-wrap:wrap}
 
@@ -392,9 +447,9 @@ html.js [data-reveal].in{opacity:1;transform:none}
 .scene svg{width:100%;height:auto;display:block;overflow:visible}
 
 /* graph nodes: quiet by default, activated as the packet reaches them */
-.scene .node{transition:filter .45s ease,opacity .45s ease}
-.scene .node .box{transition:stroke .4s ease,fill .4s ease,stroke-width .4s ease}
-.scene .node .lbl{transition:fill .4s ease}
+.scene .node{transition:filter var(--dur-slow) var(--ease-out),opacity var(--dur-slow) var(--ease-out)}
+.scene .node .box{transition:stroke var(--dur-slow) var(--ease-out),fill var(--dur-slow) var(--ease-out),stroke-width var(--dur-slow) var(--ease-out)}
+.scene .node .lbl{transition:fill var(--dur-slow) var(--ease-out)}
 .scene .node:not(.lit){opacity:.34}
 .scene .node.lit{opacity:1}
 .scene .node.lit .box{stroke-width:1.6}
@@ -413,15 +468,31 @@ html.js [data-reveal].in{opacity:1;transform:none}
 
 /* the trail it leaves */
 .scene .trail{fill:none;stroke:#FF8A8A;stroke-width:2;stroke-linecap:round;
-  stroke-linejoin:round;opacity:.0;transition:opacity .3s ease;
+  stroke-linejoin:round;opacity:.0;transition:opacity var(--dur-slow) var(--ease-out);
   filter:drop-shadow(0 0 5px rgba(255,138,138,.55))}
 
 /* the gate that slams shut when the fix lands */
-.scene .gate{transition:opacity .35s ease}
-.scene .gate line{stroke:#59D499;stroke-width:3;stroke-linecap:round}
+.scene .gate{transition:opacity var(--dur) var(--ease-out)}
+.scene .gate line{stroke:#59D499;stroke-width:3;stroke-linecap:round;
+  transform-box:fill-box;transform-origin:center top}
+.scene .gate.slam line{animation:gateSlam var(--dur-slow) var(--ease-snap) both}
 
 /* alarm ring on the agent while tainted */
-.scene .alarm{transition:opacity .5s ease}
+.scene .alarm{transition:opacity var(--dur-slow) var(--ease-out)}
+.scene .alarm circle{transform-box:fill-box;transform-origin:center}
+/* one decisive pulse when the context turns poisoned, settling into the ring */
+.scene .alarm.pulse circle{animation:taintPulse .9s var(--ease-snap) both}
+
+@keyframes gateSlam{
+  0%{transform:scaleY(0)}
+  65%{transform:scaleY(1.12)}
+  100%{transform:scaleY(1)}
+}
+@keyframes taintPulse{
+  0%{transform:scale(.55);opacity:0}
+  55%{transform:scale(1.14);opacity:.95}
+  100%{transform:scale(1);opacity:1}
+}
 
 /* blocked state: everything cools down and the danger routes go grey */
 .scene.blocked .trail{stroke:#4b4f55;filter:none}
@@ -436,11 +507,11 @@ html.js [data-reveal].in{opacity:1;transform:none}
   background:var(--surface-2);border:1px solid var(--line);
   font-size:.88rem;color:var(--ink);min-height:44px;
   display:flex;align-items:center;gap:10px;
-  transition:border-color .3s ease,background .3s ease;
+  transition:border-color var(--dur-slow) var(--ease-out),background var(--dur-slow) var(--ease-out);
 }
 .caption::before{
   content:"";width:6px;height:6px;border-radius:50%;flex:0 0 6px;
-  background:var(--mute);transition:background .3s ease;
+  background:var(--mute);transition:background var(--dur-slow) var(--ease-out);
 }
 .caption[data-tone="untrusted"]{border-color:rgba(255,197,51,.35)}
 .caption[data-tone="untrusted"]::before{background:var(--untrusted)}

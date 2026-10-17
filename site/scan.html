@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scan — LethalPath</title>
 <meta name="description" content="Paste your MCP config and see the exact leak path your agent's tools can walk — secrets stripped in the browser, the route named tool by tool, and the one grant that closes it.">
+<meta name="theme-color" content="#07080a">
+<link rel="canonical" href="https://bhanu-dev82.github.io/lethalpath/scan.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LethalPath">
+<meta property="og:title" content="Scan — LethalPath">
+<meta property="og:description" content="Paste your MCP config and see the exact leak path your agent's tools can walk — secrets stripped in the browser, the route named tool by tool, and the one grant that closes it.">
+<!-- og:url + og:image — update these two URLs if hosting moves from GitHub Pages -->
+<meta property="og:url" content="https://bhanu-dev82.github.io/lethalpath/scan.html">
+<meta property="og:image" content="https://bhanu-dev82.github.io/lethalpath/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bhanu-dev82.github.io/lethalpath/og.png">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="style.css">
 <style>
   .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
@@ -31,8 +45,10 @@
   .diff .del{color:var(--danger)}
   .diff .add{color:var(--safe)}
   details{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);margin-top:12px}
-  summary{padding:12px 15px;cursor:pointer;font-family:var(--mono);font-size:.76rem;color:var(--mute)}
+  summary{padding:12px 15px;cursor:pointer;font-family:var(--mono);font-size:.76rem;color:var(--mute);
+    transition:color var(--dur-fast) var(--ease-out)}
   summary:hover{color:var(--body)}
+  details[open] summary{color:var(--body)}
   summary:focus-visible{outline:2px solid var(--sink);outline-offset:-2px}
   details .code{border:0;border-top:1px solid var(--line);border-radius:0 0 var(--r-lg) var(--r-lg)}
   /* resolved state, toggled by animate.js */
@@ -84,10 +100,10 @@
     </div>
 
     <div class="kpi">
-      <div class="k"><div class="v" style="color:var(--danger)">567</div><div class="l">leak paths</div></div>
-      <div class="k"><div class="v" style="color:var(--private)">2</div><div class="l">private resources</div></div>
-      <div class="k"><div class="v" style="color:var(--sink)">3</div><div class="l">servers involved</div></div>
-      <div class="k"><div class="v" style="color:var(--safe)">9</div><div class="l">grants to revoke</div></div>
+      <div class="k"><div class="v" style="color:var(--danger)" data-count>567</div><div class="l">leak paths</div></div>
+      <div class="k"><div class="v" style="color:var(--private)" data-count>2</div><div class="l">private resources</div></div>
+      <div class="k"><div class="v" style="color:var(--sink)" data-count>3</div><div class="l">servers involved</div></div>
+      <div class="k"><div class="v" style="color:var(--safe)" data-count>9</div><div class="l">grants to revoke</div></div>
     </div>
 
     <div class="split mt-xl">

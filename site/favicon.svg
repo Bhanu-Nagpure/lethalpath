@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="LethalPath">
+  <!-- The nav shield mark on its own tile, so it reads on dark AND light
+       browser chrome. Strokes are slightly heavier than the nav version
+       because raster targets are 16-32px. -->
+  <rect width="32" height="32" rx="7" fill="#07080a"/>
+  <g transform="translate(4 4)" fill="none">
+    <path d="M12 2.4 4.2 6v5.6c0 4.7 3.4 8.4 7.8 9.4 4.4-1 7.8-4.7 7.8-9.4V6L12 2.4z" stroke="#FF8A8A" stroke-width="2"/>
+    <path d="M9.1 12.1l2 2 4-4.1" stroke="#59D499" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
