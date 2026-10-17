@@ -18,6 +18,7 @@ import { resolve } from "node:path";
 import {
   BANNER,
   GraphDB,
+  LEAK_COUNT,
   LEAK_PATH,
   MIN_CUT,
   VERIFY_FIX,
@@ -30,6 +31,7 @@ import {
   type MaxFlowRow,
 } from "@lethalpath/core";
 import type { ScanConfig } from "@lethalpath/schema";
+import { labelConfig } from "@lethalpath/labeler";
 
 const USAGE = `lethalpath <scan|fix> [config.json] [options]
 
@@ -37,6 +39,7 @@ const USAGE = `lethalpath <scan|fix> [config.json] [options]
   fix  [config.json]   revoke the cheapest grant that closes them all
 
   config.json defaults to data/fixtures/fs-git.json
+  --mcp <mcp.json>     label a real MCP config first (packages/labeler), then scan it
   --json               machine-readable output
   --host <host>        FalkorDB host (default localhost)
   --port <port>        FalkorDB port (default 6379)`;
@@ -44,6 +47,7 @@ const USAGE = `lethalpath <scan|fix> [config.json] [options]
 interface CliArgs {
   verb: string;
   config: string;
+  mcp?: string;
   json: boolean;
   host: string;
   port: number;
@@ -61,7 +65,13 @@ function parseArgs(argv: string[]): CliArgs {
   for (let i = 0; i < rest.length; i += 1) {
     const token = rest[i];
     if (token === "--json") args.json = true;
-    else if (token === "--host") {
+    else if (token === "--mcp") {
+      const value = rest[i + 1];
+      if (value !== undefined) {
+        args.mcp = value;
+        i += 1;
+      }
+    } else if (token === "--host") {
       const value = rest[i + 1];
       if (value !== undefined) {
         args.host = value;
@@ -81,6 +91,27 @@ function parseArgs(argv: string[]): CliArgs {
 
 function loadConfig(path: string): ScanConfig {
   return JSON.parse(readFileSync(resolve(path), "utf8")) as ScanConfig;
+}
+
+interface LoadedScan {
+  cfg: ScanConfig;
+  source: "config" | "mcp";
+  unlabelled: string[];
+}
+
+/**
+ * `--mcp` runs the labeler first: the rules table turns a real MCP config into
+ * the scan graph, secrets never leave the machine, and tools no rule
+ * recognises come back named instead of silently treated as harmless. An
+ * invalid labelling throws here — it can never reach a Cypher string.
+ */
+function loadScan(args: CliArgs): LoadedScan {
+  if (args.mcp === undefined) {
+    return { cfg: loadConfig(args.config), source: "config", unlabelled: [] };
+  }
+  const raw = JSON.parse(readFileSync(resolve(args.mcp), "utf8")) as unknown;
+  const { config, unlabelled } = labelConfig(raw, {});
+  return { cfg: config, source: "mcp", unlabelled };
 }
 
 function opt(value: unknown): string | undefined {
@@ -153,7 +184,7 @@ function edgeLabel(edge: FlowEdge): string {
 }
 
 async function scan(args: CliArgs): Promise<number> {
-  const cfg = loadConfig(args.config);
+  const { cfg, source, unlabelled } = loadScan(args);
   const db = await GraphDB.open(scanGraphName(cfg.id), args.host, args.port);
   try {
     const built = await ingest(db, cfg);
@@ -161,6 +192,7 @@ async function scan(args: CliArgs): Promise<number> {
     if (!status.ready) throw new Error("graph is not ready; ingest did not finish");
 
     const paths = parseLeakPaths((await db.read(LEAK_PATH)).rows);
+    const routes = Number((await db.read(LEAK_COUNT)).rows[0]?.["routes"] ?? 0);
     const resources = await resourceIndex(db);
 
     if (args.json) {
@@ -170,10 +202,14 @@ async function scan(args: CliArgs): Promise<number> {
             verb: "scan",
             config: cfg.id,
             title: cfg.title,
+            source,
+            unlabelled,
             graph: built.graph,
             nodes: built.nodes,
             edges: built.edges,
             ready: status.ready,
+            routes,
+            pathsShown: paths.length,
             paths,
           },
           null,
@@ -188,9 +224,17 @@ async function scan(args: CliArgs): Promise<number> {
     out.push(`graph     ${built.graph} · ${built.nodes} nodes · ${built.edges} edges · ready`);
     out.push("guard     GRAPH.RO_QUERY · LIMIT 100 · 3 s timeout · write keywords refused");
     out.push("engine    leak two anchored segments through the tainted context · fix CALL algo.maxFlow + residual min-cut");
+    if (source === "mcp") {
+      const shown = unlabelled.slice(0, 5).join(", ");
+      const tail = unlabelled.length > 5 ? `, +${unlabelled.length - 5} more` : "";
+      out.push(
+        `labelled  ${cfg.tools.length} tool${cfg.tools.length === 1 ? "" : "s"} by rule · ` +
+          (unlabelled.length === 0 ? "0 unlabelled" : `${unlabelled.length} unlabelled (${shown}${tail})`),
+      );
+    }
     out.push("");
 
-    if (paths.length === 0) {
+    if (routes === 0) {
       out.push("0 routes from private data to a public sink.");
       out.push("");
       out.push("nothing to revoke — that is the answer, not an error.");
@@ -212,8 +256,11 @@ async function scan(args: CliArgs): Promise<number> {
         out.push("");
       });
       out.push(
-        `${paths.length} route${paths.length === 1 ? "" : "s"} found — every one of them is a permission you granted.`,
+        `${routes} route${routes === 1 ? "" : "s"} found — every one of them is a permission you granted.`,
       );
+      if (routes > paths.length) {
+        out.push(`  note   showing the ${paths.length} shortest by hops; the graph has ${routes} in total`);
+      }
       out.push("  next  lethalpath fix");
     }
     console.log(out.join("\n"));
@@ -224,11 +271,11 @@ async function scan(args: CliArgs): Promise<number> {
 }
 
 async function fix(args: CliArgs): Promise<number> {
-  const cfg = loadConfig(args.config);
+  const { cfg } = loadScan(args);
   const db = await GraphDB.open(scanGraphName(cfg.id), args.host, args.port);
   try {
     const built = await ingest(db, cfg);
-    const paths = parseLeakPaths((await db.read(LEAK_PATH)).rows);
+    const routes = Number((await db.read(LEAK_COUNT)).rows[0]?.["routes"] ?? 0);
     const sourceIds = await idList(
       db,
       `MATCH (p:Resource {sensitivity:'private'})
@@ -246,7 +293,7 @@ async function fix(args: CliArgs): Promise<number> {
       console.log([BANNER, "", "FIX", "", line].join("\n"));
       return 0;
     };
-    if (paths.length === 0) return absten("nothing to revoke — no route was found to close.");
+    if (routes === 0) return absten("nothing to revoke — no route was found to close.");
     if (sourceIds.length === 0) return absten("nothing to protect — no private resource is declared.");
     if (targetIds.length === 0) return absten("nothing can leave — no public sink is declared.");
 
@@ -288,7 +335,7 @@ async function fix(args: CliArgs): Promise<number> {
             side: cut.side,
             grants: cut.grants,
             cutEdges: cut.edges.map((edge) => edgeLabel(edge)),
-            closes: paths.length,
+            closes: routes,
             verifiedRemaining: remaining,
             tasks: { total: tasks.length, kept, lost: lost.map((task) => task.id) },
           },
@@ -307,8 +354,8 @@ async function fix(args: CliArgs): Promise<number> {
     out.push(`revoke     ${cut.grants.join(", ")}`);
     out.push(
       closed
-        ? `verified   0 of ${paths.length} routes remain (leak query re-run without ${cut.grants.join(", ")})`
-        : `verified   ${remaining} of ${paths.length} routes STILL OPEN — cut did not close everything`,
+        ? `verified   0 of ${routes} routes remain (leak query re-run without ${cut.grants.join(", ")})`
+        : `verified   ${remaining} of ${routes} routes STILL OPEN — cut did not close everything`,
     );
     if (tasks.length > 0) {
       out.push(`tasks      ${kept} of ${tasks.length} keep working`);

@@ -13,6 +13,9 @@ importers:
       '@lethalpath/core':
         specifier: workspace:*
         version: link:../core
+      '@lethalpath/labeler':
+        specifier: workspace:*
+        version: link:../labeler
       '@lethalpath/schema':
         specifier: workspace:*
         version: link:../schema

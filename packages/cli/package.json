@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@lethalpath/core": "workspace:*",
+    "@lethalpath/labeler": "workspace:*",
     "@lethalpath/schema": "workspace:*"
   },
   "devDependencies": {
