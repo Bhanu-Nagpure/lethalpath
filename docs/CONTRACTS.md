@@ -47,15 +47,11 @@ lethalpath fix  [config]
 lethalpath guard --config <config> [--policy policy.json]
 ```
 
-`scan` prints: banner with the pinned engine, config + graph status (nodes, edges,
-ready), the guard line (`GRAPH.RO_QUERY · LIMIT 100 · write keywords refused`),
-then each leak path named tool by tool, then the count. Zero paths prints the
-abstention line, not an error.
-
-`fix` prints: `CALL algo.maxFlow` as the source, the max-flow value, the cut
-side (read side / write side), the grant(s) to revoke, the routes it closes,
-and tasks still working (`3 of 4 · loses: publish the changelog`). Zero routes
-prints `nothing to revoke`.
+The authoritative transcripts live in the README ("What scan prints" / "What
+fix prints"), copied from real runs. Zero routes prints the abstention line,
+not an error — exit 0 either way. `fix` re-runs the leak query with the
+revoked grants excluded (`VERIFY_FIX`) and prints `verified … routes remain`;
+a non-zero remainder exits 1 and says so loudly.
 
 ## Guard session graph (`sessions_*`)
 
