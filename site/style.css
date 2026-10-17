@@ -274,8 +274,6 @@ a.pill:active{background:var(--surface-3)}
 .tag-un{background:rgba(255,197,51,.10);color:#FFC533;border-color:rgba(255,197,51,.18)}
 .tag-pr{background:rgba(167,139,250,.10);color:#B69EFB;border-color:rgba(167,139,250,.18)}
 .tag-sk{background:rgba(87,193,255,.10);color:#57C1FF;border-color:rgba(87,193,255,.18)}
-.tag-le{background:rgba(255,107,107,.10);color:#FF8A8A;border-color:rgba(255,107,107,.18)}
-.tag-sf{background:rgba(89,212,153,.10);color:#59D499;border-color:rgba(89,212,153,.18)}
 .tag-pl{background:var(--surface-3);color:var(--mute);border-color:var(--line)}
 .dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px;display:inline-block}
 
@@ -302,7 +300,6 @@ a.pill:active{background:var(--surface-3)}
 .lbl{color:var(--private)}
 .str{color:var(--safe)}
 .com{color:var(--ash)}
-.num{color:#FFD9A0}
 
 /* ---------- tables: quiet, ruled, no zebra stripes ---------- */
 table{width:100%;border-collapse:collapse;font-size:.86rem}
@@ -318,7 +315,6 @@ tbody tr:hover{background:var(--surface)}
 .rank{font-family:var(--mono);color:var(--mute);font-size:.8rem}
 .bar{height:5px;border-radius:3px;background:var(--danger-hue);min-width:5px;
   display:inline-block;vertical-align:middle}
-.bar-safe{background:var(--safe)}
 
 /* long tables scroll inside their panel instead of widening the page */
 .tw{overflow-x:auto}
@@ -339,11 +335,7 @@ footer a{color:var(--body);text-decoration:none;font-size:.83rem;
 footer a:hover{color:var(--ink)}
 footer .navlinks{display:flex;gap:22px;flex-wrap:wrap}
 
-.note{
-  font-family:var(--mono);font-size:.68rem;color:var(--mute);
-  border:1px dashed var(--line-strong);border-radius:var(--r-sm);
-  padding:6px 11px;display:inline-block;letter-spacing:.01em;
-}
+
 
 /* ---------- product chrome (Cloudflare/GitHub pattern: the UI is the hero) ---------- */
 .window{
