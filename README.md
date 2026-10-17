@@ -48,13 +48,15 @@ answer, and a vector index cannot.
 ```bash
 docker compose up -d                     # FalkorDB 6.0.2, pinned by tag — not :latest
 pnpm install
-pnpm build                               # schema → core → cli, in dependency order
+pnpm build                               # every workspace package, in dependency order
 
 node packages/cli/dist/index.js scan     # builds the graph, names every route
 node packages/cli/dist/index.js fix      # algo.maxFlow → the cheapest grant to revoke
 node packages/cli/dist/index.js scan data/fixtures/clean.json   # the abstention
 
 pnpm --filter @lethalpath/core test      # the suite, against the live instance
+pnpm --filter @lethalpath/guard demo     # a live MCP session: the poisoned push is blocked, a clean one is not
+pnpm --filter @lethalpath/eval evaluate  # the 40-case eval the Results section quotes
 ```
 
 `scan` and `fix` accept `--json`; both read the fixture `data/fixtures/fs-git.json`

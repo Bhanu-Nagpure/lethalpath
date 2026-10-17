@@ -23,6 +23,7 @@ mkdir -p docs/live-evidence
   echo "## Corpus hashes"
   sha256sum data/fixtures/*.json 2>/dev/null || true
   sha256sum packages/eval/results/*.json 2>/dev/null || true
+  sha256sum packages/labeler/gold/labels.csv 2>/dev/null || true
   echo
   echo "## Tests (packages/core, against the live instance)"
   (cd packages/core && pnpm test) 2>&1
@@ -40,6 +41,14 @@ mkdir -p docs/live-evidence
     echo "## guard — poisoned session, then a clean one"
     (cd packages/guard && node scripts/demo.mjs) 2>&1
   fi
+  echo
+  echo "## labeler — gold set agreement"
+  pnpm --filter @lethalpath/labeler build 2>&1
+  pnpm --filter @lethalpath/labeler test 2>&1
+  echo
+  echo "## eval — 40 seeded cases, both suites"
+  pnpm --filter @lethalpath/eval build 2>&1
+  pnpm --filter @lethalpath/eval evaluate 2>&1
 } | tee "$LOG"
 
 echo

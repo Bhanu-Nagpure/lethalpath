@@ -1,0 +1,152 @@
+# LethalPath live evidence — 2026-10-17T12:58:35Z
+
+## FalkorDB container
+gh-falkor falkordb/falkordb:6.0.2
+
+## Corpus hashes
+ecc8492444ba80f63e78f809011b6cf1c5a562cbcbc7cff99a13049d8a3bd964  data/fixtures/clean.json
+78b15a966d29dd13adcb701896987d57ab603d9ed6854c1f6aa4904b4f974836  data/fixtures/fs-git.json
+e7ced4ab3cba5ff535553a6d48396db877801e00b8a9eeeca319956108aadafd  data/fixtures/github-only.json
+c6817131d23f0b7b29ed420304700edb3feb1960e20d5b51cf2080b36db9da07  packages/eval/results/detection.json
+c5308fbfb92151d1fa21c2bd837ae922a88b0465e964f68ba68d503f037984ba  packages/eval/results/fix-quality.json
+4ddec1828051ad567bef9fbfb53039a684d4b39118ab5b79a1aa8a2e5123ba9d  packages/labeler/gold/labels.csv
+
+## Tests (packages/core, against the live instance)
+
+> @lethalpath/core@0.0.1 pretest /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/core
+> pnpm --filter @lethalpath/schema build && tsc -p tsconfig.json
+
+
+> @lethalpath/schema@0.0.1 build /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/schema
+> tsc -p tsconfig.json
+
+
+> @lethalpath/core@0.0.1 test /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/core
+> node --test dist/report.test.js dist/ingest.test.js dist/db.test.js dist/analysis/*.test.js
+
+✔ live FalkorDB max-flow yields the grant to revoke (89.963589ms)
+✔ saturated path cuts at the source edge (4.946245ms)
+✔ a structural edge with spare capacity is not the cut (0.458938ms)
+✔ no flow means no cut (0.262451ms)
+✔ both canonical cuts close the route (0.331941ms)
+✔ the tie-break prefers the cut that breaks fewer tasks (0.322647ms)
+✔ on a full tie the write side wins, so the read survives (0.215124ms)
+✔ cutSide names the side from the endpoints (0.457413ms)
+✔ zero flow cuts nothing on either side (0.19236ms)
+✔ a revocable min cut beats one with nothing to revoke (0.601839ms)
+✔ no max-flow row is an empty cut, not a crash (0.480124ms)
+✔ leak path crosses three tools through the shared context (88.710562ms)
+✔ max-flow returns a real flow, not an error (12.143704ms)
+✔ a write statement is refused before it reaches the server (5.542041ms)
+✔ data that contains write words is not refused (95.986558ms)
+✔ a parameter that names a write tool still reads (21.07917ms)
+✔ a write statement is still refused before dispatch (5.249652ms)
+✔ a hostile parameter key is refused, not concatenated (5.027127ms)
+✔ the cap does not corrupt literals and still bounds rows (10.541619ms)
+✔ ingest builds the fs-git graph and raises the ready flag (103.098429ms)
+✔ the leak query names the route tool by tool, on a graph ingest built (23.32745ms)
+✔ a live max-flow cuts the write side: revoke git.push, cost one task (26.628347ms)
+✔ an agent that can read but not publish gets the abstention, not a guess (24.204749ms)
+✔ a hostile config id never reaches a Cypher string (4.632272ms)
+✔ a tool that names the same resource twice still cuts (15.152117ms)
+✔ the leak query stays inside the server budget on a labeler-sized graph (290.218339ms)
+✔ the run output names FalkorDB before it names the fix (1.620291ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 873.144632
+
+## scan — fs-git
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+config    fs-git · A public issue steers the agent through the private folder out to a public repo
+graph     scan_fs-git · 11 nodes · 9 edges · ready
+guard     GRAPH.RO_QUERY · LIMIT 100 · 3 s timeout · write keywords refused
+engine    leak two anchored segments through the tainted context · fix CALL algo.maxFlow + residual min-cut
+
+LEAK PATHS
+  1  4 hops  project folder → filesystem.read → context → git.push → public repo
+     injection  github issue → github.read → context
+     in         project folder · ~/work/stats
+     out        public repo · github.com/acme/notes
+
+1 route found — every one of them is a permission you granted.
+  next  lethalpath fix
+
+## fix — fs-git
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+FIX  ·  CALL algo.maxFlow on FalkorDB
+
+max-flow   2
+cut        write side · git.push → public repo
+revoke     git.push
+verified   0 of 1 routes remain (leak query re-run without git.push)
+tasks      3 of 4 keep working
+           loses: publish the changelog
+
+cost = 1 + declared tasks that use the grant; the max-flow value proves
+this cut is minimal. The verification re-runs the same query, not a promise.
+
+## fix — clean (the abstention)
+LethalPath  ·  powered by FalkorDB 6.0.2
+
+FIX
+
+nothing to revoke — no route was found to close.
+
+## guard — poisoned session, then a clean one
+guard       stdio MCP server · scan_fs-git · sessions_demo · policy: 0 pre-denied
+call 1      github.read(issue#42)             ALLOWED · taint: untrusted
+call 2      filesystem.read(~/work/stats)     ALLOWED · taint: untrusted + private
+call 3      git.push(main)                    BLOCKED
+            route  github issue → github.read → context → git.push → public repo
+            why    a write to a public sink while the session holds untrusted input and private data
+call 4      git.push(main) [fresh session]    ALLOWED · taint: none
+
+## labeler — gold set agreement
+
+> @lethalpath/labeler@0.0.1 build /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/labeler
+> tsc -p tsconfig.json
+
+
+> @lethalpath/labeler@0.0.1 test /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/labeler
+> node --test dist/rules.test.js
+
+gold 50/50
+✔ gold set: every row resolves to its expected resources (10.257855ms)
+✔ unknown tool: unlabelled, conf <= 0.2, config still valid (0.578503ms)
+✔ hostile mcp.json: env values and tokens never survive (1.10471ms)
+✔ known server expansions are fully labelled (3.558957ms)
+✔ ScanConfig input passes through labelled (0.635438ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 95.272267
+
+## eval — 40 seeded cases, both suites
+
+> @lethalpath/eval@0.0.1 build /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/eval
+> tsc -p tsconfig.json
+
+
+> @lethalpath/eval@0.0.1 evaluate /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/eval
+> node dist/run.js
+
+LethalPath eval — seeded generator (mulberry32, seed 20261017), 40 cases (16 leak / 8 laundering / 8 clean / 8 tie)
+run id 1792241926760-19400 · FalkorDB localhost:6379
+detection    cases  40  passed  40  failed   0  0.6s  ok
+             leak 16/16 · laundering 8/8 · clean 8/8 · tie 8/8
+fix-quality  cases  40  passed  40  failed   0  0.6s  ok
+             leak 16/16 · laundering 8/8 · clean 8/8 · tie 8/8
+results written to /home/bhd/projects_2/Graph_Hacks/lethalpath/packages/eval/results/detection.json and fix-quality.json
+cleanup: deleted 80 eval_* graph(s) via GRAPH.LIST
+total wall time: 1.2s
