@@ -53,7 +53,7 @@ pnpm build                               # every workspace package, in dependenc
 node packages/cli/dist/index.js scan     # builds the graph, names every route
 node packages/cli/dist/index.js fix      # algo.maxFlow → the cheapest grant to revoke
 node packages/cli/dist/index.js scan data/fixtures/clean.json   # the abstention
-node packages/cli/dist/index.js scan --mcp mcp.json            # label a real MCP config, then scan it
+node packages/cli/dist/index.js scan --mcp data/fixtures/mcp-demo.json   # label a real MCP config, then scan it
 
 pnpm --filter @lethalpath/core test      # the suite, against the live instance
 pnpm --filter @lethalpath/guard demo     # a live MCP session: the poisoned push is blocked, a clean one is not
