@@ -157,3 +157,35 @@ test("ScanConfig input passes through labelled", () => {
   assert.deepEqual(result.unlabelled, []);
   assert.deepEqual(result.config, declared);
 });
+
+test("a token-shaped server name is redacted in key position too", () => {
+  const hostile = {
+    mcpServers: {
+      "ghp_abcdefghijklmnopqrst0123456789": { command: "npx" },
+      ok: { command: "npx", args: ["--token=supersecret-value"] },
+    },
+  };
+  assert.deepEqual(serverNames(hostile), ["[redacted]", "ok"]);
+  const blob = JSON.stringify({ parsed: parseClaudeMcp(hostile), names: serverNames(hostile) });
+  assert.ok(!blob.includes("ghp_abcdefghijklmnopqrst0123456789"), "token-shaped key survived");
+  assert.ok(!blob.includes("supersecret-value"), "assignment-shaped arg survived");
+});
+
+test("a malformed server entry fails loudly, by name", () => {
+  assert.throws(() => parseClaudeMcp({ mcpServers: { x: 5 } }), /mcpServers\['x'\] must be an object/);
+  assert.throws(
+    () => parseClaudeMcp({ mcpServers: { x: { command: "npx", tools: 5 } } }),
+    /tools must be an array/,
+  );
+});
+
+test("a declared ScanConfig that fails validation is refused, not passed through", () => {
+  const declared = {
+    id: "declared-bad",
+    title: 7,
+    servers: [],
+    resources: [],
+    tools: [],
+  };
+  assert.throws(() => labelConfig(declared as unknown as ScanConfig), /declared scan config is invalid/);
+});

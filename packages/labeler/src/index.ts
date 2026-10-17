@@ -61,7 +61,12 @@ export function labelConfig(input: unknown, opts: LabelOptions = {}): LabelResul
 
   // Our own ScanConfig: pass through, labels are already declared there.
   if (parsed.declared) {
-    return { config: structuredClone(parsed.declared), unlabelled: [] };
+    const declared = structuredClone(parsed.declared);
+    const problems = validateScanConfig(declared);
+    if (problems.length > 0) {
+      throw new Error(`declared scan config is invalid:\n- ${problems.join("\n- ")}`);
+    }
+    return { config: declared, unlabelled: [] };
   }
 
   const resources = new Map<string, ResourceDecl>();

@@ -8,9 +8,10 @@
  *
  * Secrets are stripped before anything else happens: every `env` value is
  * replaced, every value whose key looks like a credential is replaced, and
- * every string that looks like a token is replaced. Nothing in the returned
- * structures ever contains them — `stripSecrets` is exported so callers can
- * strip and then look at the whole thing themselves.
+ * every string that looks like a token is replaced — in key position too,
+ * because a key is just another string. Nothing in the returned structures
+ * ever contains them — `stripSecrets` is exported so callers can strip and
+ * then look at the whole thing themselves.
  */
 
 import type { ScanConfig } from "@lethalpath/schema";
@@ -43,6 +44,12 @@ export const REDACTED = "[redacted]";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function typeName(value: unknown): string {
+  if (value === null) return "null";
+  if (Array.isArray(value)) return "array";
+  return typeof value;
 }
 
 function asString(value: unknown): string | undefined {
@@ -104,7 +111,10 @@ export function stripSecrets(input: unknown): unknown {
   if (Array.isArray(input)) return input.map((item) => stripSecrets(item));
   if (isRecord(input)) {
     const out: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(input)) {
+    for (const [rawKey, value] of Object.entries(input)) {
+      // A key is a string too: server names live in key position, and a
+      // pasted config can carry a token there. Redact the key itself.
+      const key = redactString(rawKey);
       if (/^(env|environment)$/i.test(key)) {
         out[key] = redactEnv(value);
         continue;
@@ -207,7 +217,15 @@ export function parseClaudeMcp(json: unknown): ParsedMcp {
   const used = new Set<string>();
   const servers: McpServerEntry[] = [];
   for (const [name, rawEntry] of Object.entries(rawServers)) {
-    const entry = isRecord(rawEntry) ? rawEntry : {};
+    if (!isRecord(rawEntry)) {
+      throw new Error(
+        `mcpServers['${name}'] must be an object describing how to launch the server (got ${typeName(rawEntry)})`,
+      );
+    }
+    if ("tools" in rawEntry && !Array.isArray(rawEntry["tools"])) {
+      throw new Error(`mcpServers['${name}'].tools must be an array of tool names (got ${typeName(rawEntry["tools"])})`);
+    }
+    const entry = rawEntry;
     const listed = "tools" in entry;
     let tools = extractToolNames(entry["tools"]);
     if (!listed) {
