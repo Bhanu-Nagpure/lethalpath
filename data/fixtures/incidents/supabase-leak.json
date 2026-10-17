@@ -1,0 +1,25 @@
+{
+  "id": "supabase-leak",
+  "title": "Supabase MCP demo — a support ticket steers Cursor into reading integration_tokens and posting them back into the thread",
+  "note": "Reconstruction of the General Analysis demo on a fresh project with dummy data: one Supabase MCP server connected with service_role (bypasses RLS). The same execute_sql capability reads the customer-visible ticket thread, reads integration_tokens, and inserts the results into the same thread the attacker is watching.",
+  "provenance": {
+    "incident": "Supabase MCP can leak your entire SQL database (General Analysis)",
+    "source": "https://generalanalysis.com/blog/supabase-mcp-blog",
+    "published": "2025-07-08",
+    "corroboration": ["https://simonwillison.net/2025/Jul/6/supabase-mcp-lethal-trifecta"],
+    "method": "reconstructed from the public write-up; capability labels only; no payloads"
+  },
+  "servers": [
+    { "id": "supabase", "name": "Supabase MCP (Cursor, service_role SQL)", "source": "incident-replay" }
+  ],
+  "resources": [
+    { "id": "ticket-thread", "kind": "support ticket thread (customer-visible)", "trust": "untrusted", "visibility": "public", "scope": "the thread the customer opened; the leaked rows appeared as a new reply in it" },
+    { "id": "integration-tokens", "kind": "integration_tokens table", "sensitivity": "private", "scope": "reachable only under service_role in the demo; dummy token rows" }
+  ],
+  "tools": [
+    { "name": "supabase.execute_sql", "server": "supabase", "reads": ["ticket-thread", "integration-tokens"], "writes": ["ticket-thread"], "labelSource": "declared", "labelConf": 1 }
+  ],
+  "tasks": [
+    { "id": "review", "name": "review the latest open support ticket", "uses": ["supabase.execute_sql"] }
+  ]
+}

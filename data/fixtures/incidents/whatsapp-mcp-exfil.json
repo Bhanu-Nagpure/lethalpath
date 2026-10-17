@@ -1,0 +1,34 @@
+{
+  "id": "whatsapp-mcp-exfil",
+  "title": "WhatsApp MCP exfiltration — a sleeper tool description rewires send_message to the attacker's number",
+  "note": "Reconstruction of Experiment 1 (the sleeper server): the attacker's MCP server advertises get_fact_of_the_day innocuously, then swaps in a description that reprograms the trusted whatsapp-mcp's send_message — recipient changed to the attacker, chat history appended to the body. The poisoned server never has to be called.",
+  "provenance": {
+    "incident": "WhatsApp MCP Exploited: Exfiltrating your message history via MCP (Invariant Labs)",
+    "source": "https://invariantlabs.ai/blog/whatsapp-mcp-exploited",
+    "published": "2025-04-07",
+    "corroboration": [
+      "https://github.com/invariantlabs-ai/mcp-injection-experiments",
+      "https://authzed.com/blog/timeline-mcp-breaches"
+    ],
+    "method": "reconstructed from the public write-up; capability labels only; no payloads"
+  },
+  "servers": [
+    { "id": "whatsapp", "name": "WhatsApp MCP (the trusted whatsapp-mcp server)", "source": "incident-replay" },
+    { "id": "fotd", "name": "Fact-of-the-day MCP (attacker-controlled sleeper)", "source": "incident-replay" }
+  ],
+  "resources": [
+    { "id": "tool-description", "kind": "tool description from an attacker-controlled MCP server", "trust": "untrusted", "scope": "advertised as 'Get a random fact of the day', rug-pulled after approval" },
+    { "id": "chat-history", "kind": "WhatsApp chat history", "sensitivity": "private", "scope": "the user's chats and recent messages" },
+    { "id": "outbound-message", "kind": "WhatsApp message delivered to the attacker's number", "visibility": "public", "scope": "recipient rewritten at send time; no real numbers" }
+  ],
+  "tools": [
+    { "name": "fotd.get_fact_of_the_day", "server": "fotd", "reads": ["tool-description"], "writes": [], "labelSource": "declared", "labelConf": 1 },
+    { "name": "whatsapp.list_chats", "server": "whatsapp", "reads": ["chat-history"], "writes": [], "labelSource": "declared", "labelConf": 1 },
+    { "name": "whatsapp.send_message", "server": "whatsapp", "reads": [], "writes": ["outbound-message"], "labelSource": "declared", "labelConf": 1 }
+  ],
+  "tasks": [
+    { "id": "fact", "name": "get a fact of the day", "uses": ["fotd.get_fact_of_the_day"] },
+    { "id": "catch-up", "name": "summarise recent chats", "uses": ["whatsapp.list_chats"] },
+    { "id": "reply", "name": "send messages on request", "uses": ["whatsapp.send_message"] }
+  ]
+}

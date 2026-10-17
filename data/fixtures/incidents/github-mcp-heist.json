@@ -1,0 +1,33 @@
+{
+  "id": "github-mcp-heist",
+  "title": "GitHub MCP heist — a public issue steers one broad PAT through private repos and back out through a public PR",
+  "note": "Reconstruction of Invariant Labs' demo: one official GitHub MCP server on one PAT covering public and private repos. The agent's issue-triage session reads the malicious public issue (ukend0464/pacman#1), then private repo contents (the demo leaked 'Jupiter Star', relocation plans, salary), then publishes them in a pull request on the public repo (pacman#2).",
+  "provenance": {
+    "incident": "GitHub MCP Exploited: Accessing private repositories via MCP (Invariant Labs)",
+    "source": "https://invariantlabs.ai/blog/mcp-github-vulnerability",
+    "published": "2025-05-26",
+    "corroboration": [
+      "https://simonwillison.net/2025/May/26/github-mcp-exploited/",
+      "https://www.docker.com/blog/mcp-horror-stories-github-prompt-injection"
+    ],
+    "method": "reconstructed from the public write-up; capability labels only; no payloads"
+  },
+  "servers": [
+    { "id": "github", "name": "GitHub MCP (official server, single PAT over public and private repos)", "source": "incident-replay" }
+  ],
+  "resources": [
+    { "id": "public-issue", "kind": "github issue in a public repo", "trust": "untrusted", "scope": "github.com/ukend0464/pacman/issues/1" },
+    { "id": "private-repos", "kind": "private repositories", "sensitivity": "private", "scope": "every repo the PAT can reach (the demo's private projects)" },
+    { "id": "public-pr", "kind": "pull request in a public repo", "visibility": "public", "scope": "github.com/ukend0464/pacman/pull/2" }
+  ],
+  "tools": [
+    { "name": "github.list_issues", "server": "github", "reads": ["public-issue"], "writes": [], "labelSource": "declared", "labelConf": 1 },
+    { "name": "github.get_file_contents", "server": "github", "reads": ["private-repos"], "writes": [], "labelSource": "declared", "labelConf": 1 },
+    { "name": "github.create_pull_request", "server": "github", "reads": [], "writes": ["public-pr"], "labelSource": "declared", "labelConf": 1 }
+  ],
+  "tasks": [
+    { "id": "triage", "name": "look at the open issues in the public repo", "uses": ["github.list_issues"] },
+    { "id": "read-repo", "name": "read repository files on request", "uses": ["github.get_file_contents"] },
+    { "id": "open-pr", "name": "open a pull request for an approved change", "uses": ["github.create_pull_request"] }
+  ]
+}
