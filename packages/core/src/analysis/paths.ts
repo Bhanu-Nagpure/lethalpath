@@ -49,10 +49,11 @@ RETURN count(leak) AS routes
  * The same traversal with the ordering dropped. ORDER BY forces the engine to
  * materialise and sort every walk before the LIMIT can apply, and on graphs
  * where tools chain through the context hub the walk count explodes — a
- * 40-tool config of that shape blew the server budget on the ordered form
- * while the count stayed at 233 ms. Without ORDER BY the engine can stop at
- * the LIMIT; `scan` falls back to this when the ordered query fails, and says
- * the order is arbitrary.
+ * 40-tool config of that shape (fixture: data/fixtures/many-tools.json) blew
+ * the server budget on the ordered form while the count, which materialises
+ * no path values, stayed comfortably inside it. Without ORDER BY the engine
+ * can stop at the LIMIT; `scan` falls back to this when the ordered query
+ * fails, and says the order is arbitrary.
  */
 export const LEAK_PATH_FAST = `
 MATCH inj = (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)

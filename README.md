@@ -71,9 +71,17 @@ nothing answers.
 
 `--mcp mcp.json` puts the labeler (`packages/labeler`) in front of the same
 pipeline: the rules table labels every tool, unmatched tools are **named, not
-hidden**, and secrets never leave the machine. Point it at a real config and the
-graph is your own arrangement — the committed `data/fixtures/mcp-demo.json`
-prints 567 routes and a nine-grant cut that closes all of them.
+hidden**, and secrets never leave the machine — values and token-shaped server
+names alike are redacted before anything reaches the graph. Point it at a real
+config and the graph is your own arrangement — the committed
+`data/fixtures/mcp-demo.json` prints 567 routes and a nine-grant cut that
+closes all of them.
+
+![the scan_mcp-github-filesystem-git graph in FalkorDB Browser](./docs/browser-scan-mcp.png)
+
+*The demo config after `scan --mcp data/fixtures/mcp-demo.json`: 40 tools across
+three servers — 49 nodes, 120 edges. The stats bar shows the Browser's default
+`LIMIT 100` view of that graph.*
 
 ### What `scan` prints
 
@@ -139,6 +147,13 @@ can never land in a cut; their capacity dwarfs every real cost. `(:Meta).ready`
 flips only after the whole graph is built, so a scan never reads a half-built
 graph.
 
+![the scan_fs-git graph in FalkorDB Browser](./docs/browser-scan-fs-git.png)
+
+*`scan_fs-git` in the FalkorDB Browser (`localhost:3000` after
+`docker compose up -d`): 11 nodes, 9 edges, the `FLOWS`/`HOSTS` legend, and the
+Browser's own stats bar. The capture steps — read-only, `GRAPH.RO_QUERY` — are
+in [`docs/browser-shots.md`](./docs/browser-shots.md).*
+
 ### The queries
 
 **1 — The route (`LEAK_PATH`).** Untrusted input reaches the context through one
@@ -160,7 +175,9 @@ ORDER BY hops ASC LIMIT 25
 ```
 
 The `chain` and `injection` columns exist so citations resolve to `kind` and
-`scope` ("project folder · ~/work/stats"), never to internal node ids.
+`scope` ("project folder · ~/work/stats"), never to internal node ids. When two
+resources share a kind, the CLI prints `scope omitted — 2 resources share this
+kind` instead of guessing which one the route ran through.
 
 The two bounded segments are anchored at the injecting context on purpose. A
 free `*2..10` walk can re-enter the shared hub and enumerates exponentially — a
@@ -171,6 +188,18 @@ through the tainted context itself, not merely some context.
 The list itself is capped at 25 rows so a display never explodes. `LEAK_COUNT`
 runs the same anchored traversal without the cap, and `scan` prints both — a
 capped list must never be mistaken for the count.
+
+On a graph where many tools chain through the shared hub, the walk count
+explodes combinatorially: a 40-tool config of that shape — committed as
+`data/fixtures/many-tools.json` — produces 126,321 walks, and the *ordered*
+query dies at the server's budget while `LEAK_COUNT`, which materialises no
+path values, answers comfortably inside it. `scan` catches that and retries
+with `LEAK_PATH_FAST` — the same traversal without `ORDER BY`, so `LIMIT 25`
+applies while rows stream — and prints that the order is arbitrary. If even
+that fails it counts without listing. `--json` carries `pathOrder`, so nothing
+downstream mistakes arbitrary for shortest, and the cut is never affected:
+`fix data/fixtures/many-tools.json` revokes one grant and verifies 0 of
+126,321 routes remain.
 
 **2 — The fix (`MIN_CUT`).** One `CALL`, sources are private stores, targets are
 public sinks:

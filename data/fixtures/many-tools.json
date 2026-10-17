@@ -1,0 +1,798 @@
+{
+  "id": "many-tools",
+  "title": "Forty tools chaining through one shared context",
+  "servers": [
+    {
+      "id": "s",
+      "name": "S",
+      "source": "x"
+    }
+  ],
+  "resources": [
+    {
+      "id": "u",
+      "kind": "untrusted feed",
+      "trust": "untrusted"
+    },
+    {
+      "id": "p",
+      "kind": "private store",
+      "sensitivity": "private"
+    },
+    {
+      "id": "m",
+      "kind": "shared memo"
+    },
+    {
+      "id": "sink",
+      "kind": "public sink",
+      "visibility": "public"
+    }
+  ],
+  "tools": [
+    {
+      "name": "t1",
+      "server": "s",
+      "reads": [
+        "u",
+        "p"
+      ],
+      "writes": [
+        "m"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t2",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t3",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t4",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t5",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t6",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t7",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t8",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t9",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t10",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t11",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t12",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t13",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t14",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t15",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t16",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t17",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t18",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t19",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t20",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t21",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t22",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t23",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t24",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t25",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t26",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t27",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t28",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t29",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t30",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t31",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t32",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t33",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t34",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t35",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t36",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t37",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t38",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t39",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    },
+    {
+      "name": "t40",
+      "server": "s",
+      "reads": [
+        "m"
+      ],
+      "writes": [
+        "sink"
+      ],
+      "labelSource": "declared",
+      "labelConf": 1
+    }
+  ],
+  "tasks": [
+    {
+      "id": "t-one",
+      "name": "uses t1",
+      "uses": [
+        "t1"
+      ]
+    },
+    {
+      "id": "task-2",
+      "name": "uses t2",
+      "uses": [
+        "t2"
+      ]
+    },
+    {
+      "id": "task-3",
+      "name": "uses t3",
+      "uses": [
+        "t3"
+      ]
+    },
+    {
+      "id": "task-4",
+      "name": "uses t4",
+      "uses": [
+        "t4"
+      ]
+    },
+    {
+      "id": "task-5",
+      "name": "uses t5",
+      "uses": [
+        "t5"
+      ]
+    },
+    {
+      "id": "task-6",
+      "name": "uses t6",
+      "uses": [
+        "t6"
+      ]
+    },
+    {
+      "id": "task-7",
+      "name": "uses t7",
+      "uses": [
+        "t7"
+      ]
+    },
+    {
+      "id": "task-8",
+      "name": "uses t8",
+      "uses": [
+        "t8"
+      ]
+    },
+    {
+      "id": "task-9",
+      "name": "uses t9",
+      "uses": [
+        "t9"
+      ]
+    },
+    {
+      "id": "task-10",
+      "name": "uses t10",
+      "uses": [
+        "t10"
+      ]
+    },
+    {
+      "id": "task-11",
+      "name": "uses t11",
+      "uses": [
+        "t11"
+      ]
+    },
+    {
+      "id": "task-12",
+      "name": "uses t12",
+      "uses": [
+        "t12"
+      ]
+    },
+    {
+      "id": "task-13",
+      "name": "uses t13",
+      "uses": [
+        "t13"
+      ]
+    },
+    {
+      "id": "task-14",
+      "name": "uses t14",
+      "uses": [
+        "t14"
+      ]
+    },
+    {
+      "id": "task-15",
+      "name": "uses t15",
+      "uses": [
+        "t15"
+      ]
+    },
+    {
+      "id": "task-16",
+      "name": "uses t16",
+      "uses": [
+        "t16"
+      ]
+    },
+    {
+      "id": "task-17",
+      "name": "uses t17",
+      "uses": [
+        "t17"
+      ]
+    },
+    {
+      "id": "task-18",
+      "name": "uses t18",
+      "uses": [
+        "t18"
+      ]
+    },
+    {
+      "id": "task-19",
+      "name": "uses t19",
+      "uses": [
+        "t19"
+      ]
+    },
+    {
+      "id": "task-20",
+      "name": "uses t20",
+      "uses": [
+        "t20"
+      ]
+    },
+    {
+      "id": "task-21",
+      "name": "uses t21",
+      "uses": [
+        "t21"
+      ]
+    },
+    {
+      "id": "task-22",
+      "name": "uses t22",
+      "uses": [
+        "t22"
+      ]
+    },
+    {
+      "id": "task-23",
+      "name": "uses t23",
+      "uses": [
+        "t23"
+      ]
+    },
+    {
+      "id": "task-24",
+      "name": "uses t24",
+      "uses": [
+        "t24"
+      ]
+    },
+    {
+      "id": "task-25",
+      "name": "uses t25",
+      "uses": [
+        "t25"
+      ]
+    },
+    {
+      "id": "task-26",
+      "name": "uses t26",
+      "uses": [
+        "t26"
+      ]
+    },
+    {
+      "id": "task-27",
+      "name": "uses t27",
+      "uses": [
+        "t27"
+      ]
+    },
+    {
+      "id": "task-28",
+      "name": "uses t28",
+      "uses": [
+        "t28"
+      ]
+    },
+    {
+      "id": "task-29",
+      "name": "uses t29",
+      "uses": [
+        "t29"
+      ]
+    },
+    {
+      "id": "task-30",
+      "name": "uses t30",
+      "uses": [
+        "t30"
+      ]
+    },
+    {
+      "id": "task-31",
+      "name": "uses t31",
+      "uses": [
+        "t31"
+      ]
+    },
+    {
+      "id": "task-32",
+      "name": "uses t32",
+      "uses": [
+        "t32"
+      ]
+    },
+    {
+      "id": "task-33",
+      "name": "uses t33",
+      "uses": [
+        "t33"
+      ]
+    },
+    {
+      "id": "task-34",
+      "name": "uses t34",
+      "uses": [
+        "t34"
+      ]
+    },
+    {
+      "id": "task-35",
+      "name": "uses t35",
+      "uses": [
+        "t35"
+      ]
+    },
+    {
+      "id": "task-36",
+      "name": "uses t36",
+      "uses": [
+        "t36"
+      ]
+    },
+    {
+      "id": "task-37",
+      "name": "uses t37",
+      "uses": [
+        "t37"
+      ]
+    },
+    {
+      "id": "task-38",
+      "name": "uses t38",
+      "uses": [
+        "t38"
+      ]
+    },
+    {
+      "id": "task-39",
+      "name": "uses t39",
+      "uses": [
+        "t39"
+      ]
+    },
+    {
+      "id": "task-40",
+      "name": "uses t40",
+      "uses": [
+        "t40"
+      ]
+    }
+  ],
+  "note": "The adversarial shape that breaks the ordered leak query: t1 reads the untrusted feed and the private store into the shared memo m; t2..t40 each read m and write the public sink. Walk cycles re-enter the context, so the route count explodes and the ordered LEAK_PATH dies at the server budget. scan falls back to LEAK_PATH_FAST (arbitrary order, exact count); the cut is unaffected."
+}
