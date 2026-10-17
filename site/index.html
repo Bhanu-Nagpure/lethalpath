@@ -6,18 +6,18 @@
 <title>LethalPath — find the fewest permissions that stop the leak</title>
 <meta name="description" content="Open-source guard for AI agents. Finds every route your MCP tools can be tricked into leaking data, then the fewest permissions to revoke. Powered by FalkorDB.">
 <meta name="theme-color" content="#07080a">
-<link rel="canonical" href="https://bhanu-dev82.github.io/lethalpath/">
+<link rel="canonical" href="https://www.devanshustudios.com/lethalpath/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="LethalPath">
 <meta property="og:title" content="LethalPath — find the fewest permissions that stop the leak">
 <meta property="og:description" content="Open-source guard for AI agents. Finds every route your MCP tools can be tricked into leaking data, then the fewest permissions to revoke. Powered by FalkorDB.">
-<!-- og:url + og:image — update these two URLs if hosting moves from GitHub Pages -->
-<meta property="og:url" content="https://bhanu-dev82.github.io/lethalpath/">
-<meta property="og:image" content="https://bhanu-dev82.github.io/lethalpath/og.png">
+<!-- canonical host: https://www.devanshustudios.com/lethalpath/ -->
+<meta property="og:url" content="https://www.devanshustudios.com/lethalpath/">
+<meta property="og:image" content="https://www.devanshustudios.com/lethalpath/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://bhanu-dev82.github.io/lethalpath/og.png">
+<meta name="twitter:image" content="https://www.devanshustudios.com/lethalpath/og.png">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -60,6 +60,67 @@
       <a class="btn btn-ghost" href="scan.html">Scan a config</a>
     </div>
     <p class="muted small" style="margin-top:16px">Built to be used on Monday. Not a poster for Sunday.</p>
+
+    <h2 id="problem" style="margin-top:56px">What goes wrong</h2>
+    <div class="explain">
+      <figure>
+        <svg viewBox="0 0 320 168" role="img" aria-label="Three grants drawn apart: read a public issue, read private files, and publish. Nothing connects them.">
+          <rect width="320" height="168" fill="#07080a"/>
+          <g>
+            <rect x="16" y="24" width="90" height="96" rx="10" fill="#121212" stroke="#FFC533"/>
+            <circle cx="34" cy="46" r="4" fill="#FFC533"/>
+            <text x="34" y="74" fill="#F4F4F6" font-size="14" font-family="ui-monospace,Menlo,Consolas,monospace">read</text>
+            <text x="34" y="94" fill="#FFC533" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace">issue</text>
+          </g>
+          <g>
+            <rect x="115" y="24" width="90" height="96" rx="10" fill="#121212" stroke="#B69EFB"/>
+            <circle cx="133" cy="46" r="4" fill="#B69EFB"/>
+            <text x="133" y="74" fill="#F4F4F6" font-size="14" font-family="ui-monospace,Menlo,Consolas,monospace">read</text>
+            <text x="133" y="94" fill="#B69EFB" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace">files</text>
+          </g>
+          <g>
+            <rect x="214" y="24" width="90" height="96" rx="10" fill="#121212" stroke="#57C1FF"/>
+            <circle cx="232" cy="46" r="4" fill="#57C1FF"/>
+            <text x="232" y="84" fill="#57C1FF" font-size="14" font-family="ui-monospace,Menlo,Consolas,monospace">publish</text>
+          </g>
+          <text x="16" y="148" fill="#A9A9AB" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">each one, you would approve</text>
+        </svg>
+        <figcaption><strong>Fine alone.</strong> Read a public issue. Read your folder. Publish. Three ordinary grants.</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 320 168" role="img" aria-label="A public issue enters the agent context. Private files leave through publish to a public repo.">
+          <rect width="320" height="168" fill="#07080a"/>
+          <line x1="78" y1="62" x2="132" y2="62" stroke="#FFC533" stroke-dasharray="2 5"/>
+          <line x1="188" y1="62" x2="236" y2="62" stroke="#FF8A8A"/>
+          <rect x="16" y="40" width="62" height="44" rx="8" fill="#121212" stroke="#FFC533"/>
+          <text x="47" y="66" text-anchor="middle" fill="#FFC533" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">issue</text>
+          <rect x="132" y="28" width="56" height="68" rx="8" fill="#121212" stroke="#57C1FF"/>
+          <text x="160" y="58" text-anchor="middle" fill="#F4F4F6" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">agent</text>
+          <text x="160" y="76" text-anchor="middle" fill="#57C1FF" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">notes</text>
+          <rect x="236" y="40" width="68" height="44" rx="8" fill="#121212" stroke="#FF8A8A"/>
+          <text x="270" y="66" text-anchor="middle" fill="#FF8A8A" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">public</text>
+          <text x="16" y="132" fill="#CDCDCD" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace">one sentence is the instruction</text>
+          <text x="16" y="152" fill="#A9A9AB" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">the folder is the payload</text>
+        </svg>
+        <figcaption><strong>Dangerous together.</strong> A stranger’s sentence rides into the agent’s notes, and your files leave with it. No tool misbehaved.</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 320 168" role="img" aria-label="Several leak routes stop at one revoked publish grant. The other work continues.">
+          <rect width="320" height="168" fill="#07080a"/>
+          <path d="M24 36 H150" stroke="#FF8A8A" stroke-opacity=".45" fill="none"/>
+          <path d="M24 62 H150" stroke="#FF8A8A" stroke-opacity=".7" fill="none"/>
+          <path d="M24 88 H150" stroke="#FF8A8A" fill="none"/>
+          <path d="M24 114 H150" stroke="#FF8A8A" stroke-opacity=".45" fill="none"/>
+          <line x1="168" y1="22" x2="168" y2="128" stroke="#59D499" stroke-width="2"/>
+          <rect x="196" y="48" width="100" height="52" rx="8" fill="#121212" stroke="#59D499"/>
+          <text x="246" y="70" text-anchor="middle" fill="#59D499" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace">revoke</text>
+          <text x="246" y="88" text-anchor="middle" fill="#F4F4F6" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">publish</text>
+          <text x="16" y="152" fill="#A9A9AB" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">3 of 4 tasks keep working</text>
+        </svg>
+        <figcaption><strong>Turn off the fewest.</strong> On the committed run, revoking <span class="mono">git.push</span> closes the route. The other work stays.</figcaption>
+      </figure>
+    </div>
+    <p class="small" style="margin-top:16px;max-width:68ch;color:var(--body)">Why it matters: switching every tool off stops the leak and also stops the agent. The useful answer is the smallest set to switch off, then a second query that shows the leak is gone.</p>
   </div>
 </div>
 
@@ -270,7 +331,7 @@ node packages/guard/dist/server.js --config mcp.json</pre></div>
   <div class="wrap cols">
     <div>
       <a class="brand" href="index.html">LethalPath</a>
-      <p class="mt-md" style="max-width:36ch">An open-source guard for agents that hold tools. The graph is FalkorDB. The product is the command.</p>
+      <p class="mt-md" style="max-width:38ch">An open-source guard from <a href="https://www.devanshustudios.com/">Devanshu Studios</a>. <a href="https://www.falkordb.com/">FalkorDB</a>, the hackathon sponsor, runs the path query and the cut.</p>
     </div>
     <div class="navlinks">
       <a href="scan.html">Scan</a>

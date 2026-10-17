@@ -24,7 +24,7 @@ const SITE = join(HERE, "..", "site");
 
 const PAGES = ["index.html", "scan.html", "combos.html", "benchmarks.html", "threat-model.html", "disclosure.html"];
 const VOID = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr", "path", "circle", "rect", "line", "polyline", "polygon", "ellipse", "use", "stop"]);
-const BASE_URL = "https://bhanu-dev82.github.io/lethalpath/";
+const BASE_URL = "https://www.devanshustudios.com/lethalpath/";
 
 let failures = 0;
 let structureProblems = 0;
@@ -158,10 +158,10 @@ for (const page of PAGES) {
   /* required head metadata (task: SEO / social / favicon invariants) */
   const req = {
     "theme-color": /<meta name="theme-color" content="#07080a">/,
-    "canonical link": /<link rel="canonical" href="https:\/\/bhanu-dev82\.github\.io\/lethalpath\//,
+    "canonical link": /<link rel="canonical" href="https:\/\/www\.devanshustudios\.com\/lethalpath\//,
     "og:type": /<meta property="og:type" content="website">/,
     "og:site_name": /<meta property="og:site_name" content="LethalPath">/,
-    "og:image": /<meta property="og:image" content="https:\/\/bhanu-dev82\.github\.io\/lethalpath\/og\.png">/,
+    "og:image": /<meta property="og:image" content="https:\/\/www\.devanshustudios\.com\/lethalpath\/og\.png">/,
     "og:image:width": /<meta property="og:image:width" content="1200">/,
     "og:image:height": /<meta property="og:image:height" content="630">/,
     "twitter:card": /<meta name="twitter:card" content="summary_large_image">/,

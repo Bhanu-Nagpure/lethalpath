@@ -20,10 +20,22 @@ Finds every route by which an AI agent can be tricked into leaking your data
 across its MCP servers, then computes the fewest permissions to revoke that
 close them all — without breaking your work.
 
-Built for [Graph Hacks](https://www.wemakedevs.org/hackathons/falkordb)
-(WeMakeDevs × FalkorDB, 15–18 Oct 2026). Tracks: **T01** Agents That Act on
-Connected Data, and **T02** Agent Memory and Coordination — the guard's session
-memory is a graph of its own.
+Built by [Devanshu Studios](https://www.devanshustudios.com/) for
+[Graph Hacks](https://www.wemakedevs.org/hackathons/falkordb)
+(WeMakeDevs × FalkorDB, 15–18 Oct 2026). Live site:
+[devanshustudios.com/lethalpath](https://www.devanshustudios.com/lethalpath/).
+Tracks: **T01** Agents That Act on Connected Data, and **T02** Agent Memory and
+Coordination — the guard's session memory is a graph of its own.
+
+**Sponsor, and how the sponsor is used.** FalkorDB sponsors the hackathon.
+This repository does not treat that as a badge. Every scan is a FalkorDB graph
+(`scan_<name>`). The leak query is Cypher. The fix is `CALL algo.maxFlow` on
+that graph. Reads go through `GRAPH.RO_QUERY`, so a generated query cannot
+write. The guard remembers a session in a second graph (`sessions_<id>`), one
+graph per session, which is the tenant isolation. The table
+[below](#falkordb-features-this-product-calls) lists every call, including what
+we do not claim: shortest-path indexes (CCH) are documented and are not in
+6.0.2.
 
 > Numbers appear in this README only with the file that contains them named
 > beside them — the eval results, the live-evidence log, or the fixture itself.
@@ -367,6 +379,8 @@ secrets.
 
 ## Credits and prior work
 
+- [Devanshu Studios](https://www.devanshustudios.com/) — the studio shipping LethalPath. Live site: https://www.devanshustudios.com/lethalpath/
+- [FalkorDB](https://www.falkordb.com/) — hackathon sponsor, and the engine every query runs on. See [FalkorDB features this product calls](#falkordb-features-this-product-calls).
 - Simon Willison — the [lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/), the framing this product builds on.
 - Related tools and papers that informed the design are listed with links in
   [`docs/RELATED-WORK.md`](./docs/RELATED-WORK.md).
