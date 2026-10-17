@@ -3,4 +3,5 @@ dist/
 .env
 .env.local
 *.log
+!docs/live-evidence/*.log
 .DS_Store
