@@ -16,7 +16,7 @@ sync with what is actually true at submission time.
 | Project name | LethalPath |
 | Public repo | https://github.com/bhanu-dev82/lethalpath |
 | Demo video | TODO — public YouTube link, ≤4 min, human voice; script in `docs/DEMO-SCRIPT.md` |
-| Live URL / setup | TODO — hosted site URL; local: `docker compose up -d && pnpm build && node packages/cli/dist/index.js scan` |
+| Live URL / setup | TODO — hosted site URL. The repo ships a manual Pages workflow for `site/`: enable Settings → Pages → Source: GitHub Actions, run the "Pages" workflow once, then it is live at https://bhanu-dev82.github.io/lethalpath/ . Local: `docker compose up -d && pnpm build && node packages/cli/dist/index.js scan` |
 | Tracks | T01 — Agents That Act on Connected Data (primary); T02 — Agent Memory and Coordination (the guard's session graph) |
 | AI disclosure | `AI_DISCLOSURE.md` in the repo (rule 18) |
 | Blog post | TODO — link if published same week |
@@ -63,6 +63,7 @@ recipe lives in `docs/browser-shots.md`.
 ## Checklist before hitting submit
 
 - [x] Repo is public and only the product is in it — github.com/bhanu-dev82/lethalpath, full incremental history (no squash)
+- [ ] CI green on main (`.github/workflows/ci.yml`: build, 53 tests, 40/40 eval, CLI smoke, against a pinned 6.0.2 service container)
 - [x] README numbers match `packages/eval/results/*.json` and the evidence log
 - [ ] Video is public, not-for-kids, 2–4 minutes, numbers match
 - [ ] Site is deployed and the numbers on it match the same JSON files
