@@ -7,15 +7,19 @@ AI coding assistants were used throughout this project for:
 - scaffolding and boilerplate;
 - drafting documentation, including this file;
 - suggesting Cypher, which was then reviewed and run by a human;
-- a JSON-schema classifier that proposes trust labels for MCP tools *(planned)*.
+- a rules table that proposes trust labels for MCP tools (`packages/labeler`);
+  a learned classifier was considered and is not in this build.
 
 The following were done by a human, and can be walked through on request:
 
 - every Cypher query was executed against a live FalkorDB 6.0.2 instance before
   it was committed, and corrected where the documented syntax did not run;
-- every number reported anywhere in this repository comes from a file under
-  `eval/results/` and was read before it was quoted;
-- the hand-labelled gold set of tool trust labels contains no model output;
+- every reported metric comes from a file under `packages/eval/results/` and
+  was read before it was quoted;
+- the gold set under `packages/labeler/gold/labels.csv` was drafted during this
+  build to measure the rules table; it is a reviewable fixture for rule quality,
+  not a learned model's output, and it is not claimed as independent human
+  ground truth;
 - the graph model, the decision to model capacity edges as a single relationship
   type, and the choice of product were ours.
 
