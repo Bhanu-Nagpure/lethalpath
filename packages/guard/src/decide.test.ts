@@ -183,3 +183,39 @@ test("audit holds a hash, never the arguments — and a blocked step moves nothi
     await db.close();
   }
 });
+
+test("arguments too deep to hash are still audited, marked unhashable", async () => {
+  const cfg = loadFixture();
+  const id = sessionId("deep");
+  const root: Record<string, unknown> = {};
+  let cursor = root;
+  for (let i = 0; i < 200_000; i += 1) {
+    const next: Record<string, unknown> = {};
+    cursor["n"] = next;
+    cursor = next;
+  }
+
+  const guard = new Guard(cfg, EMPTY_POLICY, { sessionId: id, host: HOST, port: PORT });
+  try {
+    const read = await guard.decide("github.read", root);
+    assert.equal(read.decision, "allowed");
+  } finally {
+    await guard.close();
+  }
+
+  const db = await GraphDB.open(`sessions_${id}`, HOST, PORT);
+  try {
+    const steps = (
+      await db.read(
+        `MATCH (:Session {id: $sid})-[:STEP]->(st:Step)
+         RETURN st.tool AS tool, st.argsHash AS argsHash`,
+        { sid: id },
+      )
+    ).rows;
+    assert.equal(steps.length, 1, "the call must leave a Step even when it cannot be hashed");
+    assert.equal(steps[0]?.["tool"], "github.read");
+    assert.equal(steps[0]?.["argsHash"], "unhashable");
+  } finally {
+    await db.close();
+  }
+});

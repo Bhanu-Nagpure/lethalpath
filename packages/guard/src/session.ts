@@ -74,10 +74,19 @@ export class SessionLog {
 
   async append(step: StepInput): Promise<StepRow> {
     this.steps += 1;
+    let hash: string;
+    try {
+      hash = argsHash(step.args);
+    } catch {
+      // A hostile payload can nest deeper than the stack allows. The step is
+      // still audited — the attempt must leave a record — with a hash that
+      // says the arguments could not be canonicalised.
+      hash = "unhashable";
+    }
     const row: StepRow = {
       id: `${this.sessionId}-step-${this.steps}`,
       ts: Date.now(),
-      argsHash: argsHash(step.args),
+      argsHash: hash,
     };
     await this.db.write(
       `MERGE (s:Session {id: $sessionId}) ON CREATE SET s.started = $started
