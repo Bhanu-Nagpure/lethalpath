@@ -3,18 +3,18 @@
 
    Four systems:
      1. reveal()    — scroll-triggered entrances via IntersectionObserver
-     2. AttackPlay  — the hero scene. A timed timeline that walks a data packet
-        down the leak path, taints the agent, exfiltrates, then blocks it when
-        the fix is applied. Replayable; reduced-motion users get the same
-        story as a correct static end frame (taint + block state included).
+     2. AttackPlay  — the hero scene. A timed timeline walks a data packet down
+        the leak path, taints the agent context, exfiltrates through git.push,
+        then cuts the route: the gate slams, the packet is refused and recoils,
+        and the dead route greys out. Pausable and replayable (WCAG 2.2.2);
+        reduced-motion users get the complete story as one static end frame —
+        the markup itself carries that frame, so it is correct with JS off too.
      3. countUp()   — KPI numbers count from 0 to their exact printed string
         when revealed; reduced-motion users see the final value immediately.
      4. copyButtons() — a Copy affordance on every code block, injected only
         when the browser can actually put text on the clipboard.
 
-   The scene is the point. It is a story with a beginning, a turn, and an end,
-   and it can be replayed. It degrades to a static correct frame if JS is off
-   (every element it touches has a sane initial state in the markup).
+   The scene is the point: a beginning, a turn, and an end.
    ========================================================================== */
 (function () {
   "use strict";
@@ -27,6 +27,11 @@
 
   // one easing family for everything the eye follows
   var EASE_TRAVEL = "cubic-bezier(.22,.61,.36,1)";
+
+  var now = function () {
+    return (window.performance && window.performance.now)
+      ? window.performance.now() : Date.now();
+  };
 
   /* ---------------------------------------------------------------- reveal */
   function reveal() {
@@ -65,218 +70,328 @@
     pub:     { x: 350, y: 169 }
   };
 
-  // each stop: [target, narration, tone]
-  var SCRIPT = [
-    { at: "issue",   text: "A stranger hides an instruction in a public issue.", tone: "untrusted" },
-    { at: "github",  text: "Your agent reads it. It cannot tell your words from theirs.", tone: "untrusted" },
-    { at: "context", text: "The instruction is now sitting in your agent's memory.", tone: "sink" },
-    { at: "fs",      text: "The agent reads your private files \u2014 for a real reason.", tone: "private" },
-    { at: "priv",    text: "Private data and a stranger's words are in the same place.", tone: "private" },
-    { at: "git",     text: "The agent pushes. Nothing looks wrong at any step.", tone: "danger" },
-    { at: "pub",     text: "Your secrets are public. No single tool misbehaved.", tone: "danger" }
+  // The walk, in order: each node centre, plus the two corners of the long
+  // route the packet takes from the private folder down to the push.
+  var WALK = [
+    [56, 70],                       // public issue
+    [202, 70],                      // github read
+    [329, 70],                      // agent context
+    [458, 70],                      // filesystem write
+    [567, 70],                      // private files
+    [567, 120],                     // corner: down out of the folder
+    [202, 120],                     // corner: across to the push
+    [202, 169],                     // git push
+    [350, 169]                      // public repo
   ];
 
-  function AttackPlay(root) {
-    var svg      = root.querySelector("[data-scene]");
-    if (!svg) return null;
+  // hops in order: [waypoint index, travel ms, beat to announce on arrival]
+  var HOPS = [
+    [1, 720, 1],
+    [2, 640, 2],
+    [3, 640, 3],
+    [4, 620, 4],
+    [5, 300, -1],
+    [6, 860, -1],
+    [7, 340, 5],
+    [8, 380, 6]
+  ];
 
-    var packet   = root.querySelector("[data-packet]");
-    var trail    = root.querySelector("[data-trail]");
-    var gate     = root.querySelector("[data-gate]");
-    var alarm    = root.querySelector("[data-alarm]");
-    var caption  = root.querySelector("[data-caption]");
-    var stepEl   = root.querySelector("[data-step]");
-    var replay   = root.querySelector("[data-replay]");
-    var nodes    = {};
+  // each beat: caption, tone, the node it lights, and what the turn is
+  var SCRIPT = [
+    { node: "issue",   tone: "untrusted", text: "A stranger hides an instruction in a public issue." },
+    { node: "github",  tone: "untrusted", text: "Your agent reads it. It cannot tell your words from theirs." },
+    { node: "context", tone: "sink",      text: "The instruction now sits in your agent's context.", taint: true },
+    { node: "fs",      tone: "private",   text: "The agent reads your private folder \u2014 for a real reason." },
+    { node: "priv",    tone: "private",   text: "Private data and a stranger's words, in the same place." },
+    { node: "git",     tone: "danger",    text: "The push leaves through your own git remote." },
+    { node: "pub",     tone: "danger",    text: "The folder is public. No single tool misbehaved." }
+  ];
+
+  var CAP_READY = "Ready.";
+  var CAP_CUT   = "Revoke git.push \u2014 the write this route needs.";
+  var CAP_END   = "Route closed. The files stay private.";
+
+  function AttackPlay(root) {
+    var svg = root.querySelector("[data-scene]");
+    if (!svg) return;
+
+    var packet  = root.querySelector("[data-packet]");
+    var trail   = root.querySelector("[data-trail]");
+    var gate    = root.querySelector("[data-gate]");
+    var alarm   = root.querySelector("[data-alarm]");
+    var caption = root.querySelector("[data-caption]");
+    var stepEl  = root.querySelector("[data-step]");
+    var replay  = root.querySelector("[data-replay]");
+    var pauseB  = root.querySelector("[data-pause]");
+    var pauseLbl = root.querySelector("[data-pause-label]");
+    var statusEl = root.querySelector("[data-status]");
+    var tickEls = root.querySelectorAll(".steps i");
+    var nodes = {};
     root.querySelectorAll("[data-node]").forEach(function (n) {
       nodes[n.getAttribute("data-node")] = n;
     });
-    // the tainted-context hook: explicit data-ctx if present, else the context node
     var ctx = root.querySelector("[data-ctx]") || nodes["context"];
 
+    /* ---- the clock: a virtual timeline that can be paused and resumed ---- */
+    var steps = [];      // { t, fn, done }
     var timers = [];
-    var done = false;
+    var base = 0;        // virtual ms consumed before the current run segment
+    var t0 = 0;          // real clock at the start of the current segment
+    var running = false;
+    var paused = false;
+    var finished = false;
+    var pausedAnims = [];
 
-    function clear() {
-      timers.forEach(clearTimeout);
-      timers = [];
-    }
-    function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
-
-    // the full route, as the trail polyline walks it — one source of truth
-    function trailPath() {
-      var d = "";
-      SCRIPT.forEach(function (stop) {
-        var p = PATH[stop.at];
-        if (!p) return;
-        d += (d ? " L" : "M") + p.x + " " + p.y;
+    function at(t, fn) { steps.push({ t: t, fn: fn, done: false }); }
+    function virtualNow() { return base + (running ? now() - t0 : 0); }
+    function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+    function schedule() {
+      clearTimers();
+      steps.forEach(function (s) {
+        if (s.done) return;
+        var delay = Math.max(0, s.t - virtualNow());
+        timers.push(setTimeout(function () {
+          if (s.done) return;
+          s.done = true;
+          s.fn();
+        }, delay));
       });
-      return d;
     }
 
-    function reset() {
-      clear();
-      done = false;
-      root.classList.remove("blocked", "exploited");
+    // freeze/thaw whatever CSS is mid-flight (transitions, the gate slam)
+    function pauseCss() {
+      pausedAnims = [];
+      if (!document.getAnimations) return;
+      try {
+        document.getAnimations().forEach(function (a) {
+          if (a.playState === "running") { a.pause(); pausedAnims.push(a); }
+        });
+      } catch (e) { /* nothing to freeze */ }
+    }
+    function resumeCss() {
+      pausedAnims.forEach(function (a) { try { a.play(); } catch (e) {} });
+      pausedAnims = [];
+    }
+
+    /* ---------------------------- scene states ---------------------------- */
+    function setCaption(text, tone) {
+      if (!caption) return;
+      caption.textContent = text;
+      caption.setAttribute("data-tone", tone || "");
+    }
+    function setStep(text) { if (stepEl) stepEl.textContent = text; }
+    function lightTicks(n) {
+      tickEls.forEach(function (el, i) { el.classList.toggle("on", i < n); });
+    }
+    function moveTo(i, ms) {
+      if (!packet) return;
+      var p = WALK[i];
+      packet.style.transition = "transform " + ms + "ms " + EASE_TRAVEL + ", opacity 200ms ease";
+      packet.setAttribute("transform", "translate(" + p[0] + "," + p[1] + ")");
+    }
+    function growTrailTo(i) {
+      if (!trail) return;
+      var d = trail.getAttribute("d") || "";
+      var p = WALK[i];
+      trail.setAttribute("d", d + (d ? " L" : "M") + p[0] + " " + p[1]);
+      trail.style.opacity = "1";
+    }
+    function taintContext() {
+      if (ctx) ctx.classList.add("tainted");
+      if (alarm) {
+        alarm.style.opacity = "1";
+        alarm.classList.remove("pulse");
+        void alarm.getBoundingClientRect();       // restart the pulse on replay
+        alarm.classList.add("pulse");
+      }
+    }
+    function announce(b) {
+      var s = SCRIPT[b];
+      if (!s) return;
+      if (nodes[s.node]) nodes[s.node].classList.add("lit");
+      setCaption(s.text, s.tone);
+      lightTicks(b + 1);
+      setStep((b + 1) + " / " + SCRIPT.length);
+    }
+
+    /* the initial state, exactly what the first frame of the story shows */
+    function resetScene() {
+      clearTimers();
+      running = false;
+      paused = false;
+      finished = false;
+      root.classList.remove("blocked");
       if (packet) {
         packet.style.transition = "none";
-        packet.setAttribute("transform", "translate(" + PATH.issue.x + "," + PATH.issue.y + ")");
+        packet.setAttribute("transform", "translate(" + WALK[0][0] + "," + WALK[0][1] + ")");
         packet.style.opacity = "0";
       }
       if (trail) { trail.setAttribute("d", ""); trail.style.opacity = "0"; }
-      if (gate)  { gate.style.opacity = "0"; gate.classList.remove("slam"); }
+      if (gate)  { gate.style.opacity = "0"; gate.classList.remove("slam", "hit"); }
       if (alarm) { alarm.style.opacity = "0"; alarm.classList.remove("pulse"); }
       Object.keys(nodes).forEach(function (k) { nodes[k].classList.remove("lit", "tainted"); });
-      if (caption) { caption.textContent = "Ready."; caption.setAttribute("data-tone", ""); }
-      if (stepEl) stepEl.textContent = "0 / " + SCRIPT.length;
-    }
-
-    /* The end of the story, as one static frame: every node lit, the context
-       tainted, the route drawn, the gate closed, the danger legs grey.
-       Used verbatim for reduced motion and for the first paint after Replay. */
-    function endFrame() {
-      clear();
-      root.classList.remove("exploited");
-      root.classList.add("blocked");
-      SCRIPT.forEach(function (stop) {
-        var node = nodes[stop.at];
-        if (!node) return;
-        node.classList.add("lit");
-        if (stop.tone === "sink") node.classList.add("tainted");
-      });
-      if (ctx) ctx.classList.add("tainted");
-      if (trail) { trail.setAttribute("d", trailPath()); trail.style.opacity = "1"; }
-      if (packet) packet.style.opacity = "0";
-      if (gate) { gate.style.opacity = "1"; gate.classList.add("slam"); }
-      if (alarm) { alarm.style.opacity = "0"; alarm.classList.remove("pulse"); }
-      if (caption) {
-        caption.textContent = "Revoke one grant. The route is gone.";
-        caption.setAttribute("data-tone", "safe");
-      }
-      if (stepEl) stepEl.textContent = SCRIPT.length + " / " + SCRIPT.length;
-      done = true;
-    }
-
-    function moveTo(key, ms, leaveTrail) {
-      var p = PATH[key];
-      if (!packet) return;
-      packet.style.transition = "transform " + ms + "ms " + EASE_TRAVEL + ", opacity 200ms ease";
-      packet.setAttribute("transform", "translate(" + p.x + "," + p.y + ")");
-      // the trail grows behind the packet: the segment lands when it arrives
-      if (leaveTrail !== false && trail) {
-        later(function () {
-          var d = trail.getAttribute("d") || "";
-          trail.setAttribute("d", d + (d ? " L" : "M") + p.x + " " + p.y);
-          trail.style.opacity = "1";
-        }, ms - 30);
+      setCaption(CAP_READY, "");
+      lightTicks(0);
+      setStep("0 / " + SCRIPT.length);
+      if (pauseB) {
+        pauseB.disabled = true;
+        pauseB.classList.remove("is-paused");
+        if (pauseLbl) pauseLbl.textContent = "Pause";
       }
     }
 
-    function play() {
-      reset();
-      if (reduced) { endFrame(); return; }
+    /* the whole story, as one timeline */
+    function buildStory() {
+      var t = 260;
 
-      later(function () {
+      at(t, function () {
         if (packet) {
-          packet.style.transition = "opacity 220ms ease";
+          packet.style.transition = "opacity 200ms ease";
           packet.style.opacity = "1";
         }
-      }, 240);
+        announce(0);
+      });
 
-      SCRIPT.forEach(function (stop, i) {
-        var stepAt = 520 + i * 900;
+      HOPS.forEach(function (hop) {
+        t += 120;
+        var depart = t;
+        var arrive = depart + hop[1];
+        at(depart, function () { moveTo(hop[0], hop[1]); });
+        at(arrive - 40, function () { growTrailTo(hop[0]); });
+        if (hop[2] >= 0) {
+          at(arrive, function () { announce(hop[2]); });
+          if (SCRIPT[hop[2]].taint) at(arrive + 340, taintContext);
+        }
+        t = arrive;
+      });
 
-        later(function () {
-          moveTo(stop.at, 820);
-          var node = nodes[stop.at];
-          if (node) {
-            node.classList.add("lit");
-            if (stop.tone === "sink") node.classList.add("tainted");
-          }
-          if (caption) {
-            caption.textContent = stop.text;
-            caption.setAttribute("data-tone", stop.tone);
-          }
-          if (stepEl) stepEl.textContent = (i + 1) + " / " + SCRIPT.length;
-        }, stepAt);
+      var end = t;                                   // the private folder is public
 
-        // the turn of the story: the context pulses poisoned, and stays tainted
-        if (stop.at === "context" && ctx) {
-          later(function () {
-            ctx.classList.add("tainted");
-            if (alarm) {
-              alarm.style.opacity = "1";
-              alarm.classList.remove("pulse");
-              void alarm.getBoundingClientRect(); // restart the pulse on replay
-              alarm.classList.add("pulse");
-            }
-          }, stepAt + 340);
+      // the fix: one bar lands across the write edge
+      at(end + 620, function () {
+        if (gate) {
+          gate.style.opacity = "1";
+          gate.classList.remove("slam", "hit");
+          void gate.getBoundingClientRect();
+          gate.classList.add("slam");
+        }
+        setCaption(CAP_CUT, "safe");
+      });
+      at(end + 820, function () { if (packet) packet.style.opacity = "0"; });
+
+      // the retry: the packet runs the route again and is refused at the cut
+      at(end + 1420, function () {
+        if (!packet) return;
+        packet.style.transition = "none";
+        packet.setAttribute("transform", "translate(" + WALK[4][0] + "," + WALK[4][1] + ")");
+        void packet.getBoundingClientRect();
+        packet.style.transition = "opacity 200ms ease";
+        packet.style.opacity = "1";
+      });
+      at(end + 1620, function () { moveTo(5, 260); });
+      at(end + 1880, function () { moveTo(6, 820); });
+      at(end + 2700, function () { moveTo(7, 320); });
+      at(end + 3020, function () { moveTo(8, 300); });
+      at(end + 3020 + 300, function () {
+        // impact, recoil back off the gate, and fade
+        if (gate) {
+          gate.classList.remove("hit");
+          void gate.getBoundingClientRect();
+          gate.classList.add("hit");
+        }
+        if (packet) {
+          packet.style.transition = "transform 240ms " + EASE_TRAVEL + ", opacity 320ms ease";
+          packet.setAttribute("transform", "translate(244,169)");
+          packet.style.opacity = "0";
         }
       });
 
-      var end = 520 + SCRIPT.length * 900;
-      later(function () {
-        root.classList.add("exploited");
-        if (caption) caption.textContent = "That is the leak. Now the fix.";
-      }, end);
-
-      // the fix: the gate slams shut, the packet is refused, the route goes grey
-      later(function () {
-        if (gate) { gate.style.opacity = "1"; gate.classList.add("slam"); }
-        if (caption) {
-          caption.textContent = "Revoke one grant. The route is gone.";
-          caption.setAttribute("data-tone", "safe");
-        }
-      }, end + 1400);
-
-      later(function () {
-        if (packet) {
-          packet.style.transition =
-            "transform 300ms " + EASE_TRAVEL + ", opacity 320ms ease";
-          packet.setAttribute("transform", "translate(" + PATH.git.x + "," + PATH.git.y + ")");
-        }
-      }, end + 1560);
-
-      later(function () {
-        if (packet) {
-          packet.style.transition =
-            "transform 340ms " + EASE_TRAVEL + ", opacity 320ms ease";
-          packet.setAttribute("transform", "translate(" + PATH.fs.x + "," + PATH.fs.y + ")");
-        }
-      }, end + 1900);
-
-      later(function () {
-        if (packet) packet.style.opacity = "0";
+      // the end state: the route is dead, and it shows
+      at(end + 3860, function () {
         root.classList.add("blocked");
         if (alarm) alarm.style.opacity = "0";
-        done = true;
-      }, end + 2300);
+        setCaption(CAP_END, "safe");
+        finished = true;
+        if (pauseB) { pauseB.disabled = true; setPaused(false); }
+        setStatus(CAP_END);
+      });
     }
+
+    function start() {
+      resetScene();
+      steps.forEach(function (s) { s.done = false; });
+      base = 0;
+      running = true;
+      t0 = now();
+      if (pauseB) pauseB.disabled = false;
+      setPaused(false);
+      setStatus("Replaying the committed run.");
+      schedule();
+    }
+
+    function setPaused(p) {
+      paused = p;
+      if (!pauseB) return;
+      pauseB.classList.toggle("is-paused", p);
+      if (pauseLbl) pauseLbl.textContent = p ? "Play" : "Pause";
+    }
+    /* the scene's captions and counters update ~20 times per run; the live
+       region announces only the two milestones (started, closed) so screen
+       readers get the outcome without the chatter. */
+    function setStatus(t) {
+      if (statusEl) statusEl.textContent = t;
+    }
+    function pause() {
+      if (!running || paused || finished) return;
+      base = virtualNow();
+      running = false;
+      clearTimers();
+      pauseCss();
+      setPaused(true);
+    }
+    function resume() {
+      if (!paused) return;
+      t0 = now();
+      running = true;
+      setPaused(false);
+      schedule();
+      resumeCss();
+    }
+
+    buildStory();
 
     if (replay) {
       replay.disabled = false;
-      replay.addEventListener("click", function () { play(); });
+      replay.addEventListener("click", function () {
+        resumeCss();
+        start();
+      });
+    }
+    if (pauseB) {
+      pauseB.addEventListener("click", function () {
+        if (finished) return;
+        if (paused) resume(); else pause();
+      });
     }
 
-    // autoplay when scrolled into view, once
     if (reduced) {
-      // correct static end frame; Replay keeps working and re-renders it
-      endFrame();
+      // no motion at all: the markup already shows the complete end frame
+      // (taint, cut, dead route, summary). Only the hidden step label updates.
+      setStep(SCRIPT.length + " / " + SCRIPT.length);
     } else if ("IntersectionObserver" in window) {
+      resetScene();
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
-          if (e.isIntersecting && !done) {
-            play();
+          if (e.isIntersecting && !finished && !running) {
+            start();
             io.disconnect();
           }
         });
       }, { threshold: 0.35 });
       io.observe(root);
     } else {
-      play();
+      start();
     }
-
-    return { play: play, reset: reset, endFrame: endFrame };
   }
 
   /* ------------------------------------------------------------- count-ups
@@ -307,11 +422,11 @@
     if (reduced || !("IntersectionObserver" in window) || !window.requestAnimationFrame) return;
 
     function animate(item) {
-      var t0 = null;
+      var t0c = null;
       var DUR = 900;
       function frame(ts) {
-        if (t0 === null) t0 = ts;
-        var p = Math.min((ts - t0) / DUR, 1);
+        if (t0c === null) t0c = ts;
+        var p = Math.min((ts - t0c) / DUR, 1);
         var eased = 1 - Math.pow(1 - p, 3);
         if (p < 1) {
           var s = String(Math.round(item.a * eased));
@@ -340,26 +455,36 @@
   /* ---------------------------------------------------------- copy buttons
      Injected only when the browser can plausibly complete the action, so a
      control never promises something it cannot do. */
+  function legacyCopy(text) {
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "-1000px";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function copyText(text, done) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { done(true); },
+        function () { done(legacyCopy(text)); }
+      );
+    } else {
+      done(legacyCopy(text));
+    }
+  }
+
   function copyButtons() {
     var boxes = document.querySelectorAll(".code");
-    if (!boxes.length) return;
-
-    function legacyCopy(text) {
-      try {
-        var ta = document.createElement("textarea");
-        ta.value = text;
-        ta.setAttribute("readonly", "");
-        ta.style.position = "fixed";
-        ta.style.top = "-1000px";
-        document.body.appendChild(ta);
-        ta.select();
-        var ok = document.execCommand("copy");
-        document.body.removeChild(ta);
-        return ok;
-      } catch (e) {
-        return false;
-      }
-    }
 
     boxes.forEach(function (box) {
       var pre = box.querySelector("pre");
@@ -375,23 +500,32 @@
       var timer = null;
       btn.addEventListener("click", function () {
         var text = pre.innerText || pre.textContent || "";
-        function settle(ok) {
+        copyText(text, function (ok) {
           if (!ok) return;
           btn.textContent = "Copied";
           if (timer) clearTimeout(timer);
           timer = setTimeout(function () { btn.textContent = "Copy"; }, 1400);
-        }
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(
-            function () { settle(true); },
-            function () { settle(legacyCopy(text)); }
-          );
-        } else {
-          settle(legacyCopy(text));
-        }
+        });
       });
 
       box.appendChild(btn);
+    });
+
+    // any control that names a target copies that target's text: the policy
+    // diff on the scan page is real clipboard content, not decoration
+    document.querySelectorAll("[data-copy]").forEach(function (btn) {
+      var target = document.querySelector(btn.getAttribute("data-copy"));
+      if (!target) return;
+      var label = btn.textContent;
+      var timer = null;
+      btn.addEventListener("click", function () {
+        copyText(target.innerText || target.textContent || "", function (ok) {
+          if (!ok) return;
+          btn.textContent = "Copied";
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(function () { btn.textContent = label; }, 1400);
+        });
+      });
     });
   }
 
@@ -415,9 +549,9 @@
     });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
-  } else {
-    boot();
-  }
+  // this script is the last element in every page's body, so the DOM is
+  // already parsed: boot synchronously, before first paint, so the scene can
+  // never flash its end frame. (Fallback covers a hypothetical <head> load.)
+  if (document.body) boot();
+  else document.addEventListener("DOMContentLoaded", boot);
 })();

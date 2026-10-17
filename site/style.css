@@ -108,22 +108,18 @@ body::after{
     linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
   background-size:72px 72px;
   mask-image:radial-gradient(ellipse at 50% 20%, #000 20%, transparent 75%);
-  animation:drift 48s linear infinite;
-}
-@keyframes drift{
-  from{background-position:0 0}
-  to{background-position:72px 72px}
 }
 .wrap{max-width:1120px;margin:0 auto;padding:0 var(--s-xl)}
-/* first tab stop: jump straight past the nav */
+/* first tab stop: hidden until focused; opacity keeps it invisible in
+   stitched full-page captures too (a transform alone can render mid-page) */
 .skip-link{
   position:fixed;top:0;left:var(--s-xl);z-index:70;
   background:#fff;color:#000;font-weight:520;font-size:.85rem;
   padding:9px 14px;border-radius:0 0 var(--r-md) var(--r-md);
-  transform:translateY(-110%);
-  transition:transform var(--dur) var(--ease-out);
+  transform:translateY(-110%);opacity:0;
+  transition:transform var(--dur) var(--ease-out),opacity var(--dur) var(--ease-out);
 }
-.skip-link:focus{transform:none}
+.skip-link:focus{transform:none;opacity:1}
 .sr-only{
   position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
   clip:rect(0 0 0 0);white-space:nowrap;border:0;
@@ -135,14 +131,21 @@ h1{font-size:clamp(2.15rem,4.6vw,3.15rem);font-weight:600;letter-spacing:-.028em
 h2{font-size:clamp(1.5rem,2.6vw,1.95rem);font-weight:600;letter-spacing:-.02em;line-height:1.2}
 h3{font-size:1.02rem;font-weight:600;letter-spacing:-.01em;line-height:1.35}
 h4{font-size:.9rem;font-weight:600;letter-spacing:.005em}
+/* the page title on inner pages: an h1 that keeps the h2 optical size, so
+   every page has exactly one h1 without changing the layout it was drawn for */
+.page-title{font-size:clamp(1.5rem,2.6vw,1.95rem);letter-spacing:-.02em;line-height:1.2}
+/* a second-level heading that must sit at h3 optical size (no skipped levels) */
+.subhead{font-size:1.02rem;font-weight:600;letter-spacing:-.01em;line-height:1.35}
 p{margin:0}
 a{color:var(--sink);text-underline-offset:2px;text-decoration-thickness:1px}
 /* keyboard: one visible ring everywhere */
 :focus-visible{outline:2px solid var(--sink);outline-offset:2px}
+pre.paste:focus-visible{outline-offset:-2px}
 code,kbd{font-family:var(--mono);font-size:.87em;letter-spacing:0}
 hr{border:0;border-top:1px solid var(--line);margin:0}
 
-section{padding:var(--section) 0;border-top:1px solid var(--line)}
+section,main{padding:var(--section) 0;border-top:1px solid var(--line)}
+main{display:block}
 
 /* hero copy: larger body, generous measure */
 .lede{color:var(--body);font-size:1.02rem;line-height:1.65;max-width:60ch}
@@ -157,19 +160,11 @@ section{padding:var(--section) 0;border-top:1px solid var(--line)}
 .mt-lg{margin-top:var(--s-lg)}.mt-xl{margin-top:var(--s-xl)}
 .mt-sc{margin-top:44px}
 
-/* ---------- mock banner ---------- */
-.mockbar{
-  position:relative;z-index:60;
-  border-bottom:1px solid var(--line);
-  background:rgba(7,8,10,.72);
-  color:var(--mute);
-  font-family:var(--mono);font-size:.68rem;letter-spacing:.04em;
-  padding:7px 0;text-align:center;
-}
-
 /* ---------- nav: monochrome, hairline, generous height ---------- */
+/* the top bar sticks via its header shell; nav keeps the visual chrome */
+header.site-head{position:sticky;top:0;z-index:50}
 nav{
-  position:sticky;top:0;z-index:50;background:rgba(7,8,10,.82);
+  background:rgba(7,8,10,.82);
   backdrop-filter:blur(14px) saturate(160%);
   border-bottom:1px solid var(--line);
 }
@@ -318,10 +313,16 @@ tbody tr:hover{background:var(--surface)}
 
 /* long tables scroll inside their panel instead of widening the page */
 .tw{overflow-x:auto}
+@media (max-width:760px){
+  /* keep data tables readable on narrow screens: they scroll, they don't squeeze */
+  .tw table{min-width:560px}
+}
 
 /* ---------- layout ---------- */
 .split{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-xl)}
 .split-a{display:grid;grid-template-columns:.85fr 1.15fr;gap:48px;align-items:start}
+/* grid items may never be held open by long unbreakable content (code blocks) */
+.split>*,.split-a>*{min-width:0}
 @media (max-width:1000px){
   .split,.split-a{grid-template-columns:1fr}
   :root{--section:64px}
@@ -360,12 +361,15 @@ footer .navlinks{display:flex;gap:22px;flex-wrap:wrap}
 .dots i:nth-child(3){background:#28c840}
 .window-title{
   flex:1;text-align:center;font-family:var(--mono);font-size:.68rem;color:var(--mute);
-  letter-spacing:.02em;
+  letter-spacing:.02em;min-width:0;
+}
+@media (max-width:560px){
+  .window-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.64rem}
 }
 .window-body{padding:16px 16px 8px}
 
-/* Designed empty slot. Not a broken image: a composed frame with the aspect
-   ratio, caption, and inner grid the real screenshot will occupy. */
+/* Designed frames. Equal heights, tops aligned, caption row pinned to the
+   bottom edge of every frame so the three read as one row. */
 .shot{
   position:relative;border-radius:12px;overflow:hidden;
   border:1px solid var(--line);
@@ -374,20 +378,21 @@ footer .navlinks{display:flex;gap:22px;flex-wrap:wrap}
     repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 1px, transparent 1px 28px),
     repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 1px, transparent 1px 28px),
     #0a0c10;
-  aspect-ratio:16/10;
-  display:flex;align-items:flex-end;
+  display:flex;flex-direction:column;
 }
+/* the terminal body inside a frame: verbatim lines, soft-wrapped */
+.shot .term{
+  flex:1;padding:14px 14px 0;
+  font-family:var(--mono);font-size:.72rem;line-height:1.78;color:var(--body);
+  white-space:pre-wrap;overflow-wrap:anywhere;
+}
+.shot .term p{margin:0}
+.shot .term .acc-d{color:var(--danger)}
+.shot .term .acc-s{color:var(--safe)}
 .shot .figcap{
-  width:100%;padding:12px 14px;
-  background:linear-gradient(transparent, rgba(0,0,0,.72));
+  width:100%;padding:11px 14px;
+  background:rgba(5,6,7,.62);border-top:1px solid var(--line-soft);
   font-family:var(--mono);font-size:.68rem;color:var(--body);letter-spacing:.02em;
-}
-.shot .ghost{
-  position:absolute;inset:18% 12% auto;height:46%;
-  border:1px dashed rgba(255,255,255,.16);border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--mute);font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;
-  text-transform:uppercase;
 }
 
 .hero-product{padding:72px 0 24px}
@@ -400,13 +405,15 @@ footer .navlinks{display:flex;gap:22px;flex-wrap:wrap}
 .kicker b{color:var(--ink);font-weight:560}
 
 .stage{
-  display:grid;grid-template-columns:1.05fr .95fr 1.05fr;gap:18px;align-items:end;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch;
   margin-top:28px;
 }
-.stage .window:nth-child(2){transform:translateY(-18px)}
+.stage figure{margin:0;display:flex;flex-direction:column}
+.stage .window-body{flex:1;display:flex;padding:12px}
+.stage .shot{flex:1;min-height:228px}
 @media (max-width:980px){
   .stage{grid-template-columns:1fr}
-  .stage .window:nth-child(2){transform:none}
+  .stage .shot{min-height:0}
 }
 
 .statrow{
@@ -436,7 +443,7 @@ html.js [data-reveal].in{opacity:1;transform:none}
 
 /* ---------- hero attack scene ---------- */
 .scene{position:relative}
-.scene svg{width:100%;height:auto;display:block;overflow:visible}
+.scene svg[data-scene]{width:100%;height:auto;display:block;overflow:visible}
 
 /* graph nodes: quiet by default, activated as the packet reaches them */
 .scene .node{transition:filter var(--dur-slow) var(--ease-out),opacity var(--dur-slow) var(--ease-out)}
@@ -454,6 +461,9 @@ html.js [data-reveal].in{opacity:1;transform:none}
 /* the tainted agent context — the visual turn of the whole story */
 .scene .node.tainted .box{fill:#0d2230;stroke:#57C1FF;stroke-width:2}
 
+/* the long hyphen in the route */
+.scene .route-dash{transition:stroke var(--dur-slow) var(--ease-out)}
+
 /* the travelling data packet */
 .scene .packet{z-index:3}
 .scene .packet circle{filter:drop-shadow(0 0 6px rgba(255,138,138,.9))}
@@ -463,11 +473,14 @@ html.js [data-reveal].in{opacity:1;transform:none}
   stroke-linejoin:round;opacity:.0;transition:opacity var(--dur-slow) var(--ease-out);
   filter:drop-shadow(0 0 5px rgba(255,138,138,.55))}
 
-/* the gate that slams shut when the fix lands */
+/* the cut: one bar across the write edge. It slams down on the fix beat and
+   takes the impact when the packet tries the route again. */
 .scene .gate{transition:opacity var(--dur) var(--ease-out)}
 .scene .gate line{stroke:#59D499;stroke-width:3;stroke-linecap:round;
-  transform-box:fill-box;transform-origin:center top}
+  transform-box:fill-box;transform-origin:center top;
+  filter:drop-shadow(0 0 6px rgba(89,212,153,.55))}
 .scene .gate.slam line{animation:gateSlam var(--dur-slow) var(--ease-snap) both}
+.scene .gate.hit line{animation:gateHit .34s var(--ease-snap) both}
 
 /* alarm ring on the agent while tainted */
 .scene .alarm{transition:opacity var(--dur-slow) var(--ease-out)}
@@ -480,24 +493,29 @@ html.js [data-reveal].in{opacity:1;transform:none}
   65%{transform:scaleY(1.12)}
   100%{transform:scaleY(1)}
 }
+@keyframes gateHit{
+  0%{transform:scaleX(2.2)}
+  60%{transform:scaleX(.9)}
+  100%{transform:scaleX(1)}
+}
 @keyframes taintPulse{
   0%{transform:scale(.55);opacity:0}
   55%{transform:scale(1.14);opacity:.95}
   100%{transform:scale(1);opacity:1}
 }
 
-/* blocked state: everything cools down and the danger routes go grey */
+/* blocked state: the route cools down and the dead legs go grey */
 .scene.blocked .trail{stroke:#4b4f55;filter:none}
-.scene.blocked .node.lit.danger .box{filter:none}
-.scene.blocked .node.lit.danger .box{stroke:#4b4f55}
-.scene.blocked .node.lit.danger .lbl{fill:var(--ash)}
+.scene.blocked .route-dash{stroke:#33363a}
+.scene.blocked .node.danger .box{filter:none;stroke:#3a3d42;stroke-width:1}
+.scene.blocked .node.danger .lbl{fill:var(--ash)}
 .scene.blocked .alarm{opacity:0}
 
 /* narration bar */
 .caption{
   margin-top:14px;padding:12px 15px;border-radius:var(--r-md);
   background:var(--surface-2);border:1px solid var(--line);
-  font-size:.88rem;color:var(--ink);min-height:44px;
+  font-size:.9rem;color:var(--ink);min-height:44px;
   display:flex;align-items:center;gap:10px;
   transition:border-color var(--dur-slow) var(--ease-out),background var(--dur-slow) var(--ease-out);
 }
@@ -516,18 +534,47 @@ html.js [data-reveal].in{opacity:1;transform:none}
 .caption[data-tone="safe"]{border-color:rgba(89,212,153,.4)}
 .caption[data-tone="safe"]::before{background:var(--safe)}
 
+/* the window footer: a step indicator on the left, two small controls right */
 .scene-bar{
-  display:flex;align-items:center;gap:12px;margin-top:10px;
+  display:flex;align-items:center;gap:14px;margin-top:12px;
   font-family:var(--mono);font-size:.7rem;color:var(--mute);
 }
 .scene-bar .spacer{flex:1}
+.scene .steps{display:flex;align-items:center;gap:4px}
+.scene .steps i{
+  display:block;width:16px;height:4px;border-radius:2px;
+  background:var(--surface-3);border:1px solid var(--line);
+  transition:background var(--dur-slow) var(--ease-out),border-color var(--dur-slow) var(--ease-out);
+}
+.scene .steps i.on{background:var(--danger);border-color:var(--danger)}
+.scene.blocked .steps i.on{background:#4b4f55;border-color:#4b4f55}
+.ctlset{display:flex;align-items:center;gap:8px}
+.ctl{
+  display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.02em;
+  color:var(--body);background:transparent;border:1px solid var(--line-strong);
+  border-radius:var(--r-sm);cursor:pointer;
+  transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-out);
+}
+.ctl:hover{background:var(--surface-2);color:var(--ink)}
+.ctl:active{transform:translateY(1px)}
+.ctl:disabled{opacity:.6;cursor:default;transform:none}
+.ctl svg{flex:0 0 auto}
+.ctl .ic-play{display:none}
+.ctl.is-paused .ic-pause{display:none}
+.ctl.is-paused .ic-play{display:block}
+/* neither control can work without JS — so neither is offered without it */
+html:not(.js) .ctlset{display:none}
+html:not(.js) [data-step]{display:none}
 
-/* reduced motion: no transforms, no drifting backdrop, no autoplay, correct
-   final frame */
+/* reduced motion: no transforms, no autoplay. The markup already carries
+   the complete end frame — taint, cut, dead route, summary — so nothing
+   needs to move for the story to be told. */
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  body::after{animation:none}
   html.js [data-reveal]{opacity:1;transform:none;transition:none}
   .scene *{transition:none!important;animation:none!important}
+  .scene-bar .ctlset{display:none}
   *{transition:none!important}
 }

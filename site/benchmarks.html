@@ -26,8 +26,8 @@
   .neutral{color:var(--body)}
   .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;font-size:.8rem;color:var(--body)}
   .grp{margin-top:48px}
-  .grp h3{display:flex;align-items:baseline;gap:12px}
-  .grp h3 .idx{font-family:var(--mono);font-size:.72rem;color:var(--mute);font-weight:500}
+  .grp h2{display:flex;align-items:baseline;gap:12px}
+  .grp h2 .idx{font-family:var(--mono);font-size:.72rem;color:var(--mute);font-weight:500}
   .foot{padding:14px 16px;color:var(--body);border-top:1px solid var(--line);font-size:.83rem}
 </style>
 </head>
@@ -35,8 +35,7 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
-<div class="mockbar">MOCK · static preview · every figure quotes a committed file: packages/eval/results/*.json and docs/live-evidence/</div>
-
+<header class="site-head">
 <nav>
   <div class="wrap">
     <a class="brand" href="index.html">
@@ -54,13 +53,14 @@
     <a class="nb" href="threat-model.html">Threat model</a>
   </div>
 </nav>
+</header>
 
-<section id="main" style="border-top:0">
+<main id="main" style="border-top:0">
   <div class="wrap">
     <p class="eyebrow" data-reveal>Benchmarks</p>
     <div class="split-a mt-xl">
       <div>
-        <h2>What we measured &mdash; including where we lose</h2>
+        <h1 class="page-title">What we measured &mdash; including where we lose</h1>
         <p class="lede mt-md">A number is only worth reading if you can reproduce it. Every row names the committed file that produced it.</p>
       </div>
       <div>
@@ -74,7 +74,7 @@
 
     <!-- ---------- 1 · detection ---------- -->
     <div class="grp">
-      <h3><span class="idx">01</span> Detection &mdash; 40 seeded configs</h3>
+      <h2 class="subhead"><span class="idx">01</span> Detection &mdash; 40 seeded configs</h2>
       <p class="lede mt-md" style="max-width:70ch">
         Ground truth known by construction: planted routes, laundering-only routes, clean
         configs, and tie cases. Each case is ingested into its own graph and scanned with the
@@ -107,7 +107,7 @@
 
     <!-- ---------- 2 · the fix ---------- -->
     <div class="grp">
-      <h3><span class="idx">02</span> The fix &mdash; the part nobody else ships</h3>
+      <h2 class="subhead"><span class="idx">02</span> The fix &mdash; the part nobody else ships</h2>
       <p class="lede mt-md" style="max-width:70ch">
         One <span class="mono">CALL algo.maxFlow</span>, two canonical cuts, the cheaper one chosen
         by grant count, then task cost, then the write side. Each case proves itself by re-running
@@ -138,7 +138,7 @@
 
     <!-- ---------- 3 · labels ---------- -->
     <div class="grp">
-      <h3><span class="idx">03</span> Label quality &mdash; the honest accounting</h3>
+      <h2 class="subhead"><span class="idx">03</span> Label quality &mdash; the honest accounting</h2>
       <p class="lede mt-md" style="max-width:70ch">
         Labels come from a 35-row rules table aided by tool-set expansions for 11 known servers.
         The gold set is 50 hand-written rows, run in the package's own test.
@@ -167,7 +167,7 @@
 
     <!-- ---------- 4 · runtime ---------- -->
     <div class="grp">
-      <h3><span class="idx">04</span> Runtime guard &mdash; live MCP session</h3>
+      <h2 class="subhead"><span class="idx">04</span> Runtime guard &mdash; live MCP session</h2>
       <div class="panel mt-lg" style="overflow:hidden">
         <div class="tw">
         <table>
@@ -193,8 +193,8 @@
 
     <!-- ---------- 5 · not measured ---------- -->
     <div class="grp">
-      <h3><span class="idx">05</span> What we did not measure</h3>
-      <p class="lede mt-md" style="max-width:70ch">A benchmarks page without this list would be a lie by omission.</p>
+      <h2 class="subhead"><span class="idx">05</span> What we did not measure</h2>
+      <p class="lede mt-md" style="max-width:70ch">A number we did not measure is a number we will not print.</p>
       <div class="panel mt-lg">
         <ul class="small" style="color:var(--body);padding:18px 18px 18px 36px;list-style:disc">
           <li style="margin:8px 0">Head-to-head against other scanners &mdash; <strong style="color:var(--ink)">not run</strong>. Positioning is qualitative and cited in <span class="mono">docs/RELATED-WORK.md</span>, including where MSCC and CaMeL are ahead of us.</li>
@@ -206,7 +206,7 @@
     </div>
 
     <div class="card mt-sc" style="border-left:2px solid var(--untrusted)">
-      <h4 style="color:var(--untrusted)">Reproduce any of it</h4>
+      <h3 style="color:var(--untrusted)">Reproduce any of it</h3>
       <div class="code mt-md"><pre><span class="com"># both eval suites, live — rewrites the JSON these tables read</span>
 pnpm --filter @lethalpath/eval build &amp;&amp; pnpm --filter @lethalpath/eval evaluate
 
@@ -220,7 +220,7 @@ pnpm --filter @lethalpath/guard demo
 cat packages/eval/results/detection.json packages/eval/results/fix-quality.json</pre></div>
     </div>
   </div>
-</section>
+</main>
 
 <footer>
   <div class="wrap cols">

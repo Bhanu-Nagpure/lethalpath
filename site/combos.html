@@ -40,8 +40,7 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
-<div class="mockbar">MOCK · static preview · pair classes come from the labeler's rulebook; no popularity data is harvested</div>
-
+<header class="site-head">
 <nav>
   <div class="wrap">
     <a class="brand" href="index.html">
@@ -59,13 +58,14 @@
     <a class="nb" href="threat-model.html">Threat model</a>
   </div>
 </nav>
+</header>
 
-<section id="main" style="border-top:0">
+<main id="main" style="border-top:0">
   <div class="wrap">
     <p class="eyebrow" data-reveal>Lethal Combos</p>
     <div class="split-a mt-xl">
       <div>
-        <h2>Popular tool <em style="font-style:normal;color:var(--danger)">pairs</em> that make a leak</h2>
+        <h1 class="page-title">Popular tool <em style="font-style:normal;color:var(--danger)">pairs</em> that make a leak</h1>
       </div>
       <div>
         <p class="lede">Everyone scores servers one at a time. Every server below looks fine on its own &mdash; that is the entire point. Candidate pairs from the rulebook; the real path query is what settles it.</p>
@@ -152,7 +152,7 @@
 
     <div class="split mt-xl">
       <div class="card">
-        <h4>How to read this</h4>
+        <h2 class="subhead">How to read this</h2>
         <ul class="small mt-md" style="color:var(--body);padding-left:18px">
           <li style="margin:7px 0"><strong style="color:var(--ink)">legs</strong> shows which of the three a pair covers: a stranger's words, your private data, a way out.</li>
           <li style="margin:7px 0">A pair is only lethal when all three legs are present <em>and</em> the agent's context joins them.</li>
@@ -161,7 +161,7 @@
         </ul>
       </div>
       <div class="card" style="border-color:#3a2a12">
-        <h4 style="color:var(--untrusted)">What this table is not</h4>
+        <h2 class="subhead" style="color:var(--untrusted)">What this table is not</h2>
         <ul class="small mt-md" style="color:var(--body);padding-left:18px">
           <li style="margin:7px 0"><strong style="color:var(--ink)">Not a vulnerability report.</strong> A combination is not a bug in either server. Both behave as documented.</li>
           <li style="margin:7px 0"><strong style="color:var(--ink)">Not a full exploit.</strong> We describe capabilities only. We never publish payloads.</li>
@@ -171,7 +171,7 @@
       </div>
     </div>
   </div>
-</section>
+</main>
 
 <footer>
   <div class="wrap cols">

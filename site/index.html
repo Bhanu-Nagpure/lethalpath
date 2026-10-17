@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LethalPath — find the permission that stops the leak</title>
-<meta name="description" content="Open-source guard for AI agents. Finds every route your MCP tools can be tricked into leaking data, then the one permission to revoke. Powered by FalkorDB.">
+<title>LethalPath — find the fewest permissions that stop the leak</title>
+<meta name="description" content="Open-source guard for AI agents. Finds every route your MCP tools can be tricked into leaking data, then the fewest permissions to revoke. Powered by FalkorDB.">
 <meta name="theme-color" content="#07080a">
 <link rel="canonical" href="https://bhanu-dev82.github.io/lethalpath/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="LethalPath">
-<meta property="og:title" content="LethalPath — find the permission that stops the leak">
-<meta property="og:description" content="Open-source guard for AI agents. Finds every route your MCP tools can be tricked into leaking data, then the one permission to revoke. Powered by FalkorDB.">
+<meta property="og:title" content="LethalPath — find the fewest permissions that stop the leak">
+<meta property="og:description" content="Open-source guard for AI agents. Finds every route your MCP tools can be tricked into leaking data, then the fewest permissions to revoke. Powered by FalkorDB.">
 <!-- og:url + og:image — update these two URLs if hosting moves from GitHub Pages -->
 <meta property="og:url" content="https://bhanu-dev82.github.io/lethalpath/">
 <meta property="og:image" content="https://bhanu-dev82.github.io/lethalpath/og.png">
@@ -25,8 +25,7 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
-<div class="mockbar">MOCK · static preview · every figure quotes committed files · the product is the install, not the poster</div>
-
+<header class="site-head">
 <nav>
   <div class="wrap">
     <a class="brand" href="index.html" aria-current="page">
@@ -45,15 +44,16 @@
     <a class="btn btn-primary btn-sm" href="#install">Install</a>
   </div>
 </nav>
+</header>
 
-<header class="hero-product">
+<div class="hero-product">
   <div class="wrap">
     <p class="kicker"><b>Open source</b> · one command · powered by FalkorDB</p>
-    <h1 style="margin-top:22px">The leak is a path.<br>Close it with one permission.</h1>
+    <h1 style="margin-top:22px">The leak is a path.<br>Close it with the fewest permissions.</h1>
     <p class="lede" style="margin-top:20px;font-size:1.12rem;max-width:46ch">
       GitHub, your files, and a way to publish. Three tools nobody would question,
       arranged so a stranger’s sentence walks your private data out the door.
-      LethalPath finds the route, then the grant to revoke — and your work still runs.
+      LethalPath finds the route, then the fewest grants to revoke — and your work still runs.
     </p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:28px">
       <a class="btn btn-primary" href="#install">Install the CLI</a>
@@ -61,9 +61,9 @@
     </div>
     <p class="muted small" style="margin-top:16px">Built to be used on Monday. Not a poster for Sunday.</p>
   </div>
-</header>
+</div>
 
-<section id="main" style="border-top:0;padding-top:8px">
+<main id="main" style="border-top:0;padding-top:8px;padding-bottom:0">
   <div class="wrap">
     <div class="window" data-reveal>
       <div class="window-bar">
@@ -72,54 +72,54 @@
         <span class="pill">FalkorDB 6.0.2</span>
       </div>
       <div class="window-body">
-        <div class="scene" data-attack>
+        <div class="scene blocked" data-attack>
           <svg data-scene viewBox="0 0 620 250" role="img"
-               aria-label="A leak path playing out, then one grant closing it.">
+               aria-label="Diagram of one demo run: a stranger's issue text poisons the agent context, your private folder travels through git push to a public repo, then revoking git.push blocks the route.">
             <text x="16" y="18" fill="#A3A4A6" font-size="9.5" font-family="monospace" letter-spacing="1.2">1 · A STRANGER</text>
             <text x="252" y="18" fill="#A3A4A6" font-size="9.5" font-family="monospace" letter-spacing="1.2">2 · YOUR AGENT</text>
             <text x="486" y="18" fill="#A3A4A6" font-size="9.5" font-family="monospace" letter-spacing="1.2">3 · YOUR DATA</text>
             <path d="M92 70 H160" stroke="#2a2b2e" stroke-width="1.5" fill="none"/>
             <path d="M244 70 H292" stroke="#2a2b2e" stroke-width="1.5" fill="none"/>
             <path d="M366 70 H414" stroke="#2a2b2e" stroke-width="1.5" fill="none"/>
+            <path d="M502 70 H530" stroke="#2a2b2e" stroke-width="1.5" fill="none"/>
             <path d="M244 168 H306" stroke="#2a2b2e" stroke-width="1.5" fill="none"/>
-            <path d="M567 92 V140 H188 V150" stroke="#2a2b2e" stroke-width="1.3" fill="none" stroke-dasharray="3 4"/>
-            <text x="392" y="134" fill="#A3A4A6" font-size="9.5" font-family="monospace">through your own folder</text>
-            <path class="trail" data-trail d=""/>
+            <path class="route-dash" d="M567 92 V120 H202 V148" stroke="#2a2b2e" stroke-width="1.3" fill="none" stroke-dasharray="3 4"/>
+            <path class="trail" data-trail d="M56 70 L202 70 L329 70 L458 70 L567 70 L567 120 L202 120 L202 169 L350 169" style="opacity:1"/>
             <g class="packet" data-packet transform="translate(56,70)" opacity="0">
               <circle r="9" fill="none" stroke="#FF8A8A" stroke-width="1" opacity=".45"/>
               <circle r="4" fill="#FF8A8A"/>
             </g>
-            <g class="node untrusted" data-node="issue">
+            <g class="node untrusted lit" data-node="issue">
               <rect class="box" x="20" y="48" width="72" height="44" rx="7" fill="#1a1608" stroke="#FFC533"/>
               <text class="lbl" x="56" y="68" fill="#FFC533" font-size="10.5" font-family="monospace" text-anchor="middle">public</text>
               <text class="lbl" x="56" y="82" fill="#FFC533" font-size="10.5" font-family="monospace" text-anchor="middle">issue</text>
             </g>
-            <g class="node" data-node="github">
+            <g class="node lit" data-node="github">
               <rect class="box" x="160" y="48" width="84" height="44" rx="7" fill="#121212" stroke="#242728"/>
               <text class="lbl" x="202" y="68" fill="#CDCDCD" font-size="10" font-family="monospace" text-anchor="middle">github</text>
               <text class="lbl" x="202" y="82" fill="#A3A4A6" font-size="9.5" font-family="monospace" text-anchor="middle">read</text>
             </g>
-            <g class="node sink" data-node="context" data-ctx>
+            <g class="node sink lit tainted" data-node="context" data-ctx>
               <rect class="box" x="292" y="42" width="74" height="56" rx="8" fill="#0b1418" stroke="#57C1FF"/>
               <text class="lbl" x="329" y="66" fill="#57C1FF" font-size="10.5" font-family="monospace" text-anchor="middle">agent</text>
               <text class="lbl" x="329" y="80" fill="#57C1FF" font-size="10.5" font-family="monospace" text-anchor="middle">context</text>
             </g>
-            <g class="node" data-node="fs">
+            <g class="node lit" data-node="fs">
               <rect class="box" x="414" y="48" width="88" height="44" rx="7" fill="#121212" stroke="#242728"/>
               <text class="lbl" x="458" y="68" fill="#CDCDCD" font-size="9.5" font-family="monospace" text-anchor="middle">filesystem</text>
               <text class="lbl" x="458" y="82" fill="#A3A4A6" font-size="9.5" font-family="monospace" text-anchor="middle">write</text>
             </g>
-            <g class="node private" data-node="priv">
+            <g class="node private lit" data-node="priv">
               <rect class="box" x="530" y="48" width="74" height="44" rx="7" fill="#16121f" stroke="#B69EFB"/>
               <text class="lbl" x="567" y="68" fill="#B69EFB" font-size="10.5" font-family="monospace" text-anchor="middle">private</text>
               <text class="lbl" x="567" y="82" fill="#B69EFB" font-size="10.5" font-family="monospace" text-anchor="middle">files</text>
             </g>
-            <g class="node danger" data-node="git">
+            <g class="node danger lit" data-node="git">
               <rect class="box" x="160" y="148" width="84" height="42" rx="7" fill="#121212" stroke="#242728"/>
               <text class="lbl" x="202" y="167" fill="#CDCDCD" font-size="10" font-family="monospace" text-anchor="middle">git</text>
               <text class="lbl" x="202" y="180" fill="#A3A4A6" font-size="9.5" font-family="monospace" text-anchor="middle">push</text>
             </g>
-            <g class="node sink" data-node="pub">
+            <g class="node sink danger lit" data-node="pub">
               <rect class="box" x="306" y="148" width="88" height="42" rx="7" fill="#0b1418" stroke="#57C1FF"/>
               <text class="lbl" x="350" y="167" fill="#57C1FF" font-size="10.5" font-family="monospace" text-anchor="middle">public</text>
               <text class="lbl" x="350" y="180" fill="#57C1FF" font-size="10.5" font-family="monospace" text-anchor="middle">repo</text>
@@ -127,23 +127,32 @@
             <g class="alarm" data-alarm opacity="0">
               <circle cx="329" cy="70" r="34" fill="none" stroke="#FF8A8A" stroke-width="1" stroke-dasharray="3 5"/>
             </g>
-            <g class="gate" data-gate opacity="0">
-              <line x1="378" y1="90" x2="378" y2="142"/>
-              <text x="386" y="120" fill="#59D499" font-size="9.5" font-family="monospace">1 grant revoked</text>
+            <g class="gate slam" data-gate opacity="1">
+              <line x1="275" y1="150" x2="275" y2="187"/>
             </g>
           </svg>
-          <div class="caption" data-caption data-tone="">Ready.</div>
+          <div class="caption" data-caption data-tone="safe">Route closed. The files stay private.</div>
           <div class="scene-bar">
-            <span data-step>0 / 7</span>
+            <div class="steps" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+            <span class="sr-only" data-step>0 / 7</span>
             <span class="spacer"></span>
-            <button type="button" class="btn btn-quiet btn-sm" data-replay disabled><svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true"><path d="M13.4 8a5.4 5.4 0 1 1-1.7-3.9M13.4 2.5v3.1h-3.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Replay</button>
+            <div class="ctlset">
+              <button type="button" class="ctl" data-pause disabled>
+                <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path class="ic-pause" d="M5.5 2.8v10.4M10.5 2.8v10.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="ic-play" d="M5.2 3.2v9.6l8-4.8z" fill="currentColor"/></svg>
+                <span data-pause-label>Pause</span>
+              </button>
+              <button type="button" class="ctl" data-replay disabled>
+                <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M13.4 8a5.4 5.4 0 1 1-1.7-3.9M13.4 2.5v3.1h-3.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Replay
+              </button>
+            </div>
           </div>
+          <span class="sr-only" role="status" data-status></span>
         </div>
       </div>
     </div>
-    <p class="muted small" style="margin-top:12px">The picture above replays the committed demo run &mdash; scripted captions, numbers from the evidence log. Replay it.</p>
+    <p class="muted small" style="margin-top:12px">The committed fs-git run, replayed: a public issue taints the agent context, and your private folder leaves through <span class="mono">git.push</span>. The transcript is in <span class="mono">docs/live-evidence/</span>.</p>
   </div>
-</section>
 
 <section>
   <div class="wrap">
@@ -152,24 +161,31 @@
         <p class="eyebrow">The surface</p>
         <h2 style="margin-top:10px">Three screens. One decision.</h2>
       </div>
-      <p class="lede">Frames are reserved for the real captures. The composition is already the layout the screenshots will sit in — nothing here is a missing image.</p>
+      <p class="lede">One run, end to end: the config goes in, the query names the route tool by tool, and one revoked grant closes it. Every line below is copied from the committed run in <span class="mono">docs/live-evidence/</span>.</p>
     </div>
     <div class="stage">
       <figure class="window" data-reveal>
         <div class="window-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">scan</span></div>
         <div class="window-body">
           <div class="shot">
-            <div class="ghost">config in · secrets stripped</div>
-            <p class="figcap">01 · paste mcp.json · keys never leave the machine</p>
+            <div class="term">
+              <p>config    fs-git · A public issue steers the agent through the private folder out to a public repo</p>
+              <p>graph     scan_fs-git · 11 nodes · 9 edges · ready</p>
+            </div>
+            <p class="figcap">01 · config in</p>
           </div>
         </div>
       </figure>
       <figure class="window" data-reveal>
         <div class="window-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">path</span></div>
         <div class="window-body">
-          <div class="shot" style="aspect-ratio:4/5">
-            <div class="ghost">graph · FalkorDB</div>
-            <p class="figcap">02 · the route, named tool by tool</p>
+          <div class="shot">
+            <div class="term">
+              <p>LEAK PATHS</p>
+              <p class="acc-d">  1  4 hops  project folder → filesystem.read → context → git.push → public repo</p>
+              <p class="acc-d">1 route found — every one of them is a permission you granted.</p>
+            </div>
+            <p class="figcap">02 · route found</p>
           </div>
         </div>
       </figure>
@@ -177,8 +193,15 @@
         <div class="window-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">fix</span></div>
         <div class="window-body">
           <div class="shot">
-            <div class="ghost">one grant · diff</div>
-            <p class="figcap">03 · revoke git.push · workflows kept</p>
+            <div class="term">
+              <p>FIX  ·  CALL algo.maxFlow on FalkorDB</p>
+              <p>max-flow   2</p>
+              <p class="acc-s">cut        write side · git.push → public repo</p>
+              <p class="acc-s">revoke     git.push</p>
+              <p class="acc-s">verified   0 of 1 routes remain (leak query re-run without git.push)</p>
+              <p class="acc-s">tasks      3 of 4 keep working</p>
+            </div>
+            <p class="figcap">03 · cut verified</p>
           </div>
         </div>
       </figure>
@@ -241,6 +264,7 @@ node packages/guard/dist/server.js --config mcp.json</pre></div>
     </div>
   </div>
 </section>
+</main>
 
 <footer>
   <div class="wrap cols">

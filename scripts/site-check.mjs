@@ -238,7 +238,7 @@ ok("no external resources, no network calls");
 
 console.log("\n-- landmark figures (number policy: these must appear verbatim)");
 const landmarks = {
-  "index.html": ["40/40", "8/8", "FalkorDB 6.0.2", "Close it with one permission."],
+  "index.html": ["40/40", "8/8", "FalkorDB 6.0.2", "Close it with the fewest permissions."],
   "scan.html": ["567", "one of 567 routes", "write grants", "0 remain"],
   "combos.html": ["35", "11", "50/50"],
   "benchmarks.html": ["detection.json", "fix-quality.json", "50/50 match"],
@@ -333,7 +333,6 @@ const special = {
   "window bar (+white .03)": mix("#ffffff", .03, mix("#0d0d0d", .86, canvas)),
   "shot #0a0c10 (+white .03)": mix("#ffffff", .03, parseColor("#0a0c10")),
   "statrow cell (rgba(13,13,13,.8) over canvas)": mix("#0d0d0d", .8, canvas),
-  "mockbar (rgba(7,8,10,.72) over canvas)": mix("#07080a", .72, canvas),
   "nav (rgba(7,8,10,.82) over canvas)": mix("#07080a", .82, canvas),
   "kicker bg (white .03 over canvas)": mix("#ffffff", .03, canvas),
   "btn-quiet hover #1f2022": parseColor("#1f2022"),
@@ -386,7 +385,6 @@ check("code tokens", ".com (ash) on code", V("--ash"), special["code #050607"]);
 check("code tokens", ".num on code", numTok, special["code #050607"]);
 check("code tokens", "pre body text on code", V("--body"), special["code #050607"]);
 
-check("chrome", ".mockbar mute on mockbar bg", V("--mute"), special["mockbar (rgba(7,8,10,.72) over canvas)"]);
 check("chrome", "nav nb body on nav bg", V("--body"), special["nav (rgba(7,8,10,.82) over canvas)"]);
 check("chrome", ".pill/.window-title mute on window bar", V("--mute"), special["window bar (+white .03)"]);
 check("chrome", ".scene-bar mute on window body", V("--mute"), special["window body (rgba(13,13,13,.86) over canvas)"]);

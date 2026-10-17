@@ -26,7 +26,7 @@
   .learn h3{margin-bottom:7px}
   .learn p{color:var(--body);font-size:.92rem}
   .steps{counter-reset:d;margin-top:20px}
-  .dstep{display:grid;grid-template-columns:34px 1fr;gap:13px;align-items:start;
+  .dstep{display:grid;grid-template-columns:34px minmax(0,1fr);gap:13px;align-items:start;
     padding:15px 0;border-bottom:1px solid var(--line-soft)}
   .dstep:last-child{border-bottom:0}
   .dstep .n{counter-increment:d;width:26px;height:26px;border-radius:var(--r-xs);
@@ -47,8 +47,7 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
-<div class="mockbar">MOCK · static preview · wording is illustrative, not legal advice</div>
-
+<header class="site-head">
 <nav>
   <div class="wrap">
     <a class="brand" href="index.html">
@@ -66,17 +65,18 @@
     <a class="nb" href="threat-model.html">Threat model</a>
   </div>
 </nav>
+</header>
 
-<section id="main" style="border-top:0">
+<main id="main" style="border-top:0">
   <div class="wrap main">
     <p class="eyebrow" data-reveal>Disclosure</p>
-    <h2 style="margin-top:14px" data-reveal>AI use, and how we report what we find</h2>
+    <h1 class="page-title" style="margin-top:14px" data-reveal>AI use, and how we report what we find</h1>
     <p class="lede mt-md">Two separate obligations: being honest about how this was built, and being careful about what we tell the world.</p>
 
-    <h3 class="mt-sc">01 &mdash; how this was built</h3>
+    <h2 class="subhead mt-sc">01 &mdash; how this was built</h2>
     <div class="ai">
       <div class="k">
-        <h4 style="color:var(--sink)">AI assistance was used</h4>
+        <h3 style="color:var(--sink)">AI assistance was used</h3>
         <ul>
           <li>Scaffolding and boilerplate</li>
           <li>Drafting documentation</li>
@@ -85,7 +85,7 @@
         </ul>
       </div>
       <div class="k">
-        <h4 style="color:var(--safe)">Human checkpoints</h4>
+        <h3 style="color:var(--safe)">Human checkpoints</h3>
         <ul>
           <li>Every Cypher query run against a live 6.0.2 instance before commit</li>
           <li>Every benchmark number read by hand from <span class="mono">eval/results/*.json</span>; every transcript from <span class="mono">docs/live-evidence/</span></li>
@@ -95,11 +95,11 @@
       </div>
     </div>
     <p class="mt-lg" style="color:var(--body);font-size:.92rem">
-      We can walk through any query, index and parameter choice on request. If a number on this site
+      We can walk through any query, index and parameter choice on request. If a number
       cannot be traced to a file in the repo, treat it as a bug and tell us.
     </p>
 
-    <h3 class="mt-sc">02 &mdash; what we learned</h3>
+    <h2 class="subhead mt-sc">02 &mdash; what we learned</h2>
     <p class="mt-md" style="color:var(--body)">The short version, because it shaped the product more than any feature did.</p>
 
     <div class="learn">
@@ -135,7 +135,7 @@
         honestly than to be caught overclaiming.</p>
     </div>
 
-    <h3 class="mt-sc">03 &mdash; reporting findings in other people's servers</h3>
+    <h2 class="subhead mt-sc">03 &mdash; reporting findings in other people's servers</h2>
     <p class="mt-md" style="color:var(--body)">
       Composition is not a vulnerability. Most of what we surface is a combination of servers that
       each behave correctly. We treat that distinction as a hard rule, not a courtesy.
@@ -145,7 +145,7 @@
       <div class="dstep">
         <div class="n"></div>
         <div>
-          <h4>We file an issue only when it is one server's fault</h4>
+          <h3>We file an issue only when it is one server's fault</h3>
           <p>Either a single server holds all three legs, or its annotations are wrong enough to make
             clients mislabel it. A pair of correct servers is not reported to either maintainer.</p>
         </div>
@@ -153,7 +153,7 @@
       <div class="dstep">
         <div class="n"></div>
         <div>
-          <h4>Private channel first, always</h4>
+          <h3>Private channel first, always</h3>
           <p>We read <span class="mono">SECURITY.md</span> before anything else. Where a private
             channel exists, we use it and wait for a reply before mentioning it publicly.</p>
         </div>
@@ -161,7 +161,7 @@
       <div class="dstep">
         <div class="n"></div>
         <div>
-          <h4>Capabilities, never payloads</h4>
+          <h3>Capabilities, never payloads</h3>
           <p>Our reports describe what a tool can read or write, suggest annotation fixes and scopes,
             and never include a working injection or steps against real users.</p>
         </div>
@@ -169,15 +169,15 @@
       <div class="dstep">
         <div class="n"></div>
         <div>
-          <h4>Every leaderboard entry is disputable</h4>
-          <p>A maintainer can ask us to correct or remove their entry, with no argument. The contact
-            line is on every page.</p>
+          <h3>Every leaderboard entry is disputable</h3>
+          <p>A maintainer can ask us to correct or remove their entry, with no argument. Open an
+            issue, or use the private channel below.</p>
         </div>
       </div>
     </div>
 
     <div class="card mt-sc" style="border-left:2px solid var(--safe)">
-      <h4>Found a problem in LethalPath?</h4>
+      <h3>Found a problem in LethalPath?</h3>
       <p class="small mt-md" style="color:var(--body)">
         Please report it privately first, so we can ship a fix before it is public. We aim to
         acknowledge within 48 hours.
@@ -186,7 +186,7 @@
 <span class="com"># private channel: GitHub &rarr; Security &rarr; Report a vulnerability</span></pre></div>
     </div>
   </div>
-</section>
+</main>
 
 <footer>
   <div class="wrap cols">

@@ -29,7 +29,7 @@
   .inout{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
     border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;margin-top:22px}
   .inout .k{background:var(--surface);padding:20px}
-  .inout h4{margin-bottom:11px}
+  .inout h3{margin-bottom:11px;font-size:.9rem;letter-spacing:.005em}
   .inout ul{margin:0;padding-left:18px;color:var(--body);font-size:.87rem}
   .inout li{margin:6px 0}
   @media (max-width:760px){.inout{grid-template-columns:1fr}}
@@ -41,8 +41,7 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
-<div class="mockbar">MOCK · static preview · wording is illustrative, not legal advice</div>
-
+<header class="site-head">
 <nav>
   <div class="wrap">
     <a class="brand" href="index.html">
@@ -60,14 +59,15 @@
     <a class="nb" href="threat-model.html" aria-current="page">Threat model</a>
   </div>
 </nav>
+</header>
 
-<section id="main" style="border-top:0">
+<main id="main" style="border-top:0">
   <div class="wrap main">
     <p class="eyebrow" data-reveal>Threat model</p>
-    <h2 style="margin-top:14px" data-reveal>What we catch, what we miss, and what we refuse to claim</h2>
+    <h1 class="page-title" style="margin-top:14px" data-reveal>What we catch, what we miss, and what we refuse to claim</h1>
     <p class="lede mt-md">
-      A security tool is judged by the honesty of its limits. This page exists so a judge,
-      a user, or a maintainer can hold us to a specific line.
+      A security tool is judged by the honesty of its limits. These are ours,
+      stated precisely enough for anyone to hold us to.
     </p>
     <div class="toc">
       <a class="pill" href="#problem">the problem</a>
@@ -76,7 +76,7 @@
       <a class="pill" href="#limits">hard limits</a>
     </div>
 
-    <h3 class="mt-sc" id="problem">The problem, stated precisely</h3>
+    <h2 class="subhead mt-sc" id="problem">The problem, stated precisely</h2>
     <p class="mt-md" style="color:var(--body)">
       An agent holds <strong style="color:var(--ink)">three capabilities at once</strong>: it can read
       text an attacker controls, it can read private data, and it can write somewhere public.
@@ -90,7 +90,7 @@
       <span class="mono">untrusted → private → public</span> is a path, and paths are what graphs answer.
     </p>
 
-    <h3 class="mt-sc" id="miss">What we miss</h3>
+    <h2 class="subhead mt-sc" id="miss">What we miss</h2>
     <div class="qa">
       <h3>Labels are inferred, not declared</h3>
       <p>Of the servers we catalogued, essentially none declare their own trust level. We infer from
@@ -118,10 +118,10 @@
         sees only the calls routed through it.</p>
     </div>
 
-    <h3 class="mt-sc" id="data">Your data</h3>
+    <h2 class="subhead mt-sc" id="data">Your data</h2>
     <div class="inout">
       <div class="k">
-        <h4 style="color:var(--safe)">What leaves your machine</h4>
+        <h3 style="color:var(--safe)">What leaves your machine</h3>
         <ul>
           <li>Nothing, unless you press scan</li>
           <li>If you do: the config with <span class="mono">env</span>, <span class="mono">headers</span> and secret-looking arguments removed</li>
@@ -129,7 +129,7 @@
         </ul>
       </div>
       <div class="k">
-        <h4 style="color:var(--danger)">What we never store</h4>
+        <h3 style="color:var(--danger)">What we never store</h3>
         <ul>
           <li>Your secrets, tokens or keys</li>
           <li>File contents, message bodies or query results</li>
@@ -142,7 +142,7 @@
       untrusted &mdash; by hash, not by content. There is no payload in the graph to leak.
     </p>
 
-    <h3 class="mt-sc" id="limits">Hard limits, stated plainly</h3>
+    <h2 class="subhead mt-sc" id="limits">Hard limits, stated plainly</h2>
     <ul class="limits">
       <li><strong style="color:var(--ink)">Not a substitute for scoped tokens.</strong> Locking a door
         is not the same as issuing a smaller key. Do both.</li>
@@ -169,7 +169,7 @@
       </div>
     </div>
   </div>
-</section>
+</main>
 
 <footer>
   <div class="wrap cols">
