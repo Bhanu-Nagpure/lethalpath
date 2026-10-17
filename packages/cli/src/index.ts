@@ -20,6 +20,7 @@ import {
   GraphDB,
   LEAK_COUNT,
   LEAK_PATH,
+  LEAK_PATH_FAST,
   MIN_CUT,
   VERIFY_FIX,
   cutFromMaxFlow,
@@ -28,6 +29,7 @@ import {
   scanGraphName,
   scanStatus,
   type FlowEdge,
+  type LeakPath,
   type MaxFlowRow,
 } from "@lethalpath/core";
 import type { ScanConfig } from "@lethalpath/schema";
@@ -128,7 +130,8 @@ interface ResourceInfo {
 }
 
 interface ResourceIndex {
-  byKind: Map<string, ResourceInfo>;
+  /** All resources under a display kind; more than one means citations cannot name a scope. */
+  byKind: Map<string, ResourceInfo[]>;
   privateCount: number;
   sinkCount: number;
 }
@@ -140,7 +143,7 @@ async function resourceIndex(db: GraphDB): Promise<ResourceIndex> {
     RETURN r.id AS id, r.kind AS kind, r.scope AS scope, r.trust AS trust,
            r.sensitivity AS sensitivity, r.visibility AS visibility
   `);
-  const byKind = new Map<string, ResourceInfo>();
+  const byKind = new Map<string, ResourceInfo[]>();
   let privateCount = 0;
   let sinkCount = 0;
   for (const row of res.rows) {
@@ -152,7 +155,9 @@ async function resourceIndex(db: GraphDB): Promise<ResourceIndex> {
       sensitivity: opt(row["sensitivity"]),
       visibility: opt(row["visibility"]),
     };
-    if (!byKind.has(info.kind)) byKind.set(info.kind, info);
+    const list = byKind.get(info.kind);
+    if (list === undefined) byKind.set(info.kind, [info]);
+    else list.push(info);
     if (info.sensitivity === "private") privateCount += 1;
     if (info.visibility === "public") sinkCount += 1;
   }
@@ -191,7 +196,22 @@ async function scan(args: CliArgs): Promise<number> {
     const status = await scanStatus(db);
     if (!status.ready) throw new Error("graph is not ready; ingest did not finish");
 
-    const paths = parseLeakPaths((await db.read(LEAK_PATH)).rows);
+    let paths: LeakPath[];
+    let pathOrder: "shortest" | "arbitrary" | "unlisted" = "shortest";
+    try {
+      paths = parseLeakPaths((await db.read(LEAK_PATH)).rows);
+    } catch {
+      // The ordered query materialises every walk; on graphs where tools
+      // chain through the context hub that explodes. Without ORDER BY the
+      // engine can stop at the display limit — fall back, and say so.
+      try {
+        paths = parseLeakPaths((await db.read(LEAK_PATH_FAST)).rows);
+        pathOrder = "arbitrary";
+      } catch {
+        paths = [];
+        pathOrder = "unlisted";
+      }
+    }
     const routes = Number((await db.read(LEAK_COUNT)).rows[0]?.["routes"] ?? 0);
     const resources = await resourceIndex(db);
 
@@ -210,6 +230,7 @@ async function scan(args: CliArgs): Promise<number> {
             ready: status.ready,
             routes,
             pathsShown: paths.length,
+            pathOrder,
             paths,
           },
           null,
@@ -247,19 +268,34 @@ async function scan(args: CliArgs): Promise<number> {
       paths.forEach((path, i) => {
         out.push(`  ${i + 1}  ${path.hops} hops  ${path.chain.join(" → ")}`);
         out.push(`     injection  ${path.injection.join(" → ")}`);
-        const tail = path.chain[0];
-        const head = path.chain[path.chain.length - 1];
-        const from = tail === undefined ? undefined : resources.byKind.get(tail);
-        const to = head === undefined ? undefined : resources.byKind.get(head);
-        if (from?.scope) out.push(`     in         ${from.kind} · ${from.scope}`);
-        if (to?.scope) out.push(`     out        ${to.kind} · ${to.scope}`);
+        const cite = (label: string, kind: string | undefined): void => {
+          if (kind === undefined) return;
+          const list = resources.byKind.get(kind) ?? [];
+          if (list.length > 1) {
+            out.push(`     ${label}${kind} · scope omitted — ${list.length} resources share this kind`);
+          } else if (list[0]?.scope !== undefined) {
+            out.push(`     ${label}${kind} · ${list[0].scope}`);
+          }
+        };
+        cite("in         ", path.chain[0]);
+        cite("out        ", path.chain[path.chain.length - 1]);
         out.push("");
       });
       out.push(
         `${routes} route${routes === 1 ? "" : "s"} found — every one of them is a permission you granted.`,
       );
-      if (routes > paths.length) {
+      if (routes > paths.length && pathOrder === "shortest") {
         out.push(`  note   showing the ${paths.length} shortest by hops; the graph has ${routes} in total`);
+      }
+      if (pathOrder === "arbitrary") {
+        out.push(
+          `  note   route enumeration exceeded the server budget on this graph; showing ${paths.length} routes in arbitrary order — the count is exact, and fix is unaffected`,
+        );
+      }
+      if (pathOrder === "unlisted") {
+        out.push(
+          `  note   route enumeration exceeded the server budget; routes are not listed — the count is exact, and fix is unaffected`,
+        );
       }
       out.push("  next  lethalpath fix");
     }
@@ -294,8 +330,16 @@ async function fix(args: CliArgs): Promise<number> {
       return 0;
     };
     if (routes === 0) return absten("nothing to revoke — no route was found to close.");
-    if (sourceIds.length === 0) return absten("nothing to protect — no private resource is declared.");
-    if (targetIds.length === 0) return absten("nothing can leave — no public sink is declared.");
+    if (sourceIds.length === 0) {
+      return absten(
+        "routes exist, but every private resource is also marked public — the sides overlap, so no revocable cut exists from these labels.",
+      );
+    }
+    if (targetIds.length === 0) {
+      return absten(
+        "routes exist, but every public sink is also marked private — the sides overlap, so no revocable cut exists from these labels.",
+      );
+    }
 
     const edges: FlowEdge[] = (
       await db.read(`

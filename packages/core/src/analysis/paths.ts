@@ -45,6 +45,28 @@ MATCH leak = (p:Resource {sensitivity:'private'})
 RETURN count(leak) AS routes
 `.trim();
 
+/**
+ * The same traversal with the ordering dropped. ORDER BY forces the engine to
+ * materialise and sort every walk before the LIMIT can apply, and on graphs
+ * where tools chain through the context hub the walk count explodes — a
+ * 40-tool config of that shape blew the server budget on the ordered form
+ * while the count stayed at 233 ms. Without ORDER BY the engine can stop at
+ * the LIMIT; `scan` falls back to this when the ordered query fails, and says
+ * the order is arbitrary.
+ */
+export const LEAK_PATH_FAST = `
+MATCH inj = (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)
+MATCH leak = (p:Resource {sensitivity:'private'})
+             -[:FLOWS*1..5]->(ctx)
+             -[:FLOWS*1..5]->(s:Resource {visibility:'public'})
+RETURN u.kind AS injected_from,
+       [n IN nodes(inj) | coalesce(n.kind, n.name, n.id)] AS injection,
+       [n IN nodes(leak) | coalesce(n.kind, n.name, n.id)] AS chain,
+       [n IN nodes(leak) WHERE n:Tool | n.name] AS tools,
+       length(leak) AS hops
+LIMIT 25
+`.trim();
+
 export const MIN_CUT = `
 MATCH (p:Resource {sensitivity:'private'})
 WHERE p.visibility IS NULL OR p.visibility <> 'public'

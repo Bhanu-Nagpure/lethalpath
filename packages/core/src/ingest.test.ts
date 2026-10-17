@@ -13,7 +13,7 @@ import type { ScanConfig } from "@lethalpath/schema";
 
 import { GraphDB } from "./db.js";
 import { ingest, scanStatus } from "./ingest.js";
-import { LEAK_COUNT, LEAK_PATH, MIN_CUT, VERIFY_FIX, parseLeakPaths } from "./analysis/paths.js";
+import { LEAK_COUNT, LEAK_PATH, LEAK_PATH_FAST, MIN_CUT, VERIFY_FIX, parseLeakPaths } from "./analysis/paths.js";
 import { cutFromMaxFlow, type FlowEdge, type MaxFlowRow } from "./analysis/mincut.js";
 
 function fixture(name: string): ScanConfig {
@@ -129,6 +129,29 @@ test("a hostile config id never reaches a Cypher string", async (t) => {
   assert.equal((await scanStatus(db)).ready, false);
 });
 
+test("hostile shapes are refused by name, never by TypeError", async (t) => {
+  const base = fixture("fs-git");
+  const res0 = base.resources[0];
+  const tool0 = base.tools[0];
+  assert.ok(res0, "fixture resource present");
+  assert.ok(tool0, "fixture tool present");
+  const cases: Array<[string, ScanConfig]> = [
+    ["resource id number", { ...base, resources: [{ ...res0, id: 7 as unknown as string }] }],
+    ["title object", { ...base, title: { nope: true } as unknown as string }],
+    ["reads null", { ...base, tools: [{ ...tool0, reads: null as unknown as string[] }] }],
+  ];
+  for (const [what, cfg] of cases) {
+    const db = await GraphDB.open(`t_shape_${Date.now()}_${Math.floor(Math.random() * 1e6)}`);
+    t.after(() => db.close());
+    await assert.rejects(
+      () => ingest(db, cfg),
+      (err: Error) =>
+        err.message.includes("scan config rejected") && /must be an? (string|array)/.test(err.message),
+      `${what} must be refused by name`,
+    );
+  }
+});
+
 test("a tool that names the same resource twice still cuts", async (t) => {
   // Two identical FLOWS edges would make algo.maxFlow reject the whole
   // relationship type globally ("contains multi-edges"). Ingest dedupes.
@@ -178,4 +201,13 @@ test("the leak query stays inside the server budget on a labeler-sized graph", a
   t.after(() => db.close());
   const res = await db.read(LEAK_PATH);
   assert.ok(res.rows.length > 0, "the route through the shared context is found");
+});
+
+test("LEAK_PATH_FAST returns the same routes as the ordered query", async (t) => {
+  const db = await scanOf(fixture("fs-git"));
+  t.after(() => db.close());
+  const ordered = parseLeakPaths((await db.read(LEAK_PATH)).rows);
+  const fast = parseLeakPaths((await db.read(LEAK_PATH_FAST)).rows);
+  assert.ok(fast.length > 0, "the fallback query still finds the route");
+  assert.deepEqual(fast, ordered);
 });
