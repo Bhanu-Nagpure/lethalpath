@@ -22,6 +22,29 @@ import { FalkorDB as Client, type Graph } from "falkordb";
 
 const WRITE = /\b(create|merge|delete|remove|set|drop|detach|foreach|load\s+csv)\b/i;
 const LIMIT_CAP = 100;
+const READ_TIMEOUT_MS = 3000;
+
+/**
+ * A guard has to give up. If the server does not answer inside the budget we
+ * abandon the read and say so; the connection is closed by the caller.
+ */
+function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`read-only guard: query abandoned after ${ms} ms`));
+    }, ms);
+    work.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
 
 export interface QueryResult {
   rows: Record<string, unknown>[];
@@ -55,7 +78,7 @@ export class GraphDB {
     }
     const capped = this.capLimit(cypher);
     const prefixed = this.prefix(capped, params);
-    const res = await this.graph.roQuery(prefixed);
+    const res = await withTimeout(this.graph.roQuery(prefixed), READ_TIMEOUT_MS);
     return this.shape(res);
   }
 
