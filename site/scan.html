@@ -79,15 +79,15 @@
         <button type="button" class="btn btn-quiet btn-sm">Claude Desktop</button>
         <button type="button" class="btn btn-quiet btn-sm">Cursor</button>
         <button type="button" class="btn btn-quiet btn-sm">VS Code</button>
-        <span class="pill">or run <span class="mono">npx lethalpath scan</span></span>
+        <span class="pill">or run <span class="mono">node packages/cli/dist/index.js scan</span></span>
       </div>
     </div>
 
     <div class="kpi">
-      <div class="k"><div class="v" style="color:var(--danger)">1</div><div class="l">leak path</div></div>
+      <div class="k"><div class="v" style="color:var(--danger)">567</div><div class="l">leak paths</div></div>
       <div class="k"><div class="v" style="color:var(--private)">2</div><div class="l">private resources</div></div>
       <div class="k"><div class="v" style="color:var(--sink)">3</div><div class="l">servers involved</div></div>
-      <div class="k"><div class="v" style="color:var(--safe)">1</div><div class="l">grant to revoke</div></div>
+      <div class="k"><div class="v" style="color:var(--safe)">9</div><div class="l">grants to revoke</div></div>
     </div>
 
     <div class="split mt-xl">
@@ -138,7 +138,7 @@
 <span class="arrow">&nbsp;&nbsp;↓</span> git.push <span style="color:var(--ash)">· writes remote</span><br>
 <span class="arrow">&nbsp;&nbsp;↓</span> <span class="tag tag-sk">public sink</span> <span style="color:var(--body)">public repo · origin/main</span>
           </div>
-          <p class="small" style="padding:0 18px 4px;color:var(--mute)">one of 567 routes &mdash; scan prints the 25 shortest by hops; the full list is in <span class="mono">--json</span>.</p>
+          <p class="small" style="padding:0 18px 4px;color:var(--mute)">one of 567 routes &mdash; scan prints the 25 shortest by hops; <span class="mono">--json</span> carries the same 25 plus the full count.</p>
           <div class="fixbox">
             <div class="mono" style="font-size:.78rem;color:var(--safe)">THE FIX &mdash; CALL <strong>algo.maxFlow</strong> &rArr; 9 grants</div>
             <p class="small mt-sm" style="color:var(--body)">
@@ -186,13 +186,15 @@
               -[:<span class="rel">FLOWS</span>*1..5]->(ctx)
               -[:<span class="rel">FLOWS</span>*1..5]->(s:<span class="lbl">Resource</span> {visibility:<span class="str">'public'</span>})
 <span class="kw">RETURN</span> u.kind <span class="kw">AS</span> injected_from,
+       [n <span class="kw">IN</span> nodes(inj) | coalesce(n.kind, n.name, n.id)] <span class="kw">AS</span> injection,
+       [n <span class="kw">IN</span> nodes(leak) | coalesce(n.kind, n.name, n.id)] <span class="kw">AS</span> chain,
        [n <span class="kw">IN</span> nodes(leak) <span class="kw">WHERE</span> n:<span class="lbl">Tool</span> | n.name] <span class="kw">AS</span> tools,
        length(leak) <span class="kw">AS</span> hops
 <span class="kw">ORDER BY</span> hops <span class="kw">ASC</span> <span class="kw">LIMIT</span> 25</pre></div>
     </details>
 
     <details>
-      <summary>Cypher executed &mdash; min-cut · <span class="mono">algo.maxFlow</span>, run twice: exfiltration and ingress</summary>
+      <summary>Cypher executed &mdash; min-cut · one <span class="mono">algo.maxFlow</span> call; both cuts derived from it in code</summary>
       <div class="code"><pre><span class="kw">MATCH</span> (p:<span class="lbl">Resource</span> {sensitivity:<span class="str">'private'</span>})
 <span class="kw">WHERE</span> p.visibility <span class="kw">IS NULL OR</span> p.visibility &lt;&gt; <span class="str">'public'</span>
 <span class="kw">WITH</span> collect(p) <span class="kw">AS</span> src
@@ -200,15 +202,17 @@
 <span class="kw">WHERE</span> s.sensitivity <span class="kw">IS NULL OR</span> s.sensitivity &lt;&gt; <span class="str">'private'</span>
 <span class="kw">WITH</span> src, collect(s) <span class="kw">AS</span> dst
 <span class="kw">CALL</span> <span class="fn">algo.maxFlow</span>({
-  sourceNodes: src, targetNodes: dst,
-  relationshipTypes: [<span class="str">'FLOWS'</span>],        <span class="com">// exactly one type on 6.0.2</span>
+  sourceNodes: src,
+  targetNodes: dst,
+  relationshipTypes: [<span class="str">'FLOWS'</span>],
   capacityProperty: <span class="str">'capacity'</span>
 })
 <span class="kw">YIELD</span> maxFlow, edges, edgeFlows
-<span class="kw">RETURN</span> maxFlow, size(edges) <span class="kw">AS</span> n_edges</pre></div>
+<span class="kw">RETURN</span> maxFlow, edges, edgeFlows</pre></div>
       <p class="small" style="padding:12px 16px;color:var(--body)">
-        FalkorDB returns flows, not the cut, so the residual graph is walked in
-        <span class="mono">mincut.ts</span> to produce the edge set above.
+        One call, one relationship type (all 6.0.2 accepts); it returns flows, not
+        the cut, so the residual graph is walked in <span class="mono">mincut.ts</span>
+        to produce the edge set above.
       </p>
     </details>
   </div>

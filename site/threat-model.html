@@ -80,9 +80,10 @@
     <div class="qa">
       <h3>Labels are inferred, not declared</h3>
       <p>Of the servers we catalogued, essentially none declare their own trust level. We infer from
-        tool names, parameter names, output schemas and annotations, and we score that inference
-        against a hand-labelled set. Sink recall is our weakest number
-        (<a href="benchmarks.html">0.79</a>) &mdash; we miss roughly one in five writing tools.</p>
+        tool names, with one conservative fallback for anything the rules cannot classify, and we
+        score that inference against a hand-labelled set. Labelling misses are our weakest area;
+        <a href="benchmarks.html">Benchmarks</a> states exactly what we measure &mdash; and what we
+        do not.</p>
     </div>
     <div class="qa">
       <h3>Annotations are untrusted by design</h3>
@@ -134,8 +135,9 @@
       <li><strong style="color:var(--ink)">Not a scanner for server vulnerabilities.</strong> CVEs,
         missing OAuth and shell-exec exposure are real problems covered by other tools
         (<a href="benchmarks.html">credited on Benchmarks</a>). We cover combinations.</li>
-      <li><strong style="color:var(--ink)">Not exhaustive.</strong> We index the public catalog. A
-        private, in-house MCP server you have not declared is invisible to us until you add it.</li>
+      <li><strong style="color:var(--ink)">Not exhaustive.</strong> We bundle label expansions for
+        11 conventional servers; a tool the rules cannot classify gets one semi-trusted fallback
+        and is named as unlabelled, so nothing is silently treated as harmless.</li>
       <li><strong style="color:var(--ink)">Not a guarantee.</strong> A combination we rate safe can
         become unsafe when a tool changes. Re-scan after upgrades.</li>
     </ul>

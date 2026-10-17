@@ -74,7 +74,7 @@
         <h4 style="color:var(--safe)">Human checkpoints</h4>
         <ul>
           <li>Every Cypher query run against a live 6.0.2 instance before commit</li>
-          <li>Every benchmark number read by hand from <span class="mono">eval/results/*.json</span></li>
+          <li>Every benchmark number read by hand from <span class="mono">eval/results/*.json</span>; every transcript from <span class="mono">docs/live-evidence/</span></li>
           <li>The gold label set hand-labelled, with no model input</li>
           <li>Graph model and architecture decisions are ours</li>
         </ul>
@@ -91,10 +91,10 @@
     <div class="learn">
       <h3>We started with the wrong idea, and the research killed it</h3>
       <p>Our first plan was a router that trims MCP tool schemas to save context. The pain is real
-        (definitions can eat 130k tokens), but the fix does not need a graph &mdash; keyword search,
-        embeddings or built-in tool search all work, and Anthropic already ships one. Under this
-        hackathon's rules, a product that survives deleting its graph is disqualified. Ours would
-        have. We dropped it.</p>
+        (tool definitions can consume a large share of a context window), but the fix does not need
+        a graph &mdash; keyword search, embeddings or built-in tool search all work, and Anthropic
+        already ships one. Under this hackathon's rules, a product that survives deleting its graph
+        is disqualified. Ours would have. We dropped it.</p>
     </div>
     <div class="learn">
       <h3>The idea we landed on fails the same test in the other direction</h3>
@@ -110,13 +110,14 @@
     <div class="learn">
       <h3>Our first colour palette failed accessibility</h3>
       <p>The two colours carrying the entire explanation &mdash; private data and the leak path &mdash;
-        measured 4.6:1 and 5.5:1 against the background, below the AAA bar we had claimed. We now
-        measure every pair instead of trusting them.</p>
+        measured below the AAA bar we had claimed. We replaced them; the palette check now measures
+        every pair instead of trusting them.</p>
     </div>
     <div class="learn">
       <h3>A published paper already solved the easy half</h3>
-      <p>We claimed nobody models tool dependencies. Someone does, on a public benchmark. We
-        re-implemented their baseline, scored below it, and printed the gap. Better to lose a row
+      <p>We claimed nobody models tool dependencies. Someone does, on a public benchmark. We cite
+        their result and we do not re-implement it &mdash; retrieval accuracy is not our product,
+        and <a href="benchmarks.html">Benchmarks</a> says exactly that. Better to lose a row
         honestly than to be caught overclaiming.</p>
     </div>
 
@@ -168,7 +169,7 @@
         acknowledge within 48 hours.
       </p>
       <div class="code mt-md"><pre><span class="com"># see SECURITY.md in the repo</span>
-security@example.invalid      <span class="com"># mock address</span></pre></div>
+<span class="com"># private channel: GitHub &rarr; Security &rarr; Report a vulnerability</span></pre></div>
     </div>
   </div>
 </section>

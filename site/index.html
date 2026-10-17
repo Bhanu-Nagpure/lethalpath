@@ -127,7 +127,7 @@
         </div>
       </div>
     </div>
-    <p class="muted small" style="margin-top:12px">The picture above is the product running, not an illustration. Replay it.</p>
+    <p class="muted small" style="margin-top:12px">The picture above replays the committed demo run &mdash; scripted captions, numbers from the evidence log. Replay it.</p>
   </div>
 </section>
 
@@ -146,7 +146,7 @@
         <div class="window-body">
           <div class="shot">
             <div class="ghost">config in · secrets stripped</div>
-            <p class="figcap">01 · paste mcp.json · keys never leave the browser</p>
+            <p class="figcap">01 · paste mcp.json · keys never leave the machine</p>
           </div>
         </div>
       </figure>
@@ -215,14 +215,15 @@
         <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="window-title">terminal</span>
       </div>
-      <div class="code" style="border:0;border-radius:0"><pre><span class="com"># find every leak path</span>
-npx lethalpath scan
+      <div class="code" style="border:0;border-radius:0"><pre><span class="com"># from a clone &mdash; the packages are not on npm</span>
+<span class="com"># find every leak path</span>
+node packages/cli/dist/index.js scan
 
 <span class="com"># the grant that closes them</span>
-npx lethalpath fix
+node packages/cli/dist/index.js fix
 
 <span class="com"># enforce it while you work</span>
-npx lethalpath guard</pre></div>
+node packages/guard/dist/server.js --config mcp.json</pre></div>
     </div>
   </div>
 </section>
