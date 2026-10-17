@@ -1,4 +1,17 @@
+<div align="left">
+  <img src="docs/logo.svg" width="72" alt="LethalPath logo">
+</div>
+
 # LethalPath
+
+*Find the MCP tool combinations that let an agent leak your data, and the one permission that stops it.*
+
+[![CI](https://github.com/bhanu-dev82/lethalpath/actions/workflows/ci.yml/badge.svg)](https://github.com/bhanu-dev82/lethalpath/actions/workflows/ci.yml)
+[![license: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-0B6E99?style=flat-square)](./LICENSE)
+[![FalkorDB 6.0.2](https://img.shields.io/badge/FalkorDB-6.0.2-C0392B?style=flat-square)](https://www.falkordb.com)
+[![node ≥20](https://img.shields.io/badge/node-%E2%89%A520-026E00?style=flat-square)](https://nodejs.org)
+[![pnpm 9](https://img.shields.io/badge/pnpm-9-B45309?style=flat-square)](https://pnpm.io)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](./CONTRIBUTING.md)
 
 **Powered by [FalkorDB](https://www.falkordb.com).** The graph is not a place we
 store the answer. It is the answer.
@@ -15,6 +28,23 @@ memory is a graph of its own.
 > Numbers appear in this README only with the file that contains them named
 > beside them — the eval results, the live-evidence log, or the fixture itself.
 > No exceptions.
+
+**New here? Jump to the [Quick start](#quick-start).**
+
+## Contents
+
+- [The removal test](#the-removal-test)
+- [The problem](#the-problem)
+- [Quick start](#quick-start)
+- [The graph](#the-graph)
+- [The queries](#the-queries)
+- [FalkorDB features this product calls](#falkordb-features-this-product-calls)
+- [Engine facts](#engine-facts)
+- [Results](#results)
+- [Data](#data)
+- [What we learned](#what-we-learned)
+- [Credits and prior work](#credits-and-prior-work)
+- [AI use](#ai-use) · [Licence](#licence)
 
 ---
 
@@ -180,7 +210,7 @@ resources share a kind, the CLI prints `scope omitted — 2 resources share this
 kind` instead of guessing which one the route ran through.
 
 The two bounded segments are anchored at the injecting context on purpose. A
-free `*2..10` walk can re-enter the shared hub and enumerates exponentially — a
+free `*2..10` walk can re-enter the shared hub and enumerate exponentially — a
 twelve-tool config timed the server out; the anchored form answers in hundreds
 of milliseconds at twenty. It also tightens the semantics: the route must pass
 through the tainted context itself, not merely some context.
