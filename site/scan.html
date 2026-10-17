@@ -125,26 +125,28 @@
       <div>
         <div class="finding" data-finding>
           <div class="finding-h">
-            <span class="dot" style="background:var(--danger)"></span> 1 leak path
+            <span class="dot" style="background:var(--danger)"></span> 567 leak paths
             <span class="spacer"></span><span>severity · high</span>
           </div>
           <div class="path">
 <span class="tag tag-un">stranger's words</span> github issue<br>
-<span class="arrow">&nbsp;&nbsp;↓</span> github.read <span style="color:var(--ash)">· reads untrusted</span><br>
+<span class="arrow">&nbsp;&nbsp;↓</span> github.get_issue <span style="color:var(--ash)">· reads untrusted</span><br>
 <span class="arrow">&nbsp;&nbsp;↓</span> <span style="color:var(--sink)">agent context</span> <span style="color:var(--ash)">· now tainted</span><br>
-<span class="tag tag-pr">private</span> project folder <span style="color:var(--ash)">· ~/work/stats</span><br>
-<span class="arrow">&nbsp;&nbsp;↓</span> filesystem.read <span style="color:var(--ash)">· reads private</span><br>
+<span class="tag tag-pr">private</span> local repo <span style="color:var(--ash)">· the project itself</span><br>
+<span class="arrow">&nbsp;&nbsp;↓</span> git.diff <span style="color:var(--ash)">· reads private</span><br>
 <span class="arrow">&nbsp;&nbsp;↓</span> <span style="color:var(--sink)">agent context</span><br>
 <span class="arrow">&nbsp;&nbsp;↓</span> git.push <span style="color:var(--ash)">· writes remote</span><br>
 <span class="arrow">&nbsp;&nbsp;↓</span> <span class="tag tag-sk">public sink</span> <span style="color:var(--body)">public repo · origin/main</span>
           </div>
+          <p class="small" style="padding:0 18px 4px;color:var(--mute)">one of 567 routes &mdash; scan prints the 25 shortest by hops; the full list is in <span class="mono">--json</span>.</p>
           <div class="fixbox">
-            <div class="mono" style="font-size:.78rem;color:var(--safe)">THE FIX &mdash; revoke <strong>git.push</strong></div>
+            <div class="mono" style="font-size:.78rem;color:var(--safe)">THE FIX &mdash; CALL <strong>algo.maxFlow</strong> &rArr; 9 grants</div>
             <p class="small mt-sm" style="color:var(--body)">
-              Breaks <strong style="color:var(--ink)">1 of 1</strong> paths · keeps
-              <strong style="color:var(--ink)">3 of 4</strong> tasks working.
-              On a full tie the cut prefers the write side &mdash; the agent keeps its read
-              and loses only the publish.
+              Breaks <strong style="color:var(--ink)">567 of 567</strong> paths &middot; revokes
+              <strong style="color:var(--ink)">9</strong> write grants (every github write + git.push) &middot;
+              verified <strong style="color:var(--ink)">0 remain</strong> when the same query re-runs
+              without them. When cuts tie on cost the engine prefers the write side &mdash; the agent
+              keeps its read and loses only the publish.
             </p>
             <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
               <button type="button" class="btn btn-safe btn-sm" data-applycut>Apply cut</button>
@@ -155,8 +157,8 @@
           <div style="border-top:1px solid var(--line);padding:16px 18px">
             <p class="eyebrow" style="margin-bottom:9px">policy diff</p>
             <div class="diff">
-              <div class="del">- allow: git.push      # breaks every path</div>
-              <div class="add">+ ask:   git.push      # only when context is tainted</div>
+              <div class="del">- allow: git.push, github.* writes   # 567 paths end in a public sink</div>
+              <div class="add">+ deny:  the nine write grants        # re-run without them: 0 remain</div>
             </div>
           </div>
         </div>
