@@ -8,12 +8,20 @@
  * `algo.maxFlow` on 6.0.2 accepts exactly one relationship type and returns
  * flows, not the cut. The relationship type is therefore `FLOWS` throughout,
  * and the cut itself is computed in mincut.ts from the residual graph.
+ *
+ * The leak and verify queries anchor at the *injecting* context instead of
+ * walking `*2..10` freely: a free walk can re-enter the hub and enumerates
+ * exponentially — a 12-tool config made the server time out, while the
+ * anchored form finishes in hundreds of milliseconds at 20 tools. Anchoring
+ * also tightens the semantics: the route must pass through the tainted
+ * context itself, not merely some context.
  */
 
 export const LEAK_PATH = `
 MATCH inj = (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)
-MATCH leak = (p:Resource {sensitivity:'private'})-[:FLOWS*2..10]->(s:Resource {visibility:'public'})
-WHERE ctx IN nodes(leak)
+MATCH leak = (p:Resource {sensitivity:'private'})
+             -[:FLOWS*1..5]->(ctx)
+             -[:FLOWS*1..5]->(s:Resource {visibility:'public'})
 RETURN u.kind AS injected_from,
        [n IN nodes(inj) | coalesce(n.kind, n.name, n.id)] AS injection,
        [n IN nodes(leak) | coalesce(n.kind, n.name, n.id)] AS chain,
@@ -24,8 +32,12 @@ LIMIT 25
 `.trim();
 
 export const MIN_CUT = `
-MATCH (p:Resource {sensitivity:'private'}) WITH collect(p) AS src
-MATCH (s:Resource {visibility:'public'}) WITH src, collect(s) AS dst
+MATCH (p:Resource {sensitivity:'private'})
+WHERE p.visibility IS NULL OR p.visibility <> 'public'
+WITH collect(p) AS src
+MATCH (s:Resource {visibility:'public'})
+WHERE s.sensitivity IS NULL OR s.sensitivity <> 'private'
+WITH src, collect(s) AS dst
 CALL algo.maxFlow({
   sourceNodes: src,
   targetNodes: dst,
@@ -42,10 +54,11 @@ RETURN maxFlow, edges, edgeFlows
  * the CYPHER prefix like every other parameter.
  */
 export const VERIFY_FIX = `
-MATCH inj = (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)
-MATCH leak = (p:Resource {sensitivity:'private'})-[:FLOWS*2..10]->(s:Resource {visibility:'public'})
-WHERE ctx IN nodes(leak)
-  AND all(rel IN relationships(leak) WHERE rel.grant IS NULL OR NOT (rel.grant IN $revoked))
+MATCH (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)
+MATCH leak = (p:Resource {sensitivity:'private'})
+             -[:FLOWS*1..5]->(ctx)
+             -[:FLOWS*1..5]->(s:Resource {visibility:'public'})
+WHERE all(rel IN relationships(leak) WHERE rel.grant IS NULL OR NOT (rel.grant IN $revoked))
 RETURN count(leak) AS remaining
 `.trim();
 

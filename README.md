@@ -24,7 +24,7 @@ decoration and the entry is ineligible. LethalPath fails that test on purpose.
 
 | What the product does | What runs it | What happens if FalkorDB is removed |
 |---|---|---|
-| Find the leak route | `MATCH … -[:FLOWS*2..10]->` through the shared context | There is no path. A list of tools cannot express "through this folder". |
+| Find the leak route | `MATCH … -[:FLOWS*1..5]->(ctx)-[:FLOWS*1..5]->` — bounded segments anchored at the tainted context | There is no path. A list of tools cannot express "through this folder". |
 | Choose the permission to revoke | `CALL algo.maxFlow` then a residual cut | There is no flow, so there is no cut. `cutFromMaxFlow` has nothing to consume. |
 | Prove the fix closed it | `VERIFY_FIX`, the same traversal with `$revoked` excluded | There is no second query to re-run. The promise has no receipt. |
 | Remember what a session absorbed | the `sessions_*` graph | The guard forgets between processes and stops blocking. |
@@ -69,7 +69,7 @@ LethalPath  ·  powered by FalkorDB 6.0.2
 config    fs-git · A public issue steers the agent through the private folder out to a public repo
 graph     scan_fs-git · 11 nodes · 9 edges · ready
 guard     GRAPH.RO_QUERY · LIMIT 100 · 3 s timeout · write keywords refused
-engine    leak MATCH -[:FLOWS*2..10]->  ·  fix CALL algo.maxFlow + residual min-cut
+engine    leak two anchored segments through the tainted context · fix CALL algo.maxFlow + residual min-cut
 
 LEAK PATHS
   1  4 hops  project folder → filesystem.read → context → git.push → public repo
@@ -134,8 +134,9 @@ cannot write and a vector index cannot express.
 
 ```cypher
 MATCH inj = (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)
-MATCH leak = (p:Resource {sensitivity:'private'})-[:FLOWS*2..10]->(s:Resource {visibility:'public'})
-WHERE ctx IN nodes(leak)
+MATCH leak = (p:Resource {sensitivity:'private'})
+             -[:FLOWS*1..5]->(ctx)
+             -[:FLOWS*1..5]->(s:Resource {visibility:'public'})
 RETURN u.kind AS injected_from,
        [n IN nodes(inj) | coalesce(n.kind, n.name, n.id)] AS injection,
        [n IN nodes(leak) | coalesce(n.kind, n.name, n.id)] AS chain,
@@ -147,12 +148,22 @@ ORDER BY hops ASC LIMIT 25
 The `chain` and `injection` columns exist so citations resolve to `kind` and
 `scope` ("project folder · ~/work/stats"), never to internal node ids.
 
+The two bounded segments are anchored at the injecting context on purpose. A
+free `*2..10` walk can re-enter the shared hub and enumerates exponentially — a
+twelve-tool config timed the server out; the anchored form answers in hundreds
+of milliseconds at twenty. It also tightens the semantics: the route must pass
+through the tainted context itself, not merely some context.
+
 **2 — The fix (`MIN_CUT`).** One `CALL`, sources are private stores, targets are
 public sinks:
 
 ```cypher
-MATCH (p:Resource {sensitivity:'private'}) WITH collect(p) AS src
-MATCH (s:Resource {visibility:'public'})  WITH src, collect(s) AS dst
+MATCH (p:Resource {sensitivity:'private'})
+WHERE p.visibility IS NULL OR p.visibility <> 'public'
+WITH collect(p) AS src
+MATCH (s:Resource {visibility:'public'})
+WHERE s.sensitivity IS NULL OR s.sensitivity <> 'private'
+WITH src, collect(s) AS dst
 CALL algo.maxFlow({sourceNodes: src, targetNodes: dst,
                    relationshipTypes: ['FLOWS'], capacityProperty: 'capacity'})
 YIELD maxFlow, edges, edgeFlows
@@ -162,17 +173,25 @@ RETURN maxFlow, edges, edgeFlows
 `algo.maxFlow` returns flows, not the cut. The cut is derived from the residual
 graph in `packages/core/src/analysis/mincut.ts`. A max-flow admits two canonical
 minimum cuts — one hugged to the sources, one to the sinks. Both close every
-route; the product picks the one that costs you less: fewer distinct grants
-first, fewer broken tasks second, and on a full tie the **write** side, so the
+route; the product picks the one that costs you less: a cut you can actually
+execute first (an all-grant-less cut is not a fix), fewer distinct grants
+second, fewer broken tasks third, and on a full tie the **write** side, so the
 agent keeps its ability to read and loses only the publish.
+
+The `WHERE` clauses keep a resource that is somehow labelled both private and
+public out of both sides: max-flow requires disjoint source and sink sets, and
+that label combination is a config smell worth refusing, not crashing on.
 
 **3 — The receipt (`VERIFY_FIX`).** The same traversal, with the revoked grants'
 edges excluded through a list parameter (`$revoked` binds via the `CYPHER k=v`
 prefix, like every parameter here):
 
 ```cypher
-MATCH leak = (p:Resource {sensitivity:'private'})-[:FLOWS*2..10]->(s:Resource {visibility:'public'})
-WHERE … AND all(rel IN relationships(leak) WHERE rel.grant IS NULL OR NOT (rel.grant IN $revoked))
+MATCH (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)
+MATCH leak = (p:Resource {sensitivity:'private'})
+             -[:FLOWS*1..5]->(ctx)
+             -[:FLOWS*1..5]->(s:Resource {visibility:'public'})
+WHERE all(rel IN relationships(leak) WHERE rel.grant IS NULL OR NOT (rel.grant IN $revoked))
 RETURN count(leak) AS remaining
 ```
 
@@ -186,7 +205,7 @@ Not a list of what the database can do. A list of what this repository executes.
 | Feature | Where | Why it has to be FalkorDB |
 |---|---|---|
 | `algo.maxFlow` | `MIN_CUT` in `paths.ts`, consumed by `cutFromMaxFlow` | The fix. One relationship type, verified on 6.0.2. |
-| Variable-length `FLOWS*2..10` + `relationships(path)` | `LEAK_PATH`, `VERIFY_FIX` | The laundering hop, and the receipt. |
+| Bounded variable-length segments anchored at a bound node + `relationships(path)` | `LEAK_PATH`, `VERIFY_FIX` | The laundering hop, and the receipt. |
 | `GRAPH.RO_QUERY` | `GraphDB.read` — analysis, CLI and guard reads | Cannot write, enforced by the server. |
 | `id()` | joining `edgeFlows` back onto grants | Edge identity across two queries. |
 | Multigraph (`select_graph`) | one `scan_*` per config, `sessions_*` per session | Tenant isolation without extra infrastructure. |

@@ -8,6 +8,7 @@ import { test } from "node:test";
 
 import {
   chooseCut,
+  cutFromMaxFlow,
   cutSide,
   minCut,
   sinkSideCut,
@@ -101,4 +102,25 @@ test("cutSide names the side from the endpoints", () => {
 
 test("zero flow cuts nothing on either side", () => {
   assert.equal(sinkSideCut([2], dumbbell, new Map(), 0).edges.length, 0);
+});
+
+test("a revocable min cut beats one with nothing to revoke", () => {
+  // The sink-side crossing has a grant; the source-side crossing does not.
+  // Ranking by size alone would pick the cut nobody can execute.
+  const pair: FlowEdge[] = [
+    { id: 0, from: 0, to: 2, capacity: 1, grant: null, revocable: false },
+    { id: 1, from: 2, to: 1, capacity: 1, grant: "g_ts", revocable: true },
+  ];
+  const cut = cutFromMaxFlow([0], [1], pair, {
+    maxFlow: 1,
+    edges: [{ id: 0 }, { id: 1 }],
+    edgeFlows: [1, 1],
+  });
+  assert.deepEqual(cut.grants, ["g_ts"]);
+  assert.equal(cut.side, "write");
+});
+
+test("no max-flow row is an empty cut, not a crash", () => {
+  const cut = cutFromMaxFlow([0], [1], dumbbell, undefined);
+  assert.deepEqual(cut, { grants: [], edges: [], maxFlow: 0, side: "none" });
 });

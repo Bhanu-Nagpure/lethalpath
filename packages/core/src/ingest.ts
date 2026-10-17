@@ -98,25 +98,30 @@ export function planIngest(cfg: ScanConfig): IngestPlan {
 
   for (const t of cfg.tools) {
     const cost = taskCost(cfg, t.name);
-    for (const r of t.reads) {
+    // Dedupe: a config may name the same resource twice. Two identical FLOWS
+    // edges would make algo.maxFlow reject the whole relationship type
+    // globally ("contains multi-edges"), killing the fix for the entire scan.
+    const reads = [...new Set(t.reads)];
+    const writes = [...new Set(t.writes)];
+    for (const r of reads) {
       edge(
         `MATCH (r:Resource {id:${q(r)}}), (t:Tool {name:${q(t.name)}}) ` +
           `CREATE (r)-[:FLOWS {dir:'feeds', capacity:${1 + cost}, grant:${q(t.name)}, taskCost:${cost}, revocable:true}]->(t)`,
       );
     }
-    for (const r of t.writes) {
+    for (const r of writes) {
       edge(
         `MATCH (t:Tool {name:${q(t.name)}}), (r:Resource {id:${q(r)}}) ` +
           `CREATE (t)-[:FLOWS {dir:'emits', capacity:${1 + cost}, grant:${q(t.name)}, taskCost:${cost}, revocable:true}]->(r)`,
       );
     }
-    if (t.reads.length > 0) {
+    if (reads.length > 0) {
       edge(
         `MATCH (t:Tool {name:${q(t.name)}}), (c:Context {id:'context'}) ` +
           `CREATE (t)-[:FLOWS {dir:'emits', capacity:${HUB_CAPACITY}, revocable:false}]->(c)`,
       );
     }
-    if (t.writes.length > 0) {
+    if (writes.length > 0) {
       edge(
         `MATCH (c:Context {id:'context'}), (t:Tool {name:${q(t.name)}}) ` +
           `CREATE (c)-[:FLOWS {dir:'feeds', capacity:${HUB_CAPACITY}, revocable:false}]->(t)`,

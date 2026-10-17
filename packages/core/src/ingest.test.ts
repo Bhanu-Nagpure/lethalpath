@@ -55,10 +55,18 @@ test("a live max-flow cuts the write side: revoke git.push, cost one task", asyn
   t.after(() => db.close());
 
   const sourceIds = (
-    await db.read(`MATCH (p:Resource {sensitivity:'private'}) RETURN id(p) AS id`)
+    await db.read(
+      `MATCH (p:Resource {sensitivity:'private'})
+       WHERE p.visibility IS NULL OR p.visibility <> 'public'
+       RETURN id(p) AS id`,
+    )
   ).rows.map((row) => Number(row["id"]));
   const targetIds = (
-    await db.read(`MATCH (s:Resource {visibility:'public'}) RETURN id(s) AS id`)
+    await db.read(
+      `MATCH (s:Resource {visibility:'public'})
+       WHERE s.sensitivity IS NULL OR s.sensitivity <> 'private'
+       RETURN id(s) AS id`,
+    )
   ).rows.map((row) => Number(row["id"]));
 
   const edges: FlowEdge[] = (
@@ -117,4 +125,55 @@ test("a hostile config id never reaches a Cypher string", async (t) => {
   t.after(() => db.close());
   await assert.rejects(() => ingest(db, hostile), /scan config rejected/);
   assert.equal((await scanStatus(db)).ready, false);
+});
+
+test("a tool that names the same resource twice still cuts", async (t) => {
+  // Two identical FLOWS edges would make algo.maxFlow reject the whole
+  // relationship type globally ("contains multi-edges"). Ingest dedupes.
+  const cfg: ScanConfig = structuredClone(fixture("fs-git"));
+  cfg.id = `dup_${Date.now()}`;
+  const tool = cfg.tools.find((x) => x.name === "filesystem.read");
+  assert.ok(tool, "fixture tool present");
+  tool.reads = ["files", "files"];
+  const db = await scanOf(cfg);
+  t.after(() => db.close());
+  const flow = await db.read(MIN_CUT);
+  assert.equal(flow.rows.length, 1, "maxFlow answered instead of refusing the type");
+});
+
+test("the leak query stays inside the server budget on a labeler-sized graph", async (t) => {
+  // The audit measured the free `*2..10` walk timing the server out at twelve
+  // tools; the query is anchored at the context now. This is the regression.
+  const cfg: ScanConfig = {
+    id: `scale_${Date.now()}`,
+    title: "Twelve tools that all read the private folder and publish",
+    servers: [{ id: "mixed", name: "Mixed MCP", source: "test" }],
+    resources: [
+      { id: "issue", kind: "github issue", trust: "untrusted" },
+      { id: "files", kind: "project folder", sensitivity: "private" },
+      { id: "repo", kind: "public repo", visibility: "public" },
+    ],
+    tools: [
+      {
+        name: "issue.read",
+        server: "mixed",
+        reads: ["issue"],
+        writes: [],
+        labelSource: "declared",
+        labelConf: 1,
+      },
+      ...Array.from({ length: 12 }, (_, i) => ({
+        name: `mixed.tool${i}`,
+        server: "mixed",
+        reads: ["files"],
+        writes: ["repo"],
+        labelSource: "declared" as const,
+        labelConf: 1,
+      })),
+    ],
+  };
+  const db = await scanOf(cfg);
+  t.after(() => db.close());
+  const res = await db.read(LEAK_PATH);
+  assert.ok(res.rows.length > 0, "the route through the shared context is found");
 });

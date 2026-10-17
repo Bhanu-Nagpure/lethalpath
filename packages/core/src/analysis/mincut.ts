@@ -137,6 +137,10 @@ export function sinkSideCut(
  * fewer distinct grants to revoke, then fewer broken tasks, then the sink side.
  */
 export function chooseCut(a: Cut, b: Cut): Cut {
+  // A cut you cannot execute is not a fix. Never prefer an all-grant-less cut
+  // over one with a revocable grant, even when it looks smaller.
+  const actionable = (c: Cut) => (c.edges.length === 0 || c.grants.length > 0 ? 0 : 1);
+  if (actionable(a) !== actionable(b)) return actionable(a) < actionable(b) ? a : b;
   if (a.grants.length !== b.grants.length) return a.grants.length < b.grants.length ? a : b;
   const pain = (c: Cut) => c.edges.reduce((sum, e) => sum + (e.tasksLost ?? 0), 0);
   if (pain(a) !== pain(b)) return pain(a) < pain(b) ? a : b;
@@ -168,8 +172,11 @@ export function cutFromMaxFlow(
   sources: number[],
   targets: number[],
   allEdges: FlowEdge[],
-  row: MaxFlowRow,
+  row: MaxFlowRow | undefined,
 ): Cut {
+  // Degenerate graphs (no private store, no public sink, no FLOWS at all) can
+  // reach here with no row. "Nothing to cut" is a valid answer; a crash is not.
+  if (!row) return { grants: [], edges: [], maxFlow: 0, side: "none" };
   const flowByEdge = new Map<number, number>();
   row.edges.forEach((edge, i) => {
     flowByEdge.set(edge.id, row.edgeFlows[i] ?? 0);

@@ -187,7 +187,7 @@ async function scan(args: CliArgs): Promise<number> {
     out.push(`config    ${cfg.id} · ${cfg.title}`);
     out.push(`graph     ${built.graph} · ${built.nodes} nodes · ${built.edges} edges · ready`);
     out.push("guard     GRAPH.RO_QUERY · LIMIT 100 · 3 s timeout · write keywords refused");
-    out.push("engine    leak MATCH -[:FLOWS*2..10]->  ·  fix CALL algo.maxFlow + residual min-cut");
+    out.push("engine    leak two anchored segments through the tainted context · fix CALL algo.maxFlow + residual min-cut");
     out.push("");
 
     if (paths.length === 0) {
@@ -229,8 +229,18 @@ async function fix(args: CliArgs): Promise<number> {
   try {
     const built = await ingest(db, cfg);
     const paths = parseLeakPaths((await db.read(LEAK_PATH)).rows);
-    const sourceIds = await idList(db, `MATCH (p:Resource {sensitivity:'private'}) RETURN id(p) AS id`);
-    const targetIds = await idList(db, `MATCH (s:Resource {visibility:'public'}) RETURN id(s) AS id`);
+    const sourceIds = await idList(
+      db,
+      `MATCH (p:Resource {sensitivity:'private'})
+       WHERE p.visibility IS NULL OR p.visibility <> 'public'
+       RETURN id(p) AS id`,
+    );
+    const targetIds = await idList(
+      db,
+      `MATCH (s:Resource {visibility:'public'})
+       WHERE s.sensitivity IS NULL OR s.sensitivity <> 'private'
+       RETURN id(s) AS id`,
+    );
 
     const absten = (line: string): number => {
       console.log([BANNER, "", "FIX", "", line].join("\n"));

@@ -27,7 +27,8 @@ test("live FalkorDB max-flow yields the grant to revoke", async (t) => {
   const listed = await db.read(`
     MATCH (a)-[e:FLOWS]->(b)
     RETURN id(e) AS id, id(a) AS fromId, id(b) AS toId,
-           e.capacity AS capacity, e.grant AS grant, e.revocable AS revocable
+           e.capacity AS capacity, e.grant AS grant, e.revocable AS revocable,
+           e.taskCost AS taskCost
   `);
   const edges: FlowEdge[] = listed.rows.map((row) => ({
     id: Number(row["id"]),
@@ -36,14 +37,19 @@ test("live FalkorDB max-flow yields the grant to revoke", async (t) => {
     capacity: Number(row["capacity"]),
     grant: row["grant"] == null ? null : String(row["grant"]),
     revocable: Boolean(row["revocable"]),
+    tasksLost: Number(row["taskCost"] ?? 0),
   }));
 
   const sources = await db.read(`
-    MATCH (p:Resource {sensitivity:'private'}) RETURN id(p) AS id
+    MATCH (p:Resource {sensitivity:'private'})
+    WHERE p.visibility IS NULL OR p.visibility <> 'public'
+    RETURN id(p) AS id
   `);
   const sourceIds = sources.rows.map((row) => Number(row["id"]));
   const targets = await db.read(`
-    MATCH (s:Resource {visibility:'public'}) RETURN id(s) AS id
+    MATCH (s:Resource {visibility:'public'})
+    WHERE s.sensitivity IS NULL OR s.sensitivity <> 'private'
+    RETURN id(s) AS id
   `);
   const targetIds = targets.rows.map((row) => Number(row["id"]));
 

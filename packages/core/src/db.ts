@@ -10,9 +10,14 @@
  *
  *   2. Every read goes through GRAPH.RO_QUERY. The server rejects writes on it
  *      outright ("graph.RO_QUERY is to be executed only on read-only queries"),
- *      which is the property the guard depends on. We add a write-keyword check
- *      and a LIMIT cap in front of that, so a hostile parameter is refused
- *      before it is dispatched.
+ *      which is the property the guard depends on. In front of that we add
+ *      three more: a write-keyword check, a LIMIT cap, and a 3 s deadline.
+ *
+ * The keyword check and the cap read the query with literals and comments
+ * blanked out, so `RETURN 'the set of tools'` is not mistaken for a write and
+ * a LIMIT inside a string is not mistaken for a cap. Parameter values are
+ * never scanned: they are escaped by `literal()` and cannot change the shape
+ * of the query. Parameter keys are validated, because those are concatenated.
  *
  * The model never receives a handle to this module. Cypher decides; the model
  * only ever sees its results.
@@ -23,6 +28,65 @@ import { FalkorDB as Client, type Graph } from "falkordb";
 const WRITE = /\b(create|merge|delete|remove|set|drop|detach|foreach|load\s+csv)\b/i;
 const LIMIT_CAP = 100;
 const READ_TIMEOUT_MS = 3000;
+const PARAM_KEY = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+/**
+ * Same length as the input, with the insides of string literals, `//` comments
+ * and `/* *​/` comments replaced by spaces. Regexes that run on this see the
+ * query's structure, not its data. Length is preserved so match offsets can be
+ * mapped back onto the original string.
+ */
+function maskLiterals(cypher: string): string {
+  let out = "";
+  let i = 0;
+  const n = cypher.length;
+  while (i < n) {
+    const ch = cypher[i];
+    if (ch === "'" || ch === '"' || ch === "`") {
+      out += ch;
+      i += 1;
+      while (i < n) {
+        const c = cypher[i];
+        if (c === "\\" && i + 1 < n) {
+          out += "  ";
+          i += 2;
+          continue;
+        }
+        if (c === ch) {
+          out += ch;
+          i += 1;
+          break;
+        }
+        out += " ";
+        i += 1;
+      }
+      continue;
+    }
+    if (ch === "/" && cypher[i + 1] === "/") {
+      while (i < n && cypher[i] !== "\n") {
+        out += " ";
+        i += 1;
+      }
+      continue;
+    }
+    if (ch === "/" && cypher[i + 1] === "*") {
+      out += "  ";
+      i += 2;
+      while (i < n && !(cypher[i] === "*" && cypher[i + 1] === "/")) {
+        out += " ";
+        i += 1;
+      }
+      if (i < n) {
+        out += "  ";
+        i += 2;
+      }
+      continue;
+    }
+    out += ch;
+    i += 1;
+  }
+  return out;
+}
 
 /**
  * A guard has to give up. If the server does not answer inside the budget we
@@ -69,11 +133,7 @@ export class GraphDB {
 
   /** Read-only. Refuses write keywords before dispatch; the server enforces it too. */
   async read(cypher: string, params: Record<string, unknown> = {}): Promise<QueryResult> {
-    const flat = JSON.stringify(params);
-    if (WRITE.test(flat)) {
-      throw new Error("read-only guard: write keyword in parameter, refused before dispatch");
-    }
-    if (WRITE.test(cypher)) {
+    if (WRITE.test(maskLiterals(cypher))) {
       throw new Error("read-only guard: write keyword in query, refused before dispatch");
     }
     const capped = this.capLimit(cypher);
@@ -82,7 +142,7 @@ export class GraphDB {
     return this.shape(res);
   }
 
-  /** Writes. Used only by ingest and by the audit append, never by the guard. */
+  /** Writes. Used only by ingest and by the guard's session log, never to answer a question. */
   async write(cypher: string, params: Record<string, unknown> = {}): Promise<QueryResult> {
     const res = await this.graph.query(this.prefix(cypher, params));
     return this.shape(res);
@@ -96,23 +156,40 @@ export class GraphDB {
 
   /**
    * `CYPHER k=v` prefix. FalkorDB's map literal requires unquoted keys, so we
-   * emit Cypher literals directly rather than JSON.
+   * emit Cypher literals directly rather than JSON — and the key is the one
+   * part that is concatenated raw, so it is validated here.
    */
   private prefix(cypher: string, params: Record<string, unknown>): string {
     const keys = Object.keys(params);
     if (keys.length === 0) return cypher;
-    const head = keys.map((k) => `${k}=${literal(params[k])}`).join(" ");
+    const head = keys
+      .map((k) => {
+        if (!PARAM_KEY.test(k)) {
+          throw new Error(`read-only guard: parameter key '${k}' is not a valid identifier`);
+        }
+        return `${k}=${literal(params[k])}`;
+      })
+      .join(" ");
     return `CYPHER ${head} ${cypher}`;
   }
 
-  /** A LIMIT above the cap is clamped. No LIMIT at all gets one appended. */
+  /**
+   * A LIMIT above the cap is clamped; a parameterised limit is the caller's to
+   * keep; no limit at all gets one appended on its own line (so a trailing
+   * `//` comment cannot swallow it). Matching runs on the masked query, so
+   * "limit 2" inside a string is not a limit.
+   */
   private capLimit(cypher: string): string {
-    if (/\blimit\s+\d+/i.test(cypher)) {
-      return cypher.replace(/\blimit\s+(\d+)/i, (_m, n) =>
-        `LIMIT ${Math.min(Number(n), LIMIT_CAP)}`,
-      );
-    }
-    return `${cypher.replace(/\s+$/, "")} LIMIT ${LIMIT_CAP}`;
+    const masked = maskLiterals(cypher);
+    const matches = [...masked.matchAll(/\blimit\s+(\d+|\$[A-Za-z_][A-Za-z0-9_]*)\b/gi)];
+    const last = matches[matches.length - 1];
+    if (!last) return `${cypher.replace(/\s+$/, "")}\nLIMIT ${LIMIT_CAP}`;
+    const value = last[1] ?? "";
+    if (value.startsWith("$")) return cypher;
+    const limit = Number(value);
+    if (!Number.isFinite(limit) || limit <= LIMIT_CAP) return cypher;
+    const start = (last.index ?? 0) + last[0].length - value.length;
+    return `${cypher.slice(0, start)}${LIMIT_CAP}${cypher.slice(start + value.length)}`;
   }
 }
 
