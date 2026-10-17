@@ -42,12 +42,17 @@ test("live FalkorDB max-flow yields the grant to revoke", async (t) => {
     MATCH (p:Resource {sensitivity:'private'}) RETURN id(p) AS id
   `);
   const sourceIds = sources.rows.map((row) => Number(row["id"]));
+  const targets = await db.read(`
+    MATCH (s:Resource {visibility:'public'}) RETURN id(s) AS id
+  `);
+  const targetIds = targets.rows.map((row) => Number(row["id"]));
 
   const flow = await db.read(MIN_CUT);
   const row = flow.rows[0] as unknown as MaxFlowRow;
   assert.ok(row, "algo.maxFlow returned a row");
   assert.equal(row.maxFlow, 1);
 
-  const cut = cutFromMaxFlow(sourceIds, edges, row);
+  const cut = cutFromMaxFlow(sourceIds, targetIds, edges, row);
   assert.deepEqual(cut.grants, ["git.push"]);
+  assert.equal(cut.side, "write");
 });

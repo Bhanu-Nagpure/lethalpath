@@ -11,10 +11,12 @@
  */
 
 export const LEAK_PATH = `
-MATCH (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)
+MATCH inj = (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)
 MATCH leak = (p:Resource {sensitivity:'private'})-[:FLOWS*2..10]->(s:Resource {visibility:'public'})
 WHERE ctx IN nodes(leak)
 RETURN u.kind AS injected_from,
+       [n IN nodes(inj) | coalesce(n.kind, n.name, n.id)] AS injection,
+       [n IN nodes(leak) | coalesce(n.kind, n.name, n.id)] AS chain,
        [n IN nodes(leak) WHERE n:Tool | n.name] AS tools,
        length(leak) AS hops
 ORDER BY hops ASC
@@ -34,8 +36,25 @@ YIELD maxFlow, edges, edgeFlows
 RETURN maxFlow, edges, edgeFlows
 `.trim();
 
+/**
+ * The proof that the fix works: the same leak query again, with the revoked
+ * grants' edges excluded. Zero rows is the receipt. `$revoked` binds through
+ * the CYPHER prefix like every other parameter.
+ */
+export const VERIFY_FIX = `
+MATCH inj = (u:Resource {trust:'untrusted'})-[:FLOWS]->(:Tool)-[:FLOWS]->(ctx:Context)
+MATCH leak = (p:Resource {sensitivity:'private'})-[:FLOWS*2..10]->(s:Resource {visibility:'public'})
+WHERE ctx IN nodes(leak)
+  AND all(rel IN relationships(leak) WHERE rel.grant IS NULL OR NOT (rel.grant IN $revoked))
+RETURN count(leak) AS remaining
+`.trim();
+
 export interface LeakPath {
   injectedFrom: string;
+  /** The injection chain, node by node: issue → github.read → context. */
+  injection: string[];
+  /** The leaking route, node by node: files → filesystem.read → context → git.push → repo. */
+  chain: string[];
   tools: string[];
   hops: number;
 }
@@ -58,6 +77,8 @@ function asList(v: unknown): string[] {
 export function parseLeakPaths(rows: Record<string, unknown>[]): LeakPath[] {
   return rows.map((row) => ({
     injectedFrom: String(row["injected_from"] ?? ""),
+    injection: asList(row["injection"]),
+    chain: asList(row["chain"]),
     tools: asList(row["tools"]),
     hops: Number(row["hops"]),
   }));

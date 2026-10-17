@@ -16,7 +16,7 @@ import { LEAK_PATH, MIN_CUT, parseLeakPaths } from "./paths.js";
 
 const FIXTURE = `
 CREATE (u:Resource {kind:'issue', trust:'untrusted'})
-CREATE (ctx:Context {id:'agent'})
+CREATE (ctx:Context {id:'context'})
 CREATE (p:Resource {kind:'files', sensitivity:'private'})
 CREATE (s:Resource {kind:'repo', visibility:'public'})
 CREATE (t1:Tool {name:'github.read'})
@@ -47,6 +47,8 @@ test("leak path crosses three tools through the shared context", async (t) => {
   const [found] = paths;
   assert.ok(found, "path present");
   assert.equal(found.injectedFrom, "issue");
+  assert.deepEqual(found.chain, ["files", "filesystem.write", "context", "git.push", "repo"]);
+  assert.deepEqual(found.injection, ["issue", "github.read", "context"]);
   assert.deepEqual(found.tools, ["filesystem.write", "git.push"]);
   assert.equal(found.hops, 4);
 });
