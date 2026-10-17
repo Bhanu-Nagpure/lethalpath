@@ -9,7 +9,7 @@
  */
 
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { after, test } from "node:test";
 
 import { GraphDB } from "../db.js";
 import { LEAK_PATH, MIN_CUT, parseLeakPaths } from "./paths.js";
@@ -30,12 +30,30 @@ CREATE (ctx)-[:FLOWS {dir:'feeds', capacity:1}]->(t3)
 CREATE (t3)-[:FLOWS {dir:'emits', capacity:1}]->(s)
 `;
 
+/** Graphs this file created; the after hook deletes exactly these. */
+const created: string[] = [];
+
 async function freshGraph(): Promise<GraphDB> {
   const name = `test_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+  created.push(name);
   const db = await GraphDB.open(name);
   await db.write(FIXTURE);
   return db;
 }
+
+/** `pnpm test` leaves GRAPH.LIST exactly as it found it. */
+after(async () => {
+  for (const name of created) {
+    const db = await GraphDB.open(name);
+    try {
+      await db.drop();
+    } catch {
+      /* already gone; nothing to delete */
+    } finally {
+      await db.close();
+    }
+  }
+});
 
 test("leak path crosses three tools through the shared context", async (t) => {
   const db = await freshGraph();

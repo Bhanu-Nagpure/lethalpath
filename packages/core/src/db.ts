@@ -132,6 +132,14 @@ export class GraphDB {
     await this.client.close();
   }
 
+  /**
+   * Delete the underlying graph key. Teardown only — `pnpm test` uses it so a
+   * run leaves GRAPH.LIST exactly as it found it. No answer path ever calls it.
+   */
+  async drop(): Promise<void> {
+    await this.graph.delete();
+  }
+
   /** Read-only. Refuses write keywords before dispatch; the server enforces it too. */
   async read(cypher: string, params: Record<string, unknown> = {}): Promise<QueryResult> {
     if (WRITE.test(maskLiterals(cypher))) {

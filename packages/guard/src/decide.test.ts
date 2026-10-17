@@ -8,7 +8,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import test from "node:test";
+import test, { after } from "node:test";
 
 import { GraphDB } from "@lethalpath/core";
 import type { ScanConfig } from "@lethalpath/schema";
@@ -22,12 +22,31 @@ const FIXTURE = fileURLToPath(new URL("../../../data/fixtures/fs-git.json", impo
 const HOST = process.env["FALKOR_HOST"] ?? "localhost";
 const PORT = Number(process.env["FALKOR_PORT"] ?? 6379);
 
+/** Session graphs this file created; the after hook deletes exactly these. */
+const created: string[] = [];
+
+/** `pnpm test` leaves GRAPH.LIST exactly as it found it. */
+after(async () => {
+  for (const name of created) {
+    const db = await GraphDB.open(name, HOST, PORT);
+    try {
+      await db.drop();
+    } catch {
+      /* already gone; nothing to delete */
+    } finally {
+      await db.close();
+    }
+  }
+});
+
 function loadFixture(): ScanConfig {
   return JSON.parse(readFileSync(FIXTURE, "utf8")) as ScanConfig;
 }
 
 function sessionId(label: string): string {
-  return `guard-test-${label}-${Date.now().toString(36)}`;
+  const id = `guard-test-${label}-${Date.now().toString(36)}`;
+  created.push(`sessions_${id}`);
+  return id;
 }
 
 test("explainRoute walks untrusted → reader → context → called tool → public sink", () => {

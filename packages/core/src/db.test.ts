@@ -10,7 +10,7 @@
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { test } from "node:test";
+import { after, test } from "node:test";
 
 import type { ScanConfig } from "@lethalpath/schema";
 
@@ -23,13 +23,32 @@ function fixture(name: string): ScanConfig {
   return JSON.parse(readFileSync(url, "utf8")) as ScanConfig;
 }
 
+/** Graphs this file created; the after hook deletes exactly these. */
+const created: string[] = [];
+
 async function freshGraph(): Promise<GraphDB> {
-  const db = await GraphDB.open(`t_db_${Date.now()}_${Math.floor(Math.random() * 1e6)}`);
+  const name = `t_db_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+  created.push(name);
+  const db = await GraphDB.open(name);
   // A graph that was never written answers reads with "Invalid graph operation
   // on empty key" on 6.0.2, so seed the key the way a scan would.
   await db.write("CREATE (:Meta {seed:true})");
   return db;
 }
+
+/** `pnpm test` leaves GRAPH.LIST exactly as it found it. */
+after(async () => {
+  for (const name of created) {
+    const db = await GraphDB.open(name);
+    try {
+      await db.drop();
+    } catch {
+      /* already gone; nothing to delete */
+    } finally {
+      await db.close();
+    }
+  }
+});
 
 test("data that contains write words is not refused", async (t) => {
   const db = await freshGraph();

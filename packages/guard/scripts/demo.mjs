@@ -17,6 +17,10 @@ import { dirname, resolve } from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 
+// Style helpers no-op unless a real terminal is watching, so a piped demo
+// transcript stays plain text.
+import { bold, green, red } from "@lethalpath/core";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(here, "..", "..", "..");
 const SERVER = resolve(here, "..", "dist", "server.js");
@@ -112,9 +116,9 @@ function callExpr(tool, args) {
 }
 
 function verdict(result) {
-  if (result.blocked) return "BLOCKED";
+  if (result.blocked) return bold(red("BLOCKED"));
   const taint = /session taint: (.*)$/m.exec(result.text)?.[1] ?? "unknown";
-  return `ALLOWED · taint: ${taint}`;
+  return `${green(bold("ALLOWED"))} · taint: ${taint}`;
 }
 
 function splitReason(text) {

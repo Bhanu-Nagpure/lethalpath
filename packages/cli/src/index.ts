@@ -23,9 +23,12 @@ import {
   LEAK_PATH_FAST,
   MIN_CUT,
   VERIFY_FIX,
+  bold,
   cutFromMaxFlow,
+  green,
   ingest,
   parseLeakPaths,
+  red,
   scanGraphName,
   scanStatus,
   type FlowEdge,
@@ -99,6 +102,8 @@ interface LoadedScan {
   cfg: ScanConfig;
   source: "config" | "mcp";
   unlabelled: string[];
+  /** What the labeler's secret pass replaced; zero when no labeler ran. */
+  redacted: { values: number; names: number };
 }
 
 /**
@@ -109,11 +114,16 @@ interface LoadedScan {
  */
 function loadScan(args: CliArgs): LoadedScan {
   if (args.mcp === undefined) {
-    return { cfg: loadConfig(args.config), source: "config", unlabelled: [] };
+    return {
+      cfg: loadConfig(args.config),
+      source: "config",
+      unlabelled: [],
+      redacted: { values: 0, names: 0 },
+    };
   }
   const raw = JSON.parse(readFileSync(resolve(args.mcp), "utf8")) as unknown;
-  const { config, unlabelled } = labelConfig(raw, {});
-  return { cfg: config, source: "mcp", unlabelled };
+  const { config, unlabelled, redacted } = labelConfig(raw, {});
+  return { cfg: config, source: "mcp", unlabelled, redacted };
 }
 
 function opt(value: unknown): string | undefined {
@@ -189,7 +199,7 @@ function edgeLabel(edge: FlowEdge): string {
 }
 
 async function scan(args: CliArgs): Promise<number> {
-  const { cfg, source, unlabelled } = loadScan(args);
+  const { cfg, source, unlabelled, redacted } = loadScan(args);
   const db = await GraphDB.open(scanGraphName(cfg.id), args.host, args.port);
   try {
     const built = await ingest(db, cfg);
@@ -252,19 +262,36 @@ async function scan(args: CliArgs): Promise<number> {
         `labelled  ${cfg.tools.length} tool${cfg.tools.length === 1 ? "" : "s"} by rule · ` +
           (unlabelled.length === 0 ? "0 unlabelled" : `${unlabelled.length} unlabelled (${shown}${tail})`),
       );
+      if (redacted.values + redacted.names > 0) {
+        out.push(
+          `redacted  ${redacted.values} value${redacted.values === 1 ? "" : "s"}, ` +
+            `${redacted.names} token-shaped name${redacted.names === 1 ? "" : "s"} — stripped before the graph`,
+        );
+      }
     }
     out.push("");
 
     if (routes === 0) {
-      out.push("0 routes from private data to a public sink.");
+      out.push(green("0 routes from private data to a public sink."));
       out.push("");
-      out.push("nothing to revoke — that is the answer, not an error.");
+      out.push(green("nothing to revoke — that is the answer, not an error."));
       out.push(
         `the graph holds ${resources.privateCount} private store${resources.privateCount === 1 ? "" : "s"} ` +
           `and ${resources.sinkCount} public sink${resources.sinkCount === 1 ? "" : "s"}; none are connected to each other.`,
       );
     } else {
-      out.push("LEAK PATHS");
+      const headline =
+        `${red(bold(routes))} route${routes === 1 ? "" : "s"} found — ` +
+        "every one of them is a permission you granted.";
+      // When the list is a sample, the count must lead — the punchline cannot
+      // sit under three screens of near-identical routes. A complete listing
+      // keeps the conclusion at the end.
+      const truncated = routes > paths.length;
+      if (truncated) {
+        out.push(headline);
+        out.push("");
+      }
+      out.push(red("LEAK PATHS"));
       paths.forEach((path, i) => {
         out.push(`  ${i + 1}  ${path.hops} hops  ${path.chain.join(" → ")}`);
         out.push(`     injection  ${path.injection.join(" → ")}`);
@@ -281,15 +308,13 @@ async function scan(args: CliArgs): Promise<number> {
         cite("out        ", path.chain[path.chain.length - 1]);
         out.push("");
       });
-      out.push(
-        `${routes} route${routes === 1 ? "" : "s"} found — every one of them is a permission you granted.`,
-      );
+      if (!truncated) out.push(headline);
       if (routes > paths.length && pathOrder === "shortest") {
         out.push(`  note   showing the ${paths.length} shortest by hops; the graph has ${routes} in total`);
       }
       if (pathOrder === "arbitrary") {
         out.push(
-          `  note   route enumeration exceeded the server budget on this graph; showing ${paths.length} routes in arbitrary order — the count is exact, and fix is unaffected`,
+          `  note   route enumeration exceeded the server budget on this graph; showing ${paths.length} of ${routes} routes, order unspecified — the count is exact, and fix is unaffected`,
         );
       }
       if (pathOrder === "unlisted") {
@@ -325,11 +350,11 @@ async function fix(args: CliArgs): Promise<number> {
        RETURN id(s) AS id`,
     );
 
-    const absten = (line: string): number => {
-      console.log([BANNER, "", "FIX", "", line].join("\n"));
+    const absten = (line: string, safe = false): number => {
+      console.log([BANNER, "", "FIX", "", safe ? green(line) : line].join("\n"));
       return 0;
     };
-    if (routes === 0) return absten("nothing to revoke — no route was found to close.");
+    if (routes === 0) return absten("nothing to revoke — no route was found to close.", true);
     if (sourceIds.length === 0) {
       return absten(
         "routes exist, but every private resource is also marked public — the sides overlap, so no revocable cut exists from these labels.",
@@ -390,19 +415,45 @@ async function fix(args: CliArgs): Promise<number> {
       return closed ? 0 : 1;
     }
 
+    // The receipt is what a recording points the camera at, so a long list
+    // wraps one item per line, aligned under its label; a single item keeps
+    // the one-line form. Every fact and every number stays.
+    const INDENT = " ".repeat(11);
     const out: string[] = [BANNER, ""];
     out.push("FIX  ·  CALL algo.maxFlow on FalkorDB");
     out.push("");
-    out.push(`max-flow   ${cut.maxFlow}`);
-    out.push(`cut        ${String(cut.side)} side · ${cut.edges.map(edgeLabel).join(", ")}`);
-    out.push(`revoke     ${cut.grants.join(", ")}`);
-    out.push(
-      closed
-        ? `verified   0 of ${routes} routes remain (leak query re-run without ${cut.grants.join(", ")})`
-        : `verified   ${remaining} of ${routes} routes STILL OPEN — cut did not close everything`,
-    );
+    out.push(`max-flow   ${bold(cut.maxFlow)}`);
+    if (cut.edges.length > 1) {
+      out.push(`cut        ${String(cut.side)} side`);
+      for (const edge of cut.edges) out.push(`${INDENT}${edgeLabel(edge)}`);
+    } else {
+      out.push(`cut        ${String(cut.side)} side · ${cut.edges.map(edgeLabel).join(", ")}`);
+    }
+    const first = cut.grants[0];
+    if (cut.grants.length > 1 && first !== undefined) {
+      out.push(`revoke     ${red(first)}`);
+      for (const grant of cut.grants.slice(1)) out.push(`${INDENT}${red(grant)}`);
+    } else {
+      out.push(`revoke     ${cut.grants.map(red).join(", ")}`);
+    }
+    if (closed) {
+      if (cut.grants.length > 1) {
+        out.push(`verified   ${green(`${bold(remaining)} of ${routes} routes remain`)}`);
+        out.push(`${INDENT}${green("leak query re-run without the revoked grants")}`);
+      } else {
+        out.push(
+          `verified   ${green(
+            `${bold(remaining)} of ${routes} routes remain (leak query re-run without ${cut.grants.join(", ")})`,
+          )}`,
+        );
+      }
+    } else {
+      out.push(
+        `verified   ${red(`${bold(remaining)} of ${routes} routes STILL OPEN — cut did not close everything`)}`,
+      );
+    }
     if (tasks.length > 0) {
-      out.push(`tasks      ${kept} of ${tasks.length} keep working`);
+      out.push(`tasks      ${bold(kept)} of ${bold(tasks.length)} keep working`);
       if (lost.length > 0) out.push(`           loses: ${lost.map((task) => task.name).join(", ")}`);
     }
     out.push("");
@@ -416,12 +467,20 @@ async function fix(args: CliArgs): Promise<number> {
 }
 
 async function main(): Promise<number> {
-  const args = parseArgs(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  const [verb = ""] = argv;
+  // Help is asked for anywhere: `scan --help` and `fix -h` print the same
+  // usage the bare invocation does, and answer 0. Asking for help is not an
+  // error, at any position.
+  if (verb === "help" || argv.includes("--help") || argv.includes("-h")) {
+    console.log(USAGE);
+    return 0;
+  }
+  const args = parseArgs(argv);
   if (args.verb === "scan") return scan(args);
   if (args.verb === "fix") return fix(args);
   console.log(USAGE);
-  if (args.verb === "" || args.verb === "help" || args.verb === "--help") return 0;
-  return 1;
+  return verb === "" ? 0 : 1;
 }
 
 main()

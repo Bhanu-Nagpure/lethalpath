@@ -14,7 +14,7 @@
 
 import { validateScanConfig, type ResourceDecl, type ScanConfig, type ServerDecl, type ToolDecl } from "@lethalpath/schema";
 
-import { parseClaudeMcp, safeId, uniqueId } from "./mcp.js";
+import { parseClaudeMcp, safeId, uniqueId, type RedactionStats } from "./mcp.js";
 import { matchRule, type ResourceShape, UNKNOWN_RULE_ID } from "./rules.js";
 
 export interface LabelOptions {
@@ -26,6 +26,8 @@ export interface LabelResult {
   config: ScanConfig;
   /** Full tool names (e.g. `weird.mystery_tool`) no rule could classify. */
   unlabelled: string[];
+  /** What the secret pass replaced on the way in; the CLI shows this as a receipt. */
+  redacted: RedactionStats;
 }
 
 function mergeResource(resources: Map<string, ResourceDecl>, shape: ResourceShape): void {
@@ -57,7 +59,8 @@ function deriveConfigId(servers: ServerDecl[]): string {
 }
 
 export function labelConfig(input: unknown, opts: LabelOptions = {}): LabelResult {
-  const parsed = parseClaudeMcp(input);
+  const redacted: RedactionStats = { values: 0, names: 0 };
+  const parsed = parseClaudeMcp(input, redacted);
 
   // Our own ScanConfig: pass through, labels are already declared there.
   if (parsed.declared) {
@@ -66,7 +69,7 @@ export function labelConfig(input: unknown, opts: LabelOptions = {}): LabelResul
     if (problems.length > 0) {
       throw new Error(`declared scan config is invalid:\n- ${problems.join("\n- ")}`);
     }
-    return { config: declared, unlabelled: [] };
+    return { config: declared, unlabelled: [], redacted };
   }
 
   const resources = new Map<string, ResourceDecl>();
@@ -124,8 +127,8 @@ export function labelConfig(input: unknown, opts: LabelOptions = {}): LabelResul
   if (problems.length > 0) {
     throw new Error(`labeler produced an invalid scan config:\n- ${problems.join("\n- ")}`);
   }
-  return { config, unlabelled };
+  return { config, unlabelled, redacted };
 }
 
-export { parseClaudeMcp, serverNames, stripSecrets, type McpServerEntry, type ParsedMcp } from "./mcp.js";
+export { parseClaudeMcp, serverNames, stripSecrets, type McpServerEntry, type ParsedMcp, type RedactionStats } from "./mcp.js";
 export { matchRule, RULES, UNKNOWN_RULE_ID, type ResourceShape, type Rule } from "./rules.js";

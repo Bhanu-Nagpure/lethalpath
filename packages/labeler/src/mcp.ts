@@ -42,6 +42,20 @@ export interface ParsedMcp {
 
 export const REDACTED = "[redacted]";
 
+/** What the secret pass replaced, so a caller can show the receipt. */
+export interface RedactionStats {
+  /** String values replaced with `[redacted]` (env values, tokens, URL params, assignments). */
+  values: number;
+  /** Key-position strings replaced because the name itself looked like a token. */
+  names: number;
+}
+
+function bump(stats: RedactionStats | undefined, name: boolean): void {
+  if (stats === undefined) return;
+  if (name) stats.names += 1;
+  else stats.values += 1;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -85,45 +99,62 @@ const ASSIGNMENT_RE = /^([A-Za-z0-9_.-]+)=(.+)$/;
 /** `?token=abc` and `&api_key=abc` inside a URL string. */
 const URL_PARAM_RE = /([?&][A-Za-z0-9_.-]*(?:token|key|secret|password|passwd|auth)[A-Za-z0-9_.-]*=)([^&\s]+)/gi;
 
-function redactString(value: string): string {
-  if (SECRET_VALUE_RES.some((re) => re.test(value))) return REDACTED;
+function redactString(value: string, stats?: RedactionStats, name = false): string {
+  if (SECRET_VALUE_RES.some((re) => re.test(value))) {
+    bump(stats, name);
+    return REDACTED;
+  }
   const m = ASSIGNMENT_RE.exec(value);
   const key = m?.[1];
-  if (key !== undefined && SECRET_KEY_RE.test(key.replace(/^--?/, ""))) return `${key}=${REDACTED}`;
-  return value.replace(URL_PARAM_RE, (_all: string, prefix: string) => `${prefix}${REDACTED}`);
+  if (key !== undefined && SECRET_KEY_RE.test(key.replace(/^--?/, ""))) {
+    bump(stats, name);
+    return `${key}=${REDACTED}`;
+  }
+  return value.replace(URL_PARAM_RE, (_all: string, prefix: string) => {
+    bump(stats, name);
+    return `${prefix}${REDACTED}`;
+  });
 }
 
 /** Every env VALUE is replaced; keys are kept because they are what tells you a secret was there. */
-function redactEnv(value: unknown): unknown {
-  if (!isRecord(value)) return REDACTED;
+function redactEnv(value: unknown, stats?: RedactionStats): unknown {
+  if (!isRecord(value)) {
+    bump(stats, false);
+    return REDACTED;
+  }
   const out: Record<string, unknown> = {};
-  for (const key of Object.keys(value)) out[key] = REDACTED;
+  for (const key of Object.keys(value)) {
+    bump(stats, false);
+    out[key] = REDACTED;
+  }
   return out;
 }
 
 /**
  * Deep-copy `input` with every secret-shaped string replaced. The returned
  * value never contains a secret that was in the input. Structural shape is
- * preserved so parsers can keep walking it.
+ * preserved so parsers can keep walking it. An optional `stats` counter
+ * records what was replaced, for callers that must show a receipt.
  */
-export function stripSecrets(input: unknown): unknown {
-  if (typeof input === "string") return redactString(input);
-  if (Array.isArray(input)) return input.map((item) => stripSecrets(item));
+export function stripSecrets(input: unknown, stats?: RedactionStats): unknown {
+  if (typeof input === "string") return redactString(input, stats);
+  if (Array.isArray(input)) return input.map((item) => stripSecrets(item, stats));
   if (isRecord(input)) {
     const out: Record<string, unknown> = {};
     for (const [rawKey, value] of Object.entries(input)) {
       // A key is a string too: server names live in key position, and a
       // pasted config can carry a token there. Redact the key itself.
-      const key = redactString(rawKey);
+      const key = redactString(rawKey, stats, true);
       if (/^(env|environment)$/i.test(key)) {
-        out[key] = redactEnv(value);
+        out[key] = redactEnv(value, stats);
         continue;
       }
       if (SECRET_KEY_RE.test(key)) {
+        bump(stats, false);
         out[key] = REDACTED;
         continue;
       }
-      out[key] = stripSecrets(value);
+      out[key] = stripSecrets(value, stats);
     }
     return out;
   }
@@ -189,9 +220,9 @@ function looksLikeScanConfig(rec: Record<string, unknown>): boolean {
  * from `KNOWN_SERVER_TOOLS` (name first, then command+args) and flagged with
  * `toolsListed: false` so the report can say the tool list was inferred.
  */
-export function parseClaudeMcp(json: unknown): ParsedMcp {
+export function parseClaudeMcp(json: unknown, stats?: RedactionStats): ParsedMcp {
   if (!isRecord(json)) throw new Error("mcp config must be a JSON object");
-  const stripped = stripSecrets(json) as Record<string, unknown>;
+  const stripped = stripSecrets(json, stats) as Record<string, unknown>;
 
   if (looksLikeScanConfig(stripped)) {
     const cfg = stripped as unknown as ScanConfig;

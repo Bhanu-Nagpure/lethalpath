@@ -4,11 +4,28 @@
  */
 
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { after, test } from "node:test";
 
 import { GraphDB } from "../db.js";
 import { MIN_CUT } from "./paths.js";
 import { cutFromMaxFlow, type FlowEdge, type MaxFlowRow } from "./mincut.js";
+
+/** Graphs this file created; the after hook deletes exactly these. */
+const created: string[] = [];
+
+/** `pnpm test` leaves GRAPH.LIST exactly as it found it. */
+after(async () => {
+  for (const name of created) {
+    const db = await GraphDB.open(name);
+    try {
+      await db.drop();
+    } catch {
+      /* already gone; nothing to delete */
+    } finally {
+      await db.close();
+    }
+  }
+});
 
 const FIXTURE = `
 CREATE (p:Resource {name:'files', sensitivity:'private'})
@@ -20,6 +37,7 @@ CREATE (t)-[:FLOWS {dir:'emits', capacity:1, grant:'git.push', revocable:true}]-
 
 test("live FalkorDB max-flow yields the grant to revoke", async (t) => {
   const name = `cut_${Date.now()}`;
+  created.push(name);
   const db = await GraphDB.open(name);
   t.after(() => db.close());
   await db.write(FIXTURE);

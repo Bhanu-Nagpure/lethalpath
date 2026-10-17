@@ -8,12 +8,31 @@ import assert from "node:assert/strict";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
-import test from "node:test";
+import test, { after } from "node:test";
+
+import { GraphDB } from "@lethalpath/core";
 
 const SERVER = fileURLToPath(new URL("./server.js", import.meta.url));
 const FIXTURE = fileURLToPath(new URL("../../../data/fixtures/fs-git.json", import.meta.url));
 const HOST = process.env["FALKOR_HOST"] ?? "localhost";
 const PORT = String(process.env["FALKOR_PORT"] ?? 6379);
+
+/** Session graphs this file created; the after hook deletes exactly these. */
+const created: string[] = [];
+
+/** `pnpm test` leaves GRAPH.LIST exactly as it found it. */
+after(async () => {
+  for (const name of created) {
+    const db = await GraphDB.open(name, HOST, Number(PORT));
+    try {
+      await db.drop();
+    } catch {
+      /* already gone; nothing to delete */
+    } finally {
+      await db.close();
+    }
+  }
+});
 
 interface JsonRpcMessage {
   id?: number;
@@ -73,6 +92,7 @@ test(
   { timeout: 60_000 },
   async () => {
     const session = `guard-test-stdio-${Date.now().toString(36)}`;
+    created.push(`sessions_${session}`);
     const child = spawn(
       process.execPath,
       [SERVER, "--config", FIXTURE, "--session", session, "--host", HOST, "--port", PORT],

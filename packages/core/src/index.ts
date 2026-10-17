@@ -1,5 +1,6 @@
 export { GraphDB } from "./db.js";
 export type { QueryResult } from "./db.js";
+export { bold, green, red } from "./ansi.js";
 export {
   CONTEXT_ID,
   HUB_CAPACITY,
