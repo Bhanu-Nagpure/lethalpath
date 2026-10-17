@@ -31,7 +31,7 @@ data (zero edges written).
 
 ```bash
 pnpm --filter @lethalpath/guard build     # pretest builds deps too
-pnpm --filter @lethalpath/guard test      # 7 tests, incl. a real stdio end-to-end
+pnpm --filter @lethalpath/guard test      # 8 tests, incl. a real stdio end-to-end
 pnpm --filter @lethalpath/guard demo      # the four-call transcript, over stdio
 pnpm --filter @lethalpath/guard demo /path/policy.json   # verify the exit-1 path
 ```
