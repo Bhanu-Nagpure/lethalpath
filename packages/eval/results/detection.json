@@ -1,0 +1,31 @@
+{
+  "suite": "detection",
+  "cases": 40,
+  "passed": 40,
+  "failed": 0,
+  "generatedBy": "packages/eval",
+  "note": "Seeded generator (mulberry32, seed 20261017; mix 16 leak / 8 laundering / 8 clean / 8 tie), run live on 2026-10-17 against FalkorDB at localhost:6379. Method: each case ingested into a fresh eval_det_* graph and scanned with LEAK_PATH; pass = planted private/public endpoints and sink tool found (zero paths for clean cases). Every number computed in this run.",
+  "breakdown": {
+    "leak": {
+      "cases": 16,
+      "passed": 16,
+      "failed": 0
+    },
+    "laundering": {
+      "cases": 8,
+      "passed": 8,
+      "failed": 0
+    },
+    "clean": {
+      "cases": 8,
+      "passed": 8,
+      "failed": 0
+    },
+    "tie": {
+      "cases": 8,
+      "passed": 8,
+      "failed": 0
+    }
+  },
+  "failures": []
+}

@@ -238,8 +238,22 @@ section quotes only those files, and they are committed.
 pnpm --filter @lethalpath/eval build && node packages/eval/dist/run.js
 ```
 
-*(Filled from the files once the harness has run — the results are the last
-thing that lands.)*
+| Suite | Cases | Passed | Failed |
+|---|---|---|---|
+| detection → `results/detection.json` | 40 | 40 | 0 |
+| fix-quality → `results/fix-quality.json` | 40 | 40 | 0 |
+
+Both files break the same 40 cases down the same way: **leak 16/16 ·
+laundering 8/8 · clean 8/8 · tie 8/8**, `failures` empty in both. The
+generator is seeded (`mulberry32`, seed 20261017), and every case ran live
+against FalkorDB 6.0.2 at `localhost:6379` on 2026-10-17.
+
+Detection asks whether the scan finds the planted route — and stays silent on
+the eight clean configs. Fix-quality asks whether the cut matches the
+constructed answer, whether `VERIFY_FIX` takes the route count to zero, and
+how many declared tasks keep working. The tie cases are the ones where both
+canonical cuts close every route; they exercise the documented write-side
+tie-break.
 
 ## Data
 
