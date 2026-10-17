@@ -20,6 +20,11 @@ FalkorDB 6.0.2.
 | `whatsapp-mcp-exfil.json` | 1 | `whatsapp.send_message` | 2 of 3 |
 | `postmark-registry-bcc.json` | 1 | `postmark.send_email` | 1 of 2 |
 
+Postmark is a different kind of incident: a malicious package, not a prompt
+injection. LethalPath does not detect malicious packages; the fixture only
+shows that removing the package's grant closes the route, which is the same
+fix as removing the package. The site marks it out of scope.
+
 ---
 
 ## 1 · GitHub MCP heist — 2025-05-26
