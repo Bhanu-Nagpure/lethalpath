@@ -54,16 +54,16 @@
     <span class="spacer"></span>
     <a class="nb" href="index.html">Home</a>
     <a class="nb" href="scan.html">Scan</a>
-    <a class="nb" href="combos.html">Lethal Combos</a>
+    <a class="nb" href="combos.html">Combos</a>
     <a class="nb" href="benchmarks.html">Benchmarks</a>
-    <a class="nb" href="threat-model.html" aria-current="page">Threat model</a>
+    <a class="nb" href="threat-model.html" aria-current="page">Limits</a>
   </div>
 </nav>
 </header>
 
 <main id="main" style="border-top:0">
   <div class="wrap main">
-    <p class="eyebrow" data-reveal>Threat model</p>
+    <p class="eyebrow" data-reveal>Limits</p>
     <h1 class="page-title" style="margin-top:14px" data-reveal>What we catch, what we miss, and what we refuse to claim</h1>
     <p class="lede mt-md">
       What LethalPath checks, what it does not, and which claims it does not make.
@@ -123,13 +123,12 @@
       <div class="k">
         <h3 style="color:var(--safe)">What leaves your machine</h3>
         <ul>
-          <li>Nothing, unless you press scan</li>
-          <li>If you do: the config with <span class="mono">env</span>, <span class="mono">headers</span> and secret-looking arguments removed</li>
-          <li>A preview of exactly what will be sent, shown before you send it</li>
+          <li>Nothing. The CLI, the labeler and FalkorDB all run locally; this site shows committed runs and never receives a config</li>
+          <li>When you scan a real <span class="mono">mcp.json</span>: <span class="mono">env</span> values, headers and token-shaped server names are redacted before anything reaches the graph &mdash; the CLI prints the redaction count as a receipt</li>
         </ul>
       </div>
       <div class="k">
-        <h3 style="color:var(--danger)">What we never store</h3>
+        <h3 style="color:var(--danger)">What is never stored</h3>
         <ul>
           <li>Your secrets, tokens or keys</li>
           <li>File contents, message bodies or query results</li>
@@ -185,9 +184,9 @@
     </div>
     <div class="navlinks">
       <a href="scan.html">Scan</a>
-      <a href="combos.html">Lethal Combos</a>
+      <a href="combos.html">Combos</a>
       <a href="benchmarks.html">Benchmarks</a>
-      <a href="threat-model.html">Threat model</a>
+      <a href="threat-model.html">Limits</a>
       <a href="disclosure.html">Disclosure</a>
     </div>
   </div>
