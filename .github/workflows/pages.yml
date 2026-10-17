@@ -1,13 +1,16 @@
 # Deploys the static site in site/ to GitHub Pages.
 #
-# Requires Settings → Pages → Source: GitHub Actions (one-time, by the maintainer).
+# Manual on purpose: Pages must be enabled once (Settings → Pages → Source:
+# GitHub Actions) by the maintainer — a push-triggered run before that would
+# fail on the repository for reasons that look like our bug. After enabling,
+# run this from the Actions tab, or restore the push trigger:
+#   on:
+#     push:
+#       branches: [main]
+#       paths: ["site/**"]
 name: Pages
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "site/**"
   workflow_dispatch:
 
 permissions:
