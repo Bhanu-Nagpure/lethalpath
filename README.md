@@ -98,6 +98,14 @@ pnpm --filter @lethalpath/guard demo     # demo MCP session with simulated tool 
 pnpm --filter @lethalpath/eval evaluate  # the 40-case eval the Results section quotes
 ```
 
+Or run the whole sequence with pauses between acts — the same commands, the
+same output, plus a trimmed 567-route dump:
+
+```bash
+bash scripts/live-demo.sh          # pauses between acts
+bash scripts/live-demo.sh --no-pause   # straight through
+```
+
 `scan` and `fix` accept `--json`; both read the fixture `data/fixtures/fs-git.json`
 by default. One graph per config: `scan_fs-git`, `scan_clean` — FalkorDB's
 multigraph model is the isolation.
@@ -123,7 +131,7 @@ three servers — 49 nodes, 120 edges. The stats bar shows the Browser's default
 ### What `scan` prints
 
 ```
-LethalPath  ·  powered by FalkorDB 6.0.2
+LethalPath  ·  verified against FalkorDB 6.0.2
 
 config    fs-git · A public issue steers the agent through the private folder out to a public repo
 graph     scan_fs-git · 11 nodes · 9 edges · ready
