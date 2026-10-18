@@ -1,12 +1,13 @@
 /**
  * What the product prints when it runs.
  *
- * The banner names the engine the build is verified against. The body names the
+ * The banner names the engine version the build targets (a fixed label, not a
+ * runtime check). The body names the
  * FalkorDB procedure that produced the grant, so the output itself says where
  * the decision came from.
  */
 
-export const BANNER = "LethalPath  ·  verified against FalkorDB 6.0.2";
+export const BANNER = "LethalPath  ·  built for FalkorDB 6.0.2";
 
 export function report(input: {
   injectedFrom: string;
