@@ -41,6 +41,7 @@
     <a class="nb" href="combos.html">Combos</a>
     <a class="nb" href="benchmarks.html">Benchmarks</a>
     <a class="nb" href="threat-model.html">Limits</a>
+    <a class="nb" href="https://github.com/bhanu-dev82/lethalpath">GitHub</a>
     <a class="btn btn-primary btn-sm" href="#install">Install</a>
   </div>
 </nav>
@@ -60,6 +61,12 @@
       <a class="btn btn-primary" href="#install">Install the CLI</a>
       <a class="btn btn-ghost" href="scan.html">See an example scan</a>
     </div>
+    <p style="margin-top:22px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <a class="pill" href="benchmarks.html"><span class="mono">40/40</span>&nbsp;detection · <span class="mono">detection.json</span></a>
+      <a class="pill" href="benchmarks.html"><span class="mono">40/40</span>&nbsp;fixes verified · <span class="mono">fix-quality.json</span></a>
+      <a class="pill" href="scan.html"><span class="mono">567</span>&nbsp;routes on a public config · <span class="mono">live-evidence</span></a>
+      <a class="pill" href="benchmarks.html"><span class="mono">8/8</span>&nbsp;clean configs answered zero</a>
+    </p>
 
     <h2 id="problem" style="margin-top:56px">What goes wrong</h2>
     <div class="explain">
@@ -213,6 +220,7 @@
       </div>
     </div>
     <p class="muted small" style="margin-top:12px">The committed fs-git run, replayed: a public issue taints the agent context, and your private folder leaves through <span class="mono">git.push</span>. The transcript is in <span class="mono">docs/live-evidence/</span>.</p>
+    <p class="small" style="margin-top:8px;max-width:68ch;color:var(--body)">Both the route and the fix run as queries on <a href="https://www.falkordb.com/">FalkorDB</a> 6.0.2 — the leak is one Cypher traversal, the fix is one <span class="mono">CALL algo.maxFlow</span>. <a href="scan.html">See the exact queries</a>.</p>
   </div>
 
 <section>
@@ -401,6 +409,7 @@ node packages/cli/dist/index.js fix
 <span class="com"># guard demo: simulated tool calls, no real servers behind it</span>
 pnpm --filter @lethalpath/guard demo</pre></div>
     </div>
+    <p class="small muted" style="margin-top:14px">Every number on this site can be re-run from the repo &mdash; <a href="benchmarks.html">Benchmarks</a> shows the commands.</p>
   </div>
 </section>
 </main>
@@ -410,6 +419,7 @@ pnpm --filter @lethalpath/guard demo</pre></div>
     <div>
       <a class="brand" href="index.html">LethalPath</a>
       <p class="mt-md" style="max-width:38ch">An open-source guard from <a href="https://www.devanshustudios.com/">Devanshu Studios</a>. <a href="https://www.falkordb.com/">FalkorDB</a>, the hackathon sponsor, runs the path query and the cut.</p>
+      <p class="small muted" style="margin-top:6px">Graph Hacks entry · T01 Agents That Act on Connected Data · T02 Agent Memory and Coordination</p>
     </div>
     <div class="navlinks">
       <a href="scan.html">Scan</a>
