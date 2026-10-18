@@ -1,0 +1,277 @@
+WEBVTT
+
+00:00:00.080 --> 00:00:01.840
+An AI agent with three
+
+00:00:01.840 --> 00:00:03.740
+ordinary permissions can be
+
+00:00:03.740 --> 00:00:05.280
+steered into leaking your data.
+
+00:00:05.280 --> 00:00:07.281
+Read a public issue.
+
+00:00:07.860 --> 00:00:10.060
+Read a private folder. Publish.
+
+00:00:10.060 --> 00:00:12.880
+No tool misbehaves. The
+
+00:00:12.880 --> 00:00:14.500
+bug is the arrangement.
+
+00:00:15.720 --> 00:00:17.400
+The arrangement is a path:
+
+00:00:17.400 --> 00:00:20.200
+untrusted input, through the
+
+00:00:20.200 --> 00:00:22.820
+agent's shared context, into private
+
+00:00:22.820 --> 00:00:24.480
+data, and out to
+
+00:00:24.480 --> 00:00:26.660
+a public sink. A list
+
+00:00:26.660 --> 00:00:28.780
+of tools cannot answer
+
+00:00:28.780 --> 00:00:31.020
+whether that path exists. A
+
+00:00:31.020 --> 00:00:31.760
+graph can.
+
+00:00:32.980 --> 00:00:34.240
+Lethal Path reads the M
+
+00:00:34.240 --> 00:00:35.820
+C P config and
+
+00:00:35.820 --> 00:00:38.140
+builds a graph: servers, tools,
+
+00:00:38.140 --> 00:00:40.320
+data, and the context
+
+00:00:40.320 --> 00:00:42.700
+every tool shares. One Cypher
+
+00:00:42.700 --> 00:00:44.380
+traversal anchors on that
+
+00:00:44.380 --> 00:00:46.260
+context and returns the route.
+
+00:00:46.260 --> 00:00:48.620
+Here: one route, four
+
+00:00:48.620 --> 00:00:51.900
+hops. Project folder, filesystem dot
+
+00:00:51.900 --> 00:00:54.500
+read, context, git push,
+
+00:00:54.500 --> 00:00:56.840
+public repo. The injection is
+
+00:00:56.840 --> 00:00:57.981
+a public GitHub issue,
+
+00:00:58.540 --> 00:01:00.120
+read into the same context.
+
+00:01:01.380 --> 00:01:03.720
+Now the fix. Lethal Path
+
+00:01:03.720 --> 00:01:05.100
+calls algo dot max
+
+00:01:05.100 --> 00:01:07.000
+flow on Falkor D B.
+
+00:01:07.000 --> 00:01:09.081
+The engine returns flows,
+
+00:01:09.460 --> 00:01:10.920
+not a cut, so Lethal
+
+00:01:10.920 --> 00:01:12.280
+Path walks the residual
+
+00:01:12.280 --> 00:01:14.680
+graph, compares both canonical cuts,
+
+00:01:14.680 --> 00:01:16.000
+and picks the cheaper
+
+00:01:16.000 --> 00:01:18.940
+one. Max flow two. The
+
+00:01:18.940 --> 00:01:20.020
+cut is the write
+
+00:01:20.020 --> 00:01:22.520
+side: revoke git push. The
+
+00:01:22.520 --> 00:01:24.180
+same leak query re-runs
+
+00:01:24.180 --> 00:01:26.600
+without it and returns zero
+
+00:01:26.600 --> 00:01:28.460
+of one routes. Three
+
+00:01:28.460 --> 00:01:30.600
+of four declared tasks keep
+
+00:01:30.600 --> 00:01:32.520
+working. That is the
+
+00:01:32.520 --> 00:01:32.960
+receipt.
+
+00:01:34.200 --> 00:01:36.020
+Now a real config, built
+
+00:01:36.020 --> 00:01:37.180
+from the official M
+
+00:01:37.180 --> 00:01:40.020
+C P server READMEs: GitHub,
+
+00:01:40.020 --> 00:01:43.400
+filesystem, git. Forty tools
+
+00:01:43.400 --> 00:01:45.980
+labelled by rule, zero unlabelled,
+
+00:01:45.980 --> 00:01:48.380
+secrets redacted before anything
+
+00:01:48.380 --> 00:01:50.280
+reaches the graph. Five hundred
+
+00:01:50.280 --> 00:01:51.461
+and sixty seven routes.
+
+00:01:51.960 --> 00:01:53.740
+The fix revokes nine write
+
+00:01:53.740 --> 00:01:55.480
+grants, and the re-run
+
+00:01:55.480 --> 00:01:57.880
+returns zero. This is not
+
+00:01:57.880 --> 00:01:59.280
+a bug report. It
+
+00:01:59.280 --> 00:02:00.640
+is the arrangement of popular
+
+00:02:00.640 --> 00:02:02.040
+tools, and it has
+
+00:02:02.040 --> 00:02:03.020
+hundreds of doors.
+
+00:02:04.300 --> 00:02:05.680
+The runtime guard watches the
+
+00:02:05.680 --> 00:02:07.140
+same arrangement in a
+
+00:02:07.140 --> 00:02:08.700
+live M C P session.
+
+00:02:08.700 --> 00:02:10.001
+It reads the issue:
+
+00:02:10.500 --> 00:02:12.660
+allowed. Reads the private folder:
+
+00:02:12.660 --> 00:02:15.940
+allowed. Pushes: blocked, with
+
+00:02:15.940 --> 00:02:16.960
+the route in the error.
+
+00:02:16.960 --> 00:02:19.180
+A fresh session, same
+
+00:02:19.180 --> 00:02:21.780
+push: allowed. The call did
+
+00:02:21.780 --> 00:02:23.740
+not change. The arrangement
+
+00:02:23.740 --> 00:02:25.360
+did. The guard is a
+
+00:02:25.360 --> 00:02:27.580
+demo: real M C
+
+00:02:27.580 --> 00:02:30.440
+P stdio, simulated tool results.
+
+00:02:31.800 --> 00:02:34.080
+Forty seeded configs with ground
+
+00:02:34.080 --> 00:02:37.261
+truth by construction. Detection:
+
+00:02:37.920 --> 00:02:40.560
+forty of forty. Fix cases:
+
+00:02:40.560 --> 00:02:43.080
+forty of forty. Eight
+
+00:02:43.080 --> 00:02:46.520
+clean configs, silent. The eval
+
+00:02:46.520 --> 00:02:48.560
+is synthetic. It shows
+
+00:02:48.560 --> 00:02:50.000
+the engine is consistent with
+
+00:02:50.000 --> 00:02:52.360
+its spec, not accuracy
+
+00:02:52.360 --> 00:02:53.980
+on every real setup.
+
+00:02:55.200 --> 00:02:56.860
+Falkor D B is not
+
+00:02:56.860 --> 00:02:58.180
+a database behind this
+
+00:02:58.180 --> 00:03:00.120
+tool. It is the analysis:
+
+00:03:00.120 --> 00:03:02.100
+the path query, the
+
+00:03:02.100 --> 00:03:04.120
+max flow, the residual cut,
+
+00:03:04.120 --> 00:03:06.701
+the verification. Remove it,
+
+00:03:07.240 --> 00:03:08.580
+and the route, the cut,
+
+00:03:08.580 --> 00:03:10.600
+and the receipt stop
+
+00:03:10.600 --> 00:03:14.000
+existing. Lethal Path. Made by
+
+00:03:14.000 --> 00:03:15.200
+Bhanu Nagpure.

@@ -507,6 +507,16 @@ main{display:block}
   border-top:1px solid var(--line);border-bottom:1px solid var(--line);
 }
 .proof .section-head{margin-bottom:34px}
+
+/* ---------- demo video ---------- */
+.demo-figure{margin:0}
+.demo-window{max-width:1080px;margin:0 auto}
+.demo-video{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#05060a}
+.demo-caption{
+  max-width:76ch;margin:18px auto 0;text-align:center;
+  font-family:var(--mono);font-size:.72rem;color:var(--mute);letter-spacing:.02em;line-height:1.65;
+}
+@media (max-width:640px){.demo-caption{text-align:left}}
 .stat-band{
   display:grid;grid-template-columns:repeat(4,1fr);
   border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;

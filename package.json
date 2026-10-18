@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "description": "Find modelled MCP leak paths and compute a minimum cut of permissions that closes them.",
   "license": "Apache-2.0",
+  "author": "Bhanu Nagpure",
   "packageManager": "pnpm@9.15.0",
   "engines": { "node": ">=20" },
   "scripts": {

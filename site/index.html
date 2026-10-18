@@ -19,7 +19,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.devanshustudios.com/lethalpath/og.png">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="style.css?v=20261018-8">
+<link rel="stylesheet" href="style.css?v=20261018-9">
 </head>
 <body>
 
@@ -55,7 +55,7 @@
     <p class="lede">LethalPath maps your AI agent&rsquo;s tools as a graph, finds the routes from untrusted input to public output, and computes a minimum cut &mdash; the exact permissions to revoke.</p>
     <div class="hero-actions">
       <a class="btn btn-primary btn-lg" href="#install">Install the CLI</a>
-      <a class="btn btn-ghost btn-lg" href="scan.html">See a real scan</a>
+      <a class="btn btn-ghost btn-lg" href="#demo">Watch the demo</a>
     </div>
     <p class="hero-meta"><span>Apache-2.0</span><span>Runs locally</span><span>FalkorDB 6.0.2</span></p>
   </div>
@@ -343,9 +343,32 @@
   </div>
 </section>
 
-<!-- DEMO VIDEO: when the public YouTube URL is ready, insert a 16:9 player
-     here as a full-width .window. Keep the caption "one unedited run, 3:30"
-     and do not autoplay; the hero scene is the silent demo. -->
+<section id="demo">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Demo</p>
+        <h2 id="demo-title" style="margin-top:14px">The whole run, in three minutes.</h2>
+      </div>
+      <p class="lede">Scan finds the route. Fix computes the minimum cut, revokes it, and re-runs the query. Then a real 567-route config, the runtime guard, and the evidence. <span class="muted">3:20 · captions on.</span></p>
+    </div>
+    <figure class="demo-figure">
+      <div class="window demo-window">
+        <div class="window-bar">
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="window-title">lethalpath demo · scan → cut → guard → evidence</span>
+          <span class="pill">3:20</span>
+        </div>
+        <video class="demo-video" controls preload="metadata" poster="demo/poster.jpg" width="1600" height="900" playsinline>
+          <source src="demo/lethalpath-demo.mp4" type="video/mp4">
+          <track kind="captions" src="demo/lethalpath-demo.vtt" srclang="en" label="English captions" default>
+          Your browser does not support the video tag. <a href="demo/lethalpath-demo.mp4">Download the demo (MP4)</a>.
+        </video>
+      </div>
+      <figcaption class="demo-caption">One committed run, replayed end to end. Every number in the video is printed by a command in this repository. <span class="muted">Made by Bhanu Nagpure.</span></figcaption>
+    </figure>
+  </div>
+</section>
 
 <section id="fix">
   <div class="wrap">
@@ -542,11 +565,12 @@ node packages/cli/dist/index.js fix</pre></div>
           </svg>
           LethalPath
         </a>
-        <p>Open-source MCP security. Map the tools, find the path, compute the cut. Built by <a href="https://www.devanshustudios.com/">Devanshu Studios</a>.</p>
+        <p>Open-source MCP security. Map the tools, find the path, compute the cut. Made by <a href="https://github.com/bhanu-dev82">Bhanu Nagpure</a>.</p>
       </div>
       <div class="footer-col">
         <h3>Product</h3>
         <a href="index.html#how">How it works</a>
+        <a href="index.html#demo">Demo</a>
         <a href="scan.html">Example scan</a>
         <a href="benchmarks.html">Evidence</a>
         <a href="combos.html">Risk patterns</a>
@@ -573,6 +597,6 @@ node packages/cli/dist/index.js fix</pre></div>
   </div>
 </footer>
 
-<script src="animate.js?v=20261018-8"></script>
+<script src="animate.js?v=20261018-9"></script>
 </body>
 </html>

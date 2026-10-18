@@ -411,6 +411,13 @@ async function runPage(browser, pageName) {
     let i = 0;
     for (const el of document.querySelectorAll(H.focusableSel)) {
       if (el.disabled) continue;
+      /* Native media controls live in a shadow root. Chromium reports each
+         internal control as the video host itself, so the sequential-focus
+         probe sees a repeated stop and stops walking — every control after
+         the video is then reported unreachable. The host is keyboard
+         reachable in a real browser; skip it here rather than miscounting
+         the rest of the page. */
+      if (el.matches("video[controls], audio[controls]")) continue;
       const ti = el.getAttribute("tabindex");
       if (ti !== null && parseInt(ti, 10) < 0) continue;
       if (el.closest("[hidden]")) continue;

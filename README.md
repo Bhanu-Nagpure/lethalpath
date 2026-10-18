@@ -21,7 +21,7 @@ across its MCP servers, then computes a minimum-capacity cut and chooses the
 cheaper of the two canonical cuts by grant count, declared-task cost, then the
 write side.
 
-Built by [Devanshu Studios](https://www.devanshustudios.com/). Live site:
+Made by [Bhanu Nagpure](https://github.com/bhanu-dev82). Live site:
 [devanshustudios.com/lethalpath](https://www.devanshustudios.com/lethalpath/).
 
 **How FalkorDB is used.** Every scan is a FalkorDB graph (`scan_<name>`). The
@@ -399,7 +399,7 @@ secrets.
 
 ## Credits and prior work
 
-- [Devanshu Studios](https://www.devanshustudios.com/) — the studio shipping LethalPath. Live site: https://www.devanshustudios.com/lethalpath/
+- [Bhanu Nagpure](https://github.com/bhanu-dev82) — creator of LethalPath. Live site: https://www.devanshustudios.com/lethalpath/
 - [FalkorDB](https://www.falkordb.com/) — the engine every query runs on. See [FalkorDB features this product calls](#falkordb-features-this-product-calls).
 - Simon Willison — the [lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/), the framing this product builds on.
 - Related tools and papers that informed the design are listed with links in
