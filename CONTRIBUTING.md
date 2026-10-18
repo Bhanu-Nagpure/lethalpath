@@ -1,10 +1,10 @@
 # Contributing to LethalPath
 
-LethalPath finds every route by which an AI agent can be tricked into leaking
-your data across its MCP tools, then computes the fewest permissions to revoke
-that close them all. The graph is the product: if a change still works after you
-remove FalkorDB, it is out of scope. This file is the shortest path from a
-clone to a change that can merge.
+LethalPath finds modelled routes by which an AI agent can be tricked into
+leaking data across its MCP tools, then computes a minimum-capacity cut and
+chooses the cheaper of the two canonical cuts. The graph is the product: if a
+change still works after you remove FalkorDB, it is out of scope. This file is
+the shortest path from a clone to a change that can merge.
 
 ## Prerequisites
 
@@ -49,8 +49,9 @@ actually made.
 `scripts/evidence.sh` writes `docs/live-evidence/run-<timestamp>.log`: the
 engine image, corpus hashes, the full test output, one real `scan`, one real
 `fix`, the abstention, the 40-tool fallback and the `--mcp` demo, in a single
-tee'd log. Commit it unmodified — it is the uncut evidence the README and the
-site quote, and trimming it defeats the purpose.
+tee'd log. Commit it as produced — it is the uncut evidence the README and the
+site quote, and trimming it defeats the purpose. Replacing an absolute local
+path with `<repo>` is the only allowed normalisation.
 
 Site checks: the static site under `site/` must agree with the repo's numbers.
 After touching the site (or a number it prints), run
@@ -65,9 +66,10 @@ After touching the site (or a number it prints), run
 
 ## Project rules
 
-- **FalkorDB is the product, not decoration.** The README's removal test is the
-  bar: the route, the cut, and the receipt must stop existing without the
-  graph. A feature that survives the removal is rejected, not merged.
+- **FalkorDB is the product, not decoration.** The README's "why the graph is
+  load-bearing" table is the bar: the route, the cut, and the receipt must stop
+  existing without the graph. A feature that survives the removal is rejected,
+  not merged.
 - **The read-only guard rails are load-bearing.** Reads go through
   `GraphDB.read` (`GRAPH.RO_QUERY`, write keywords refused before dispatch,
   `LIMIT` capped at 100, 3 s deadline). Do not bypass them to make a query

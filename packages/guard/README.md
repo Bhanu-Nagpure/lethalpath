@@ -1,11 +1,12 @@
 # @lethalpath/guard
 
-The runtime half of LethalPath — and the Track 02 claim: an MCP stdio server
-that remembers what a session absorbed (in its own FalkorDB graph) and blocks
-the write that would launder it to a public sink. The poisoned `git.push` is
-refused with the route in the error; the same push in a fresh session is
-allowed. The arrangement is what makes it lethal, so the arrangement is what
-the guard watches.
+The runtime half of LethalPath: an MCP stdio server that tracks what a session
+has absorbed in-process and blocks the write that would launder it to a public
+sink. Every decision is appended to a per-session FalkorDB audit graph
+(`sessions_<id>`); the block decision itself is in-process. The poisoned
+`git.push` is refused with the route in the error; the same push in a fresh
+session is allowed. The arrangement is what makes it lethal, so the arrangement
+is what the guard watches.
 
 ## How a decision is made
 

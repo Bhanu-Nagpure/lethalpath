@@ -1,13 +1,13 @@
 /**
  * Turn FalkorDB's max-flow into the set of grants to revoke.
  *
- * `CALL algo.maxFlow` is the sponsor feature this product cannot live without:
- * it returns the flow on each edge, not the cut. The cut — the cheapest set of
+ * `CALL algo.maxFlow` is the engine feature this product cannot live without:
+ * it returns the flow on each edge, not the cut. The cut — the minimum-capacity set of
  * grants whose removal breaks every leak — is derived here from the residual
  * graph. Without the flow there is no cut, and without FalkorDB there is no flow.
  *
  * A max-flow admits two canonical minimum cuts: one hugged to the sources, one
- * hugged to the sinks. Both close every route and both are proven minimal by
+ * hugged to the sinks. Both close the modelled route set and both are proven minimal by
  * the same flow value. The product picks the cheaper one for the owner: fewer
  * distinct grants first, fewer broken tasks second, and on a full tie the sink
  * side — so the agent keeps its ability to read and loses only the publish.
@@ -166,7 +166,7 @@ export interface MaxFlowRow {
 
 /**
  * Join a FalkorDB max-flow reply to the graph's edges and return the cut.
- * This is the only place the product turns a sponsor result into a decision.
+ * This is the only place the product turns a FalkorDB result into a decision.
  */
 export function cutFromMaxFlow(
   sources: number[],

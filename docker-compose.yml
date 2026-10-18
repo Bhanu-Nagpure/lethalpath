@@ -1,7 +1,7 @@
 services:
   falkordb:
-    # Pinned by tag, never :latest — the tag moved once already during this
-    # event and we do not want a silent engine change under a running demo.
+    # Pinned by tag, never :latest — we do not want a silent engine change
+    # under a running scan.
     image: falkordb/falkordb:6.0.2
     ports:
       - "6379:6379"

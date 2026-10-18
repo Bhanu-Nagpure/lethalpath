@@ -139,7 +139,7 @@ test("audit holds a hash, never the arguments — and a blocked step moves nothi
   const cfg = loadFixture();
   const id = sessionId("audit");
   const secretQuery = "TOP-SECRET-QUERY-9b2c";
-  const secretPath = "/home/bhd/private/stats-MARKER-7f3a.json";
+  const secretPath = "/home/user/private/stats-MARKER-7f3a.json";
   const secretPayload = "DO-NOT-STORE-PAYLOAD-c4d1";
 
   const guard = new Guard(cfg, EMPTY_POLICY, { sessionId: id, host: HOST, port: PORT });
@@ -164,7 +164,7 @@ test("audit holds a hash, never the arguments — and a blocked step moves nothi
     ).rows;
     assert.equal(steps.length, 3);
 
-    const forbidden = [secretQuery, secretPath, secretPayload, "/home/bhd/private"];
+    const forbidden = [secretQuery, secretPath, secretPayload, "/home/user/private"];
     for (const step of steps) {
       for (const value of Object.values(step)) {
         const text = JSON.stringify(value);

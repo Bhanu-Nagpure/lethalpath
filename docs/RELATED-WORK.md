@@ -1,10 +1,10 @@
 # Related work
 
-Scouted **17 Oct 2026** with live web research (Bright Data search + scraping, GitHub/arXiv/PyPI
-APIs). Every fact below is from a primary source read on that date, unless a cell says
-**unverified**. Nothing here is repeated from older notes without re-checking.
+Research note, **17 Oct 2026**. Every fact below is from a primary source read on that date,
+unless a cell says **unverified**. Repository counts and activity are a snapshot of that date,
+not a ranking.
 
-Two questions are answered for every tool, because they are the only two LethalPath claims:
+Two questions are asked of every tool:
 
 1. **Path analysis through shared resources** — does it find *paths* across servers, including
    laundering through intermediate tools/resources (a folder, a repo, a channel), rather than
@@ -30,7 +30,7 @@ confirm say so.
 | **Docker MCP Gateway** (`docker/mcp-gateway`, ~1.6k★, active) | Runs catalog MCP servers as isolated containers behind one gateway; signature checks, call logging, secret and network controls, programmable interceptors (security middleware). | **No** — infrastructure isolation and policy, not path discovery. | **No** — controls are user-configured, not computed. | **No** | [github.com/docker/mcp-gateway](https://github.com/docker/mcp-gateway) · [docs](https://docs.docker.com/ai/mcp-catalog-and-toolkit/mcp-gateway/) · [Docker security blog](https://www.docker.com/blog/mcp-security-explained/) |
 | **Trail of Bits `mcp-context-protector`** (226★) | Wrapper MCP server: trust-on-first-use pinning of tool descriptions/server instructions, LLM guardrail scanning of them for prompt injection, ANSI control-sequence sanitisation, human-in-the-loop controls; defends the "line jumping" class. | **No** — runtime protection of the context window. | **No** | **No** | [repo](https://github.com/trailofbits/mcp-context-protector) · [announcement](https://blog.trailofbits.com/2025/07/28/we-built-the-security-layer-mcp-always-needed/) |
 | **Semgrep** (`semgrep/mcp`, 686★; plus MCP guide) | Code SAST; ships an MCP server so assistants can run Semgrep scans, and published "A Security Engineer's Guide to MCP" with a cheatsheet and a tool-shadowing demo. Its analysis target is *code*, not MCP composition; it is a baseline others benchmark against (MCP-BiFlow compares against Semgrep). | **No** | **No** — rules and guidance. | **No** | [guide](https://semgrep.dev/blog/2025/a-security-engineers-guide-to-mcp) · [semgrep/mcp](https://github.com/semgrep/mcp) |
-| **Cisco `mcp-scanner`** (1,094★, active; *added by us — not in the brief*) | "Scan MCP servers for potential threats & security findings" (repo description). | **No** shown | **No** | **No** | [github.com/cisco-ai-defense/mcp-scanner](https://github.com/cisco-ai-defense/mcp-scanner) |
+| **Cisco `mcp-scanner`** (1,094★, active) | "Scan MCP servers for potential threats & security findings" (repo description). | **No** shown | **No** | **No** | [github.com/cisco-ai-defense/mcp-scanner](https://github.com/cisco-ai-defense/mcp-scanner) |
 
 ---
 
@@ -41,7 +41,7 @@ confirm say so.
 | **triflow** (`Lonkins/triflow`, Apache-2.0) | "Cross-server MCP toxic-flow (lethal-trifecta) analyzer + SKILL.md linter"; its public description says it complements per-tool scanners (mcp-scan/Snyk agent-scan) that "inspect individual tool descriptions". | **Partial** — classifies servers into trifecta legs and prints a representative chain (server-level; internals **unverified** — README fetch blocked). | **No** computed set. | **Unverified** | [github.com/Lonkins/triflow](https://github.com/Lonkins/triflow) |
 | **Trilock** (`mcp-trilock` on PyPI, v0.2.0; `Poojan6216/trilock`) | "A drop-in MCP proxy that makes the lethal trifecta structurally impossible"; repo description adds that it "publishes the benchmark, and the attacks that beat it". Benchmark numbers **unverified** in this pass. | **No** — runtime session gating, not static path mapping. | **No** | **No** | [pypi.org/project/mcp-trilock](https://pypi.org/project/mcp-trilock/) · [repo](https://github.com/Poojan6216/trilock) |
 | **Manifest linters/gates**: `fevziegeyurtsevenler/lethal-trifecta-lint` (Apache-2.0), `hyuga611/trifecta-gate` (MIT, created 14 Oct 2026), `j-dahl7/lethal-trifecta-lab` (MIT) | CI linters / gates that fail when a tool manifest (MCP, OpenAI, LangChain) holds all three legs; `lethal-trifecta-lab` is a tool-call policy engine enforcing the Rule of Two. (trifecta-gate repo description empty — details **unverified**.) | **No** — leg presence / counting. | **No** — a gate, not a cut. | **No** | [lint](https://github.com/fevziegeyurtsevenler/lethal-trifecta-lint) · [gate](https://github.com/hyuga611/trifecta-gate) · [lab](https://github.com/j-dahl7/lethal-trifecta-lab) |
-| **MSCC** (`gensecaihq/mcpscc`, Apache-2.0) — *closest prior art we found* | Maps MCP servers, skills, and memory into graded cross-surface exposure paths (0–100 by approval gating, capability breadth, source trust, egress breadth); toxic-flow detection, drift/rug-pull detection, policy-as-code in CI; runs fully locally. | **Yes** — "Cross-server chains (source → sensitive → egress)" and a "cross-surface graph" where a poisoned skill/memory reaches a sensitive MCP server and an egress server. This is the closest existing thing to our path claim. | **No** shown — it reports and ranks paths; enforcement is user-authored policy, not a computed minimal revocation set. | **Yes** — "cross-surface graph". | [github.com/gensecaihq/mcpscc](https://github.com/gensecaihq/mcpscc) |
+| **MSCC** (`gensecaihq/mcpscc`, Apache-2.0) — *closest prior art we found* | Maps MCP servers, skills, and memory into graded cross-surface exposure paths (0–100 by approval gating, capability breadth, source trust, egress breadth); toxic-flow detection, drift/rug-pull detection, policy-as-code in CI; runs fully locally. | **Yes** — "Cross-server chains (source → sensitive → egress)" and a "cross-surface graph" where a poisoned skill/memory reaches a sensitive MCP server and an egress server. This is the closest existing thing to the path-analysis question. | **No** shown — it reports and ranks paths; enforcement is user-authored policy, not a computed minimal revocation set. | **Yes** — "cross-surface graph". | [github.com/gensecaihq/mcpscc](https://github.com/gensecaihq/mcpscc) |
 | **AgentHound** (`Dolphinllc/agenthound`, 4★, dormant since Apr 2026) | "BloodHound for AI agents — visualize attack paths through MCP tool chains" (repo description). | **Yes** — path visualisation; modelling depth **unverified**. | **No** | **Yes** | [github.com/Dolphinllc/agenthound](https://github.com/Dolphinllc/agenthound) |
 | **AgentSeal** (`getagentseal/agentseal`, 377★; agentseal.org) | Scans a machine for dangerous skills and MCP configs, prompt-injection testing, live MCP server audit; registry of "Security scores for 800+ MCP servers. 9 analyzers scan for prompt injection, toxic flows, and attack surface risks." Blog (org-published): 1,808 servers scanned, 66% with findings (company-reported). | **No** — per-server scores. | **No** | Unverified | [agentseal.org](https://agentseal.org/blog/mcp-server-security-findings) · [repo](https://github.com/getagentseal/agentseal) |
 | **Promptfoo** | Red-teaming/guardrails platform with an MCP proxy; its blog post shows how to test an agent for the lethal trifecta with adversarial evals. | **No** — dynamic attack testing, not static graph analysis. | **No** | **No** | [blog](https://www.promptfoo.dev/blog/lethal-trifecta-testing/) |
@@ -67,7 +67,7 @@ confirm say so.
 
 ---
 
-## Names we could not verify (write these as "unverified" everywhere)
+## Names we could not verify
 
 - **AgentSandbox** — **unverified**: no artifact found under this name (Google/Bing, arXiv, GitHub
   incl. the `microsoft` org — 404). If it refers to a sandboxing runtime, the verified relatives
@@ -84,18 +84,18 @@ confirm say so.
 
 ---
 
-## How LethalPath differs (strictly honest)
+## How LethalPath differs
 
 **What we are not first at, and who does it better or equal:**
 
 - *Detecting the trifecta*: Snyk Agent Scan (`mcp-scan`), mcptrustchecker, triflow, Trilock and the
   manifest linters already do it. Snyk runs at ecosystem scale and is maintained; mcptrustchecker
   grades at single-server depth with source verification of published packages — its per-server
-  precision can beat our inferred labels. We claim nothing new here.
+  precision can beat our inferred labels. The contribution is elsewhere.
 - *Cross-surface path mapping*: **MSCC already charts graded source → sensitive → egress exposure
   paths across servers, skills, and memory**, with drift detection and CI policy — ahead of us on
   surfaces covered (skills, memory) and on maturity. AgentHound already visualises attack paths
-  through MCP tool chains. "We draw paths" is not the differentiation.
+  through MCP tool chains. Cross-surface path mapping is already established.
 - *Runtime enforcement*: Trilock (proxy that makes the session trifecta impossible), Trail of Bits'
   `mcp-context-protector`, promptfoo's MCP proxy/guardrails, and Docker's gateway/interceptors
   enforce at runtime and can see argument-level data our static analysis only infers. Runtime
@@ -103,13 +103,13 @@ confirm say so.
 - *Guarantees*: CaMeL gives provable non-exfiltration by construction — a stronger property than
   any static cut — at the cost of rewriting the agent into its interpreter. We do not match that.
 - *Precision inside a server*: MCP-BiFlow statically traces real taint through server source;
-  mcptrustchecker reads the shipped code. Our labels are inferred (rules + LLM, gold-set scored),
-  which is a genuine accuracy risk they don't share.
+  mcptrustchecker reads the shipped code. Our labels are inferred (a rules table plus tool-set
+  expansions, regression-tested), which is a genuine accuracy risk they do not share.
 - *The algorithm*: max-flow/min-cut is classical graph theory. We claim no novelty for it.
 - MCPHunt studies the same phenomenon (cross-boundary propagation) as a benchmark, with numbers
-  we should quote honestly in the README rather than pretend not to compete with.
+  worth citing in the README.
 
-**What no tool we examined ships (our actual differentiation — nothing more, nothing less):**
+**What we did not find in the tools above:**
 
 1. **Resource-level, multi-hop leak paths across servers, including laundering hops through shared
    resources** (a folder, a repo, a channel) and with the agent's **Context as a first-class node**.
@@ -122,15 +122,9 @@ confirm say so.
 3. **Both, executed on the graph database itself** (FalkorDB 6.0.2, `GRAPH.RO_QUERY`-enforced reads,
    `algo.maxFlow` for the cut), so the path finder and the fix are the same queryable artifact.
 
-One-sentence positioning for the README: *other tools tell you the trifecta (or its parts) exists;
-some draw server-level paths; LethalPath draws the cross-server resource-level paths — including
-laundering through shared storage — and computes the cheapest set of grants to revoke that closes them
-all under a task-preservation cost. "Graph + minimal fix" is the differentiation, and we will say
-exactly that.*
-
 ---
 
-## Prior art we must credit (for the README)
+## Prior art
 
 - **Simon Willison** — "The lethal trifecta" (16 Jun 2025) and the GitHub MCP exploit coverage;
   the *Agents Rule of Two* write-up.

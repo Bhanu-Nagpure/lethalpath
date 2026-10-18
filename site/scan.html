@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Example scan — LethalPath</title>
-<meta name="description" content="An example scan from a committed CLI run: a GitHub, filesystem and git config from the official MCP server READMEs, the leak routes it contains, and the grants that close them.">
-<meta name="theme-color" content="#07080a">
+<meta name="description" content="A committed LethalPath run on a config built from the official MCP server READMEs: 567 routes, the path it prints, and the nine grants that close them.">
+<meta name="theme-color" content="#08090c">
 <link rel="canonical" href="https://www.devanshustudios.com/lethalpath/scan.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="LethalPath">
 <meta property="og:title" content="Example scan — LethalPath">
-<meta property="og:description" content="An example scan from a committed CLI run: a GitHub, filesystem and git config from the official MCP server READMEs, the leak routes it contains, and the grants that close them.">
+<meta property="og:description" content="A committed LethalPath run on a config built from the official MCP server READMEs: 567 routes, the path it prints, and the nine grants that close them.">
 <!-- canonical host: https://www.devanshustudios.com/lethalpath/ -->
 <meta property="og:url" content="https://www.devanshustudios.com/lethalpath/scan.html">
 <meta property="og:image" content="https://www.devanshustudios.com/lethalpath/og.png">
@@ -19,51 +19,14 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.devanshustudios.com/lethalpath/og.png">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="style.css">
-<style>
-  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
-    border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;margin-top:26px}
-  .kpi .k{background:var(--surface);padding:16px}
-  .kpi .v{font-family:var(--mono);font-size:1.45rem;font-weight:600;letter-spacing:-.02em;line-height:1}
-  .kpi .l{font-size:.72rem;color:var(--mute);margin-top:5px}
-  @media (max-width:820px){.kpi{grid-template-columns:repeat(2,1fr)}}
-  .paste{background:#050607;border:0;font-family:var(--mono);font-size:.78rem;
-    line-height:1.75;padding:16px 18px;color:var(--body);white-space:pre;overflow:auto;margin:0}
-  .strip{margin-top:12px;padding:9px 13px;border-radius:var(--r-sm);
-    background:rgba(89,212,153,.09);border:1px solid rgba(89,212,153,.24);
-    color:var(--safe);font-size:.78rem}
-  .finding{border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;background:var(--surface)}
-  .finding-h{display:flex;align-items:center;gap:9px;padding:12px 15px;
-    background:rgba(255,107,107,.06);border-bottom:1px solid var(--line);
-    font-family:var(--mono);font-size:.74rem;color:var(--danger)}
-  .finding-h .spacer{flex:1}
-  .path{padding:16px 18px;font-family:var(--mono);font-size:.77rem;line-height:2;color:var(--body)}
-  .path .arrow{color:var(--ash)}
-  .fixbox{margin:0 16px 16px;padding:14px 16px;border-radius:var(--r-md);
-    background:rgba(89,212,153,.07);border:1px solid rgba(89,212,153,.22)}
-  .diff{font-family:var(--mono);font-size:.76rem;line-height:1.9}
-  .diff .del{color:var(--danger)}
-  .diff .add{color:var(--safe)}
-  details{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);margin-top:12px}
-  summary{padding:12px 15px;cursor:pointer;font-family:var(--mono);font-size:.76rem;color:var(--mute);
-    transition:color var(--dur-fast) var(--ease-out)}
-  summary:hover{color:var(--body)}
-  details[open] summary{color:var(--body)}
-  summary:focus-visible{outline:2px solid var(--sink);outline-offset:-2px}
-  details .code{border:0;border-top:1px solid var(--line);border-radius:0 0 var(--r-lg) var(--r-lg)}
-  /* resolved state, toggled by animate.js */
-  [data-finding].resolved .path{opacity:.45}
-  [data-finding].resolved .finding-h{color:var(--safe);background:rgba(89,212,153,.06)}
-  [data-finding].resolved .finding-h .dot{background:var(--safe)}
-  .scene .trail,[data-finding] .path{transition:opacity .4s ease}
-</style>
+<link rel="stylesheet" href="style.css?v=20261018-7">
 </head>
 <body>
 
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site-head">
-<nav>
+<nav aria-label="Main">
   <div class="wrap">
     <a class="brand" href="index.html">
       <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -73,39 +36,42 @@
       LethalPath
     </a>
     <span class="spacer"></span>
-    <a class="nb" href="index.html">Home</a>
-    <a class="nb" href="scan.html" aria-current="page">Scan</a>
-    <a class="nb" href="combos.html">Combos</a>
-    <a class="nb" href="benchmarks.html">Benchmarks</a>
+    <a class="nb" href="index.html">Product</a>
+    <a class="nb" href="scan.html" aria-current="page">Example scan</a>
+    <a class="nb" href="benchmarks.html">Evidence</a>
     <a class="nb" href="threat-model.html">Limits</a>
     <a class="nb" href="https://github.com/bhanu-dev82/lethalpath">GitHub</a>
+    <a class="btn btn-primary btn-sm nav-cta" href="index.html#install">Install</a>
   </div>
 </nav>
 </header>
 
 <main id="main" style="border-top:0">
-  <div class="wrap">
-    <p class="eyebrow" data-reveal>Scan</p>
-    <div class="split-a mt-xl">
+  <div class="wrap page-head">
+    <div class="split-a">
       <div>
-        <h1 class="page-title">Example scan: GitHub, files and git</h1>
-        <p class="lede mt-md">This page shows output from a committed CLI run, not a live scanner. The config is built from the official MCP server READMEs. Nothing is pasted or sent from here; to scan your own config, run the CLI on your machine.</p>
+        <p class="eyebrow">Example scan</p>
+        <h1 class="page-title" style="margin-top:14px">A real config, scanned end to end.</h1>
+        <p class="lede" style="margin-top:18px">This is output from a committed CLI run, not a live scanner. The config is built from the official MCP server READMEs. To scan your own, run the CLI on your machine.</p>
       </div>
-      <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
-        <span class="pill">run log: <span class="mono">docs/live-evidence/public-readmes-*.log</span></span>
+      <div class="pills">
+        <span class="pill">run log: <span class="mono">docs/live-evidence/</span></span>
         <span class="pill">your config: <span class="mono">node packages/cli/dist/index.js scan --mcp &lt;file&gt;</span></span>
       </div>
     </div>
 
     <h2 class="sr-only">Scan summary</h2>
     <div class="kpi">
-      <div class="k"><div class="v" style="color:var(--danger)" data-count>567</div><div class="l">leak paths</div></div>
-      <div class="k"><div class="v" style="color:var(--private)" data-count>2</div><div class="l">private resources</div></div>
-      <div class="k"><div class="v" style="color:var(--sink)" data-count>3</div><div class="l">servers involved</div></div>
-      <div class="k"><div class="v" style="color:var(--safe)" data-count>9</div><div class="l">grants to revoke</div></div>
+      <div class="k"><div class="v" style="color:var(--danger)">567</div><div class="l">leak paths</div></div>
+      <div class="k"><div class="v" style="color:var(--private)">2</div><div class="l">private resources</div></div>
+      <div class="k"><div class="v" style="color:var(--sink)">3</div><div class="l">servers involved</div></div>
+      <div class="k"><div class="v" style="color:var(--safe)">9</div><div class="l">grants to revoke</div></div>
     </div>
+    <p class="small muted" style="margin-top:12px">The CLI prints the route count (567) and the revoke count (9). The two private resources and three servers are derived from the same labelled config.</p>
+  </div>
 
-    <div class="split mt-xl">
+  <div class="wrap" style="margin-top:40px">
+    <div class="split">
       <div>
         <h2 class="sr-only">The config that was scanned</h2>
         <div class="panel">
@@ -128,7 +94,24 @@
     }
   }
 }</pre>
-          <div style="padding:0 16px 16px"><div class="strip">CLI log: redacted 1 value before the graph &middot; 40 tools labelled by rule &middot; 0 unlabelled</div></div>
+          <div style="padding:0 18px 18px"><div class="strip">CLI log: redacted 1 value before the graph &middot; 40 tools labelled by rule &middot; 0 unlabelled</div></div>
+        </div>
+        <p class="small muted" style="margin-top:12px">Entries are copied from the public MCP server READMEs; the token is a placeholder. The labeler drops <span class="mono">env</span> values and secret-shaped keys before anything reaches the graph.</p>
+
+        <div class="panel mt-lg">
+          <div class="panel-h"><span class="dot" style="background:var(--untrusted)"></span> label confidence <span class="spacer"></span><span>self-assessed rule confidence</span></div>
+          <div class="tw">
+          <table>
+            <caption class="sr-only">Label confidence for three tools in the scanned config</caption>
+            <thead><tr><th>tool</th><th>label</th><th>source</th><th>conf</th></tr></thead>
+            <tbody>
+              <tr><td><span class="mono">github.get_issue</span></td><td><span class="tag tag-un">untrusted</span></td><td class="rank">rule</td><td class="rank">0.70</td></tr>
+              <tr><td><span class="mono">filesystem.write_file</span></td><td><span class="tag tag-pr">private</span></td><td class="rank">rule</td><td class="rank">0.60</td></tr>
+              <tr><td><span class="mono">git.push</span></td><td><span class="tag tag-sk">sink</span></td><td class="rank">rule</td><td class="rank">0.70</td></tr>
+            </tbody>
+          </table>
+          </div>
+          <p class="small muted" style="padding:0 18px 16px">These are the labeler&rsquo;s own rule scores, not measured accuracy. The 50-row gold set is a regression check; see <a href="benchmarks.html">Evidence</a>.</p>
         </div>
       </div>
 
@@ -149,42 +132,29 @@
 <span class="arrow">&nbsp;&nbsp;↓</span> git.push <span style="color:var(--ash)">· writes remote</span><br>
 <span class="arrow">&nbsp;&nbsp;↓</span> <span class="tag tag-sk">public sink</span> <span style="color:var(--body)">public repo · origin/main</span>
           </div>
-          <p class="small" style="padding:0 18px 4px;color:var(--mute)">one of 567 routes &mdash; scan prints the 25 shortest by hops; <span class="mono">--json</span> carries the same 25 plus the full count.</p>
+          <p class="small" style="padding:0 20px 4px;color:var(--mute)">one of 567 routes &mdash; scan prints the 25 shortest by hops; <span class="mono">--json</span> carries the same 25 plus the full count.</p>
           <div class="fixbox">
-            <div class="mono" style="font-size:.78rem;color:var(--safe)">THE FIX &mdash; CALL <strong>algo.maxFlow</strong> &rArr; 9 grants</div>
+            <div class="mono" style="font-size:.8rem;color:var(--safe)">THE FIX &mdash; CALL <strong>algo.maxFlow</strong> &rArr; 9 grants</div>
             <p class="small mt-sm" style="color:var(--body)">
               Breaks <strong style="color:var(--ink)">567 of 567</strong> paths &middot; revokes
-              <strong style="color:var(--ink)">9</strong> write grants (every github write + git.push) &middot;
+              <strong style="color:var(--ink)">9</strong> write grants (every github write plus <span class="mono">git.push</span>) &middot;
               verified <strong style="color:var(--ink)">0 remain</strong> when the same query re-runs
               without them. When cuts tie on cost the engine prefers the write side &mdash; the agent
               keeps its read and loses only the publish.
             </p>
-            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-              <button type="button" class="btn btn-safe btn-sm" data-applycut>Preview cut</button>
-              <button type="button" class="btn btn-ghost btn-sm" data-copy="#policydiff">Copy policy diff</button>
+            <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+              <button type="button" class="btn btn-safe btn-sm" data-applycut>Show the cut</button>
+              <button type="button" class="btn btn-ghost btn-sm" data-copy="#policydiff">Copy example deny list</button>
               <a class="btn btn-ghost btn-sm" href="#cut">Why this edge?</a>
             </div>
           </div>
-          <div style="border-top:1px solid var(--line);padding:16px 18px">
-            <p class="eyebrow" style="margin-bottom:9px">policy diff</p>
+          <div style="border-top:1px solid var(--line);padding:18px 20px">
+            <p class="eyebrow" style="margin-bottom:10px">example deny list &middot; illustrative</p>
             <div class="diff" id="policydiff">
               <div class="del">- allow: git.push, github.* writes   # 567 paths end in a public sink</div>
               <div class="add">+ deny:  the nine write grants        # re-run without them: 0 remain</div>
             </div>
-          </div>
-        </div>
-
-        <div class="panel mt-lg">
-          <div class="panel-h"><span class="dot" style="background:var(--untrusted)"></span> label confidence <span class="spacer"></span><span>from the rulebook · a wrong label is a bug — tell us</span></div>
-          <div class="tw">
-          <table>
-            <thead><tr><th>tool</th><th>label</th><th>source</th><th>conf</th></tr></thead>
-            <tbody>
-              <tr><td><span class="mono">github.get_issue</span></td><td><span class="tag tag-un">untrusted</span></td><td class="rank">rule</td><td class="rank">0.70</td></tr>
-              <tr><td><span class="mono">filesystem.write_file</span></td><td><span class="tag tag-pr">private</span></td><td class="rank">rule</td><td class="rank">0.60</td></tr>
-              <tr><td><span class="mono">git.push</span></td><td><span class="tag tag-sk">sink</span></td><td class="rank">rule</td><td class="rank">0.70</td></tr>
-            </tbody>
-          </table>
+            <p class="small muted" style="margin-top:10px">The CLI prints a revoke list; it does not export a policy file. This block shows how that list maps onto a deny list.</p>
           </div>
         </div>
       </div>
@@ -193,10 +163,10 @@
     <h2 class="sr-only">The queries, verbatim</h2>
     <details>
       <summary>Cypher executed &mdash; leak-path query · read-only · 3 s timeout · LIMIT capped at 100</summary>
-      <div class="code"><pre><span class="kw">MATCH</span> (u:<span class="lbl">Resource</span> {trust:<span class="str">'untrusted'</span>})-[:<span class="rel">FLOWS</span>]->(:<span class="lbl">Tool</span>)-[:<span class="rel">FLOWS</span>]->(ctx:<span class="lbl">Context</span>)
+      <div class="code"><pre><span class="kw">MATCH</span> inj = (u:<span class="lbl">Resource</span> {trust:<span class="str">'untrusted'</span>})-[:<span class="rel">FLOWS</span>]-&gt;(:<span class="lbl">Tool</span>)-[:<span class="rel">FLOWS</span>]-&gt;(ctx:<span class="lbl">Context</span>)
 <span class="kw">MATCH</span> leak = (p:<span class="lbl">Resource</span> {sensitivity:<span class="str">'private'</span>})
-              -[:<span class="rel">FLOWS</span>*1..5]->(ctx)
-              -[:<span class="rel">FLOWS</span>*1..5]->(s:<span class="lbl">Resource</span> {visibility:<span class="str">'public'</span>})
+              -[:<span class="rel">FLOWS</span>*1..5]-&gt;(ctx)
+              -[:<span class="rel">FLOWS</span>*1..5]-&gt;(s:<span class="lbl">Resource</span> {visibility:<span class="str">'public'</span>})
 <span class="kw">RETURN</span> u.kind <span class="kw">AS</span> injected_from,
        [n <span class="kw">IN</span> nodes(inj) | coalesce(n.kind, n.name, n.id)] <span class="kw">AS</span> injection,
        [n <span class="kw">IN</span> nodes(leak) | coalesce(n.kind, n.name, n.id)] <span class="kw">AS</span> chain,
@@ -206,7 +176,7 @@
     </details>
 
     <details id="cut">
-      <summary>Cypher executed &mdash; min-cut · one <span class="mono">algo.maxFlow</span> call; both cuts derived from it in code</summary>
+      <summary>Cypher executed &mdash; minimum cut · one <span class="mono">algo.maxFlow</span> call; both canonical cuts derived in code</summary>
       <div class="code"><pre><span class="kw">MATCH</span> (p:<span class="lbl">Resource</span> {sensitivity:<span class="str">'private'</span>})
 <span class="kw">WHERE</span> p.visibility <span class="kw">IS NULL OR</span> p.visibility &lt;&gt; <span class="str">'public'</span>
 <span class="kw">WITH</span> collect(p) <span class="kw">AS</span> src
@@ -221,38 +191,60 @@
 })
 <span class="kw">YIELD</span> maxFlow, edges, edgeFlows
 <span class="kw">RETURN</span> maxFlow, edges, edgeFlows</pre></div>
-      <p class="small" style="padding:12px 16px;color:var(--body)">
+      <p class="small" style="padding:14px 20px;color:var(--body)">
         One call, one relationship type (all 6.0.2 accepts); it returns flows, not
         the cut, so the residual graph is walked in <span class="mono">mincut.ts</span>
-        to produce the edge set above.
+        to produce the edge set above. The cut is chosen by grant count, then declared-task
+        cost, then the write side.
       </p>
     </details>
+
+    <p class="small muted" style="margin-top:24px">Engine note: the public-readmes transcript was recorded on the 6.0.1 module build. The same 40-tool config is re-run on the pinned 6.0.2 container in <span class="mono">docs/live-evidence/run-2026-10-17T13:52:42Z.log</span> and produces the same 567-route count.</p>
   </div>
 </main>
 
 <footer>
-  <div class="wrap cols">
-    <div>
-      <a class="brand" href="index.html" style="font-size:.88rem">
-        <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 2.4 4.2 6v5.6c0 4.7 3.4 8.4 7.8 9.4 4.4-1 7.8-4.7 7.8-9.4V6L12 2.4z" stroke="#FF8A8A" stroke-width="1.5"/>
-          <path d="M9.1 12.1l2 2 4-4.1" stroke="#59D499" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        LethalPath
-      </a>
-      <p class="mt-md" style="max-width:38ch">Built by <a href="https://www.devanshustudios.com/">Devanshu Studios</a> for Graph Hacks. FalkorDB, the sponsor, runs the path and the cut.</p>
-      <p class="small muted" style="margin-top:6px">Graph Hacks entry &middot; T01 Agents That Act on Connected Data &middot; T02 Agent Memory and Coordination</p>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2.4 4.2 6v5.6c0 4.7 3.4 8.4 7.8 9.4 4.4-1 7.8-4.7 7.8-9.4V6L12 2.4z" stroke="#FF8A8A" stroke-width="1.5"/>
+            <path d="M9.1 12.1l2 2 4-4.1" stroke="#59D499" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          LethalPath
+        </a>
+        <p>Open-source MCP security. Map the tools, find the path, compute the cut. Built by <a href="https://www.devanshustudios.com/">Devanshu Studios</a>.</p>
+      </div>
+      <div class="footer-col">
+        <h3>Product</h3>
+        <a href="index.html#how">How it works</a>
+        <a href="scan.html">Example scan</a>
+        <a href="benchmarks.html">Evidence</a>
+        <a href="combos.html">Risk patterns</a>
+        <a href="threat-model.html">Limits</a>
+      </div>
+      <div class="footer-col">
+        <h3>Resources</h3>
+        <a href="https://github.com/bhanu-dev82/lethalpath">GitHub</a>
+        <a href="https://github.com/bhanu-dev82/lethalpath#quick-start">README</a>
+        <a href="https://github.com/bhanu-dev82/lethalpath/blob/main/SECURITY.md">Security</a>
+        <a href="https://github.com/bhanu-dev82/lethalpath/blob/main/LICENSE">Apache-2.0</a>
+      </div>
+      <div class="footer-col">
+        <h3>Built with</h3>
+        <a href="https://www.falkordb.com/">FalkorDB 6.0.2</a>
+        <a href="https://www.falkordb.com/">Cypher + algo.maxFlow</a>
+        <a href="disclosure.html">AI use &amp; disclosure</a>
+      </div>
     </div>
-    <div class="navlinks">
-      <a href="scan.html">Scan</a>
-      <a href="combos.html">Combos</a>
-      <a href="benchmarks.html">Benchmarks</a>
-      <a href="threat-model.html">Limits</a>
-      <a href="disclosure.html">Disclosure</a>
+    <div class="footer-bottom">
+      <span>© 2026 LethalPath contributors</span>
+      <span>Apache-2.0 · no telemetry</span>
     </div>
   </div>
 </footer>
 
-<script src="animate.js"></script>
+<script src="animate.js?v=20261018-7"></script>
 </body>
 </html>

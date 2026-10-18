@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Benchmarks — LethalPath</title>
-<meta name="description" content="Every number LethalPath publishes, and the committed file that produced it: the eval suites, the label gold set, and the live guard transcript — including what we did not measure.">
-<meta name="theme-color" content="#07080a">
+<title>Evidence — LethalPath</title>
+<meta name="description" content="Every number LethalPath publishes, and the committed file behind it: the 40-case eval suites, the label regression set, the guard transcript, and the incidents replayed as fixtures.">
+<meta name="theme-color" content="#08090c">
 <link rel="canonical" href="https://www.devanshustudios.com/lethalpath/benchmarks.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="LethalPath">
-<meta property="og:title" content="Benchmarks — LethalPath">
-<meta property="og:description" content="Every number LethalPath publishes, and the committed file that produced it: the eval suites, the label gold set, and the live guard transcript — including what we did not measure.">
+<meta property="og:title" content="Evidence — LethalPath">
+<meta property="og:description" content="Every number LethalPath publishes, and the committed file behind it: the 40-case eval suites, the label regression set, the guard transcript, and the incidents replayed as fixtures.">
 <!-- canonical host: https://www.devanshustudios.com/lethalpath/ -->
 <meta property="og:url" content="https://www.devanshustudios.com/lethalpath/benchmarks.html">
 <meta property="og:image" content="https://www.devanshustudios.com/lethalpath/og.png">
@@ -19,24 +19,14 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.devanshustudios.com/lethalpath/og.png">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="style.css">
-<style>
-  .win{color:var(--safe);font-weight:520}
-  .lose{color:var(--untrusted);font-weight:520}
-  .neutral{color:var(--body)}
-  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;font-size:.8rem;color:var(--body)}
-  .grp{margin-top:48px}
-  .grp h2{display:flex;align-items:baseline;gap:12px}
-  .grp h2 .idx{font-family:var(--mono);font-size:.72rem;color:var(--mute);font-weight:500}
-  .foot{padding:14px 16px;color:var(--body);border-top:1px solid var(--line);font-size:.83rem}
-</style>
+<link rel="stylesheet" href="style.css?v=20261018-7">
 </head>
 <body>
 
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site-head">
-<nav>
+<nav aria-label="Main">
   <div class="wrap">
     <a class="brand" href="index.html">
       <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -46,23 +36,23 @@
       LethalPath
     </a>
     <span class="spacer"></span>
-    <a class="nb" href="index.html">Home</a>
-    <a class="nb" href="scan.html">Scan</a>
-    <a class="nb" href="combos.html">Combos</a>
-    <a class="nb" href="benchmarks.html" aria-current="page">Benchmarks</a>
+    <a class="nb" href="index.html">Product</a>
+    <a class="nb" href="scan.html">Example scan</a>
+    <a class="nb" href="benchmarks.html" aria-current="page">Evidence</a>
     <a class="nb" href="threat-model.html">Limits</a>
     <a class="nb" href="https://github.com/bhanu-dev82/lethalpath">GitHub</a>
+    <a class="btn btn-primary btn-sm nav-cta" href="index.html#install">Install</a>
   </div>
 </nav>
 </header>
 
 <main id="main" style="border-top:0">
-  <div class="wrap">
-    <p class="eyebrow" data-reveal>Benchmarks</p>
-    <div class="split-a mt-xl">
+  <div class="wrap page-head">
+    <div class="split-a">
       <div>
-        <h1 class="page-title">What we measured &mdash; including where we lose</h1>
-        <p class="lede mt-md">Every row names the committed file that produced it, so you can re-run it. The eval suites use synthetic configs; the label gold set is 50 rows we wrote ourselves.</p>
+        <p class="eyebrow">Evidence</p>
+        <h1 class="page-title" style="margin-top:14px">Every number, and the file behind it.</h1>
+        <p class="lede" style="margin-top:18px">The eval suites use 40 seeded synthetic configs. The label set is 50 rows we wrote. The incidents are reconstructions from published write-ups. Each row names its source, so you can re-run it.</p>
       </div>
       <div>
         <div class="legend">
@@ -73,80 +63,64 @@
       </div>
     </div>
 
-    <!-- ---------- 1 · detection ---------- -->
+    <div class="kpi">
+      <div class="k"><div class="v" style="color:var(--danger)">40/40</div><div class="l">detection cases</div></div>
+      <div class="k"><div class="v" style="color:var(--safe)">40/40</div><div class="l">fix cases</div></div>
+      <div class="k"><div class="v" style="color:var(--sink)">8/8</div><div class="l">clean configs, zero routes</div></div>
+      <div class="k"><div class="v" style="color:var(--untrusted)">50/50</div><div class="l">label regression rows</div></div>
+    </div>
+    <p class="small muted" style="margin-top:12px">Both eval suites ran live against FalkorDB 6.0.2 on 2026-10-17. The JSON is committed at <span class="mono">packages/eval/results/</span>.</p>
+  </div>
+
+  <div class="wrap">
     <div class="grp">
       <h2 class="subhead"><span class="idx">01</span> Detection &mdash; 40 seeded configs</h2>
-      <p class="lede mt-md" style="max-width:70ch">
-        Ground truth known by construction: planted routes, laundering-only routes, clean
-        configs, and tie cases. Each case is ingested into its own graph and scanned with the
-        committed query, live against FalkorDB 6.0.2 on 2026-10-17.
-      </p>
+      <p class="lede mt-md" style="max-width:72ch">Ground truth is known by construction: planted routes, laundering-only routes, clean configs, and tie cases. Each case is ingested into its own graph and scanned with the committed query.</p>
       <div class="panel mt-lg" style="overflow:hidden">
         <div class="tw">
         <table>
+          <caption class="sr-only">Detection results by case kind</caption>
           <thead><tr><th>case kind</th><th>cases</th><th>found</th><th>failed</th><th>source</th></tr></thead>
           <tbody>
             <tr><td><strong>planted route</strong></td><td>16</td><td class="win">16</td><td>0</td><td class="rank">detection.json</td></tr>
             <tr><td>laundering-only route</td><td>8</td><td class="win">8</td><td>0</td><td class="rank">detection.json</td></tr>
             <tr><td>clean &mdash; expected silent</td><td>8</td><td class="win">8</td><td>0</td><td class="rank">detection.json</td></tr>
-            <tr><td>tie &mdash; both cuts close it</td><td>8</td><td class="win">8</td><td>0</td><td class="rank">detection.json</td></tr>
+            <tr><td>tie &mdash; both canonical cuts close it</td><td>8</td><td class="win">8</td><td>0</td><td class="rank">detection.json</td></tr>
             <tr><td><strong>total</strong></td><td><strong>40</strong></td><td class="win"><strong>40</strong></td><td><strong>0</strong></td><td class="rank">detection.json</td></tr>
           </tbody>
         </table>
         </div>
-        <p class="foot">
-          <strong style="color:var(--ink)">What this does not show.</strong> A single-server trifecta check
-          is solved work, and we publish no head-to-head table: we did not run Snyk Agent Scan,
-          triflow or mcptrustchecker ourselves, so any comparison row would be invented. The
-          qualitative comparison, with citations, is in
-          <span class="mono">docs/RELATED-WORK.md</span>. What this table claims is narrower and
-          reproducible: the committed query found every planted route, and all eight clean
-          configs produced zero rows.
-        </p>
+        <p class="foot"><strong>What this does not show.</strong> A single-server trifecta check is solved work, and we publish no head-to-head table: we did not run Snyk Agent Scan, triflow or mcptrustchecker ourselves, so a comparison row would be invented. What this table claims is narrower: the committed query found every planted route, and all eight clean configs produced zero routes.</p>
       </div>
     </div>
 
-    <!-- ---------- 2 · the fix ---------- -->
     <div class="grp">
-      <h2 class="subhead"><span class="idx">02</span> The fix &mdash; the part nobody else ships</h2>
-      <p class="lede mt-md" style="max-width:70ch">
-        One <span class="mono">CALL algo.maxFlow</span>, two canonical cuts, the cheaper one chosen
-        by grant count, then task cost, then the write side. Each case proves itself by re-running
-        the leak query with the revoked grants excluded.
-      </p>
+      <h2 class="subhead"><span class="idx">02</span> The fix &mdash; computed, not advised</h2>
+      <p class="lede mt-md" style="max-width:72ch">One <span class="mono">CALL algo.maxFlow</span>, two canonical cuts, the cheaper one chosen by grant count, then declared-task cost, then the write side. Each route case proves itself by re-running the leak query with the revoked grants excluded.</p>
       <div class="panel mt-lg" style="overflow:hidden">
         <div class="tw">
         <table>
-          <thead><tr><th>what the pass condition checks</th><th>cases</th><th>passed</th><th>failed</th><th>source</th></tr></thead>
+          <caption class="sr-only">Fix-quality results by pass condition</caption>
+          <thead><tr><th>pass condition</th><th>cases</th><th>passed</th><th>failed</th><th>source</th></tr></thead>
           <tbody>
             <tr><td>cut matches the constructed answer</td><td>40</td><td class="win">40</td><td>0</td><td class="rank">fix-quality.json</td></tr>
-            <tr><td>route closes &mdash; <span class="mono">VERIFY_FIX</span> returns zero</td><td>40</td><td class="win">40</td><td>0</td><td class="rank">fix-quality.json</td></tr>
-            <tr><td>expected tasks keep working</td><td>40</td><td class="win">40</td><td>0</td><td class="rank">fix-quality.json</td></tr>
-            <tr><td>clean config &rarr; empty cut, nothing revoked</td><td>8</td><td class="win">8</td><td>0</td><td class="rank">fix-quality.json</td></tr>
+            <tr><td>route closes &mdash; <span class="mono">VERIFY_FIX</span> returns zero</td><td>32 route cases</td><td class="win">32</td><td>0</td><td class="rank">fix-quality.json</td></tr>
+            <tr><td>expected tasks keep working</td><td>32 route cases</td><td class="win">32</td><td>0</td><td class="rank">fix-quality.json</td></tr>
+            <tr><td>clean config &rarr; empty cut, nothing revoked</td><td>8 clean cases</td><td class="win">8</td><td>0</td><td class="rank">fix-quality.json</td></tr>
           </tbody>
         </table>
         </div>
-        <p class="foot">
-          The first three rows are the three parts of the same pass condition over the same 40
-          cases, eight clean ones among them; the file's <span class="mono">failures</span> array
-          is empty. On the default fs-git fixture the same code path printed one route,
-          <span class="mono">max-flow 2</span>, revoke <span class="mono">git.push</span>,
-          <span class="mono">0 of 1</span> routes remain, <span class="mono">3 of 4</span> tasks
-          keep working &mdash; verbatim in <span class="mono">docs/live-evidence/</span>.
-        </p>
+        <p class="foot">The 8 clean cases return an empty cut; the verification and task checks are not run on them. On the default fs-git fixture the same code path printed one route, <span class="mono">max-flow 2</span>, revoke <span class="mono">git.push</span>, <span class="mono">0 of 1</span> routes remain, <span class="mono">3 of 4</span> tasks keep working &mdash; verbatim in <span class="mono">docs/live-evidence/</span>.</p>
       </div>
     </div>
 
-    <!-- ---------- 3 · labels ---------- -->
     <div class="grp">
-      <h2 class="subhead"><span class="idx">03</span> Label quality &mdash; the honest accounting</h2>
-      <p class="lede mt-md" style="max-width:70ch">
-        Labels come from a 35-row rules table aided by tool-set expansions for 11 known servers.
-        The gold set is 50 hand-written rows, run in the package's own test.
-      </p>
+      <h2 class="subhead"><span class="idx">03</span> Labels &mdash; a regression check, not accuracy</h2>
+      <p class="lede mt-md" style="max-width:72ch">Labels come from a 35-row rules table (34 name rules plus one fallback) aided by tool-set expansions for 11 known servers. The gold set is 50 hand-written rows.</p>
       <div class="panel mt-lg" style="overflow:hidden">
         <div class="tw">
         <table>
+          <caption class="sr-only">Label artefacts and results</caption>
           <thead><tr><th>artefact</th><th>count</th><th>result</th><th>source</th></tr></thead>
           <tbody>
             <tr><td>labelling rules</td><td>35</td><td class="neutral">&mdash;</td><td class="rank">packages/labeler/src/rules.ts</td></tr>
@@ -155,23 +129,16 @@
           </tbody>
         </table>
         </div>
-        <p class="foot">
-          <strong style="color:var(--ink)">We publish no precision/recall table.</strong> The gold
-          set is self-authored alongside the rules: it proves internal consistency and catches
-          regressions, not external ground truth. The rules we trust least are named in the
-          labeler README &mdash; the sink end (tools named generically, like
-          <span class="mono">execute</span> or <span class="mono">process</span>) is the weak one,
-          which makes a scan quieter, never noisier.
-        </p>
+        <p class="foot"><strong>We publish no precision/recall table.</strong> The gold set is self-authored alongside the rules: it proves internal consistency and catches regressions, not external ground truth. Three of the 50 rows pass by expecting the fallback resource. The rules we trust least are named in the labeler README &mdash; a missed sink makes a scan quieter; a false sink makes it noisier.</p>
       </div>
     </div>
 
-    <!-- ---------- 4 · runtime ---------- -->
     <div class="grp">
-      <h2 class="subhead"><span class="idx">04</span> Runtime guard &mdash; demo session, simulated tool results</h2>
+      <h2 class="subhead"><span class="idx">04</span> Runtime guard &mdash; demo session, simulated results</h2>
       <div class="panel mt-lg" style="overflow:hidden">
         <div class="tw">
         <table>
+          <caption class="sr-only">Guard demo transcript</caption>
           <thead><tr><th>call</th><th>result</th><th>source</th></tr></thead>
           <tbody>
             <tr><td><span class="mono">github.read(issue#42)</span></td><td class="neutral">allowed &middot; taint: untrusted</td><td class="rank">live-evidence</td></tr>
@@ -181,28 +148,39 @@
           </tbody>
         </table>
         </div>
-        <p class="foot">
-          <strong style="color:var(--ink)">This is a demo.</strong> The guard speaks real MCP over
-          stdio, but allowed calls return simulated results; no real GitHub, filesystem or git
-          server sits behind it yet. The same push is blocked in a tainted session and allowed in a clean one. The guard's own
-          suite runs eight tests, including the stdio end-to-end. Added latency:
-          <strong style="color:var(--ink)">not measured</strong>, so no milliseconds appear here.
-          The audit log stores tool, decision, reason and a short argument hash &mdash; never
-          argument contents.
-        </p>
+        <p class="foot"><strong>This is a demo.</strong> The guard speaks real MCP over stdio, but allowed calls return simulated results; no real GitHub, filesystem or git server sits behind it yet. The same push is blocked in a tainted session and allowed in a clean one. The guard&rsquo;s own suite runs eight tests. Added latency: <strong>not measured</strong>, so no milliseconds appear here. The audit log stores tool, decision, reason and a short argument hash &mdash; never argument contents.</p>
       </div>
     </div>
 
-    <!-- ---------- 5 · not measured ---------- -->
+    <div class="grp" id="incidents">
+      <h2 class="subhead"><span class="idx">05</span> Published incidents, replayed</h2>
+      <p class="lede mt-md" style="max-width:72ch">Four public write-ups, encoded as fixtures. Each fixture reconstructs the capabilities only &mdash; no payloads, no secrets &mdash; and carries its source and date. <span class="mono">scan</span> rediscovers the published chain; <span class="mono">fix</span> computes the revocation and re-runs the query.</p>
+      <div class="panel mt-lg" style="overflow:hidden">
+        <div class="tw">
+        <table>
+          <caption class="sr-only">Published incidents replayed as fixtures</caption>
+          <thead><tr><th>published incident</th><th>routes</th><th>computed cut</th><th>tasks kept</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://invariantlabs.ai/blog/mcp-github-vulnerability">GitHub MCP, 2025-05-26</a></td><td>1</td><td class="mono">github.create_pull_request</td><td>2 of 3</td></tr>
+            <tr><td><a href="https://generalanalysis.com/blog/supabase-mcp-blog">Supabase MCP, 2025-07-08</a></td><td>2</td><td class="mono">supabase.execute_sql</td><td>0 of 1</td></tr>
+            <tr><td><a href="https://invariantlabs.ai/blog/whatsapp-mcp-exploited">WhatsApp MCP, 2025-04-07</a></td><td>1</td><td class="mono">whatsapp.send_message</td><td>2 of 3</td></tr>
+            <tr><td><a href="https://www.bleepingcomputer.com/news/security/unofficial-postmark-mcp-npm-silently-stole-users-emails/">Postmark npm, 2025-09-25</a></td><td>1</td><td class="mono">postmark.send_email</td><td>1 of 2</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="foot">Reconstructions from the write-ups, not reproductions. The Postmark incident is a malicious package, not a prompt injection; LethalPath does not detect malicious packages. The fixture shows that removing the package&rsquo;s grant closes the route, which is the same fix as removing the package. Commands and limits are in <span class="mono">docs/incident-replay.md</span>.</p>
+      </div>
+    </div>
+
     <div class="grp">
-      <h2 class="subhead"><span class="idx">05</span> What we did not measure</h2>
-      <p class="lede mt-md" style="max-width:70ch">These have no number yet, so none is printed.</p>
+      <h2 class="subhead"><span class="idx">06</span> What we did not measure</h2>
+      <p class="lede mt-md" style="max-width:72ch">These have no number yet, so none is printed.</p>
       <div class="panel mt-lg">
-        <ul class="small" style="color:var(--body);padding:18px 18px 18px 36px;list-style:disc">
-          <li style="margin:8px 0">Head-to-head against other scanners &mdash; <strong style="color:var(--ink)">not run</strong>. Positioning is qualitative and cited in <span class="mono">docs/RELATED-WORK.md</span>, including where MSCC and CaMeL are ahead of us.</li>
-          <li style="margin:8px 0">Retrieval accuracy on tool-selection datasets &mdash; <strong style="color:var(--ink)">not attempted</strong>. Retrieval is not the product; the path and the cut are.</li>
-          <li style="margin:8px 0">External label ground truth &mdash; <strong style="color:var(--ink)">none exists yet</strong>. The 50-row gold set is self-authored, and says so.</li>
-          <li style="margin:8px 0">Guard latency overhead &mdash; <strong style="color:var(--ink)">not measured</strong>. We print no milliseconds we did not time.</li>
+        <ul class="small" style="color:var(--body);padding:20px 20px 20px 40px;list-style:disc">
+          <li style="margin:9px 0">Head-to-head against other scanners &mdash; <strong style="color:var(--ink)">not run</strong>. The comparison is qualitative and cited in <span class="mono">docs/RELATED-WORK.md</span>, including where MSCC and CaMeL are ahead of us.</li>
+          <li style="margin:9px 0">Retrieval accuracy on tool-selection datasets &mdash; <strong style="color:var(--ink)">not attempted</strong>. Retrieval is not the product; the path and the cut are.</li>
+          <li style="margin:9px 0">External label ground truth &mdash; <strong style="color:var(--ink)">none exists yet</strong>. The 50-row gold set is self-authored, and says so.</li>
+          <li style="margin:9px 0">Guard latency overhead &mdash; <strong style="color:var(--ink)">not measured</strong>. We print no milliseconds we did not time.</li>
         </ul>
       </div>
     </div>
@@ -225,28 +203,47 @@ cat packages/eval/results/detection.json packages/eval/results/fix-quality.json<
 </main>
 
 <footer>
-  <div class="wrap cols">
-    <div>
-      <a class="brand" href="index.html" style="font-size:.88rem">
-        <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 2.4 4.2 6v5.6c0 4.7 3.4 8.4 7.8 9.4 4.4-1 7.8-4.7 7.8-9.4V6L12 2.4z" stroke="#FF8A8A" stroke-width="1.5"/>
-          <path d="M9.1 12.1l2 2 4-4.1" stroke="#59D499" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        LethalPath
-      </a>
-      <p class="mt-md" style="max-width:38ch">Built by <a href="https://www.devanshustudios.com/">Devanshu Studios</a> for Graph Hacks. FalkorDB, the sponsor, runs the path and the cut.</p>
-      <p class="small muted" style="margin-top:6px">Graph Hacks entry &middot; T01 Agents That Act on Connected Data &middot; T02 Agent Memory and Coordination</p>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2.4 4.2 6v5.6c0 4.7 3.4 8.4 7.8 9.4 4.4-1 7.8-4.7 7.8-9.4V6L12 2.4z" stroke="#FF8A8A" stroke-width="1.5"/>
+            <path d="M9.1 12.1l2 2 4-4.1" stroke="#59D499" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          LethalPath
+        </a>
+        <p>Open-source MCP security. Map the tools, find the path, compute the cut. Built by <a href="https://www.devanshustudios.com/">Devanshu Studios</a>.</p>
+      </div>
+      <div class="footer-col">
+        <h3>Product</h3>
+        <a href="index.html#how">How it works</a>
+        <a href="scan.html">Example scan</a>
+        <a href="benchmarks.html">Evidence</a>
+        <a href="combos.html">Risk patterns</a>
+        <a href="threat-model.html">Limits</a>
+      </div>
+      <div class="footer-col">
+        <h3>Resources</h3>
+        <a href="https://github.com/bhanu-dev82/lethalpath">GitHub</a>
+        <a href="https://github.com/bhanu-dev82/lethalpath#quick-start">README</a>
+        <a href="https://github.com/bhanu-dev82/lethalpath/blob/main/SECURITY.md">Security</a>
+        <a href="https://github.com/bhanu-dev82/lethalpath/blob/main/LICENSE">Apache-2.0</a>
+      </div>
+      <div class="footer-col">
+        <h3>Built with</h3>
+        <a href="https://www.falkordb.com/">FalkorDB 6.0.2</a>
+        <a href="https://www.falkordb.com/">Cypher + algo.maxFlow</a>
+        <a href="disclosure.html">AI use &amp; disclosure</a>
+      </div>
     </div>
-    <div class="navlinks">
-      <a href="scan.html">Scan</a>
-      <a href="combos.html">Combos</a>
-      <a href="benchmarks.html">Benchmarks</a>
-      <a href="threat-model.html">Limits</a>
-      <a href="disclosure.html">Disclosure</a>
+    <div class="footer-bottom">
+      <span>© 2026 LethalPath contributors</span>
+      <span>Apache-2.0 · no telemetry</span>
     </div>
   </div>
 </footer>
 
-<script src="animate.js"></script>
+<script src="animate.js?v=20261018-7"></script>
 </body>
 </html>

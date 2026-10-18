@@ -1,6 +1,6 @@
 # AI use disclosure
 
-Required by the hackathon rules. This file is the record.
+This file records how AI assistance was used and where a human checked it.
 
 AI coding assistants were used throughout this project for:
 
@@ -10,10 +10,12 @@ AI coding assistants were used throughout this project for:
 - a rules table that proposes trust labels for MCP tools (`packages/labeler`);
   a learned classifier was considered and is not in this build.
 
-The following were done by a human, and can be walked through on request:
+The following were done by a human:
 
-- every Cypher query was executed against a live FalkorDB 6.0.2 instance before
-  it was committed, and corrected where the documented syntax did not run;
+- every Cypher query was executed against a live FalkorDB instance before it was
+  committed, and corrected where the documented syntax did not run. The pinned
+  6.0.2 image is used in CI and compose; one public-README run used the 6.0.1
+  module build and is logged as such;
 - every number we call a benchmark comes from a file under
   `packages/eval/results/` and was read before it was quoted; transcript
   numbers come from the uncut run log in `docs/live-evidence/`, labeler figures
@@ -25,14 +27,13 @@ The following were done by a human, and can be walked through on request:
 - the graph model, the decision to model capacity edges as a single relationship
   type, and the choice of product were ours.
 
-## What we got wrong, on purpose
+## What changed while we built it
 
 We started by planning an MCP tool router. The pain is real, but the fix does not
 need a graph — keyword search and embeddings do it, and it is already shipped.
-Under this hackathon's rules a product that still works after removing FalkorDB
-is disqualified, so we dropped it. The replacement — finding leak *paths* and the
-minimum cut that closes them — fails that test in the other direction: remove the
-graph and it stops existing.
+That made it a thin wrapper around a data store, so we dropped it. The
+replacement — finding leak *paths* and the minimum cut that closes them — makes
+the graph load-bearing: remove it and the product stops existing.
 
 We also found documented FalkorDB behaviour that does not run on the pinned image
 (a shortest-path index, and a parameter-binding form). We wrote fallbacks and

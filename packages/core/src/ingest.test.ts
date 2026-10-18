@@ -34,8 +34,8 @@ async function scanOf(cfg: ScanConfig): Promise<GraphDB> {
 
 /**
  * `pnpm test` must leave GRAPH.LIST exactly as it found it: the graphs this
- * file creates are deleted here, so a judge who runs the suite and then opens
- * the Browser at :3000 sees no test leftovers.
+ * file creates are deleted here, so a developer who runs the suite and then
+ * opens the Browser at :3000 sees no test leftovers.
  */
 after(async () => {
   for (const name of created) {

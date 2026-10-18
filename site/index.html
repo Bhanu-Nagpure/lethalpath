@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LethalPath — find the fewest permissions that stop the leak</title>
-<meta name="description" content="Open-source guard for AI agents. Finds every route your MCP tools can be tricked into leaking data, then the fewest permissions to revoke. Powered by FalkorDB.">
-<meta name="theme-color" content="#07080a">
+<title>LethalPath — find the leak path, cut it</title>
+<meta name="description" content="LethalPath maps an AI agent's MCP tools as a graph, finds routes from untrusted input to public output, and computes a minimum cut of permissions to revoke. Open source, runs locally on FalkorDB 6.0.2.">
+<meta name="theme-color" content="#08090c">
 <link rel="canonical" href="https://www.devanshustudios.com/lethalpath/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="LethalPath">
-<meta property="og:title" content="LethalPath — find the fewest permissions that stop the leak">
-<meta property="og:description" content="Open-source guard for AI agents. Finds every route your MCP tools can be tricked into leaking data, then the fewest permissions to revoke. Powered by FalkorDB.">
+<meta property="og:title" content="LethalPath — find the leak path, cut it">
+<meta property="og:description" content="LethalPath maps an AI agent's MCP tools as a graph, finds routes from untrusted input to public output, and computes a minimum cut of permissions to revoke. Open source, runs locally on FalkorDB 6.0.2.">
 <!-- canonical host: https://www.devanshustudios.com/lethalpath/ -->
 <meta property="og:url" content="https://www.devanshustudios.com/lethalpath/">
 <meta property="og:image" content="https://www.devanshustudios.com/lethalpath/og.png">
@@ -19,14 +19,14 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.devanshustudios.com/lethalpath/og.png">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20261018-7">
 </head>
 <body>
 
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site-head">
-<nav>
+<nav aria-label="Main">
   <div class="wrap">
     <a class="brand" href="index.html" aria-current="page">
       <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -36,107 +36,35 @@
       LethalPath
     </a>
     <span class="spacer"></span>
-    <a class="nb" href="index.html" aria-current="page">Home</a>
-    <a class="nb" href="scan.html">Scan</a>
-    <a class="nb" href="combos.html">Combos</a>
-    <a class="nb" href="benchmarks.html">Benchmarks</a>
+    <a class="nb" href="index.html" aria-current="page">Product</a>
+    <a class="nb" href="scan.html">Example scan</a>
+    <a class="nb" href="benchmarks.html">Evidence</a>
     <a class="nb" href="threat-model.html">Limits</a>
     <a class="nb" href="https://github.com/bhanu-dev82/lethalpath">GitHub</a>
-    <a class="btn btn-primary btn-sm" href="#install">Install</a>
+    <a class="btn btn-primary btn-sm nav-cta" href="#install">Install</a>
   </div>
 </nav>
 </header>
 
-<div class="hero-product">
-  <div class="wrap">
-    <p class="kicker"><b>Open source</b> · runs locally · powered by FalkorDB</p>
-    <h1 style="margin-top:22px">The leak is a path.<br>Close it with the fewest permissions.</h1>
-    <p class="lede" style="margin-top:20px;font-size:1.12rem;max-width:46ch">
-      An agent that reads a public GitHub issue, can read your private files, and can push
-      to a public repo can be steered into publishing those files. LethalPath finds that
-      route in your MCP config, then the smallest set of permissions to remove, weighted by
-      the workflows you tell it you need.
-    </p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:28px">
-      <a class="btn btn-primary" href="#install">Install the CLI</a>
-      <a class="btn btn-ghost" href="scan.html">See an example scan</a>
-    </div>
-    <p style="margin-top:22px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <a class="pill" href="benchmarks.html"><span class="mono">40/40</span>&nbsp;detection · <span class="mono">detection.json</span></a>
-      <a class="pill" href="benchmarks.html"><span class="mono">40/40</span>&nbsp;fixes verified · <span class="mono">fix-quality.json</span></a>
-      <a class="pill" href="scan.html"><span class="mono">567</span>&nbsp;routes on a public config · <span class="mono">live-evidence</span></a>
-      <a class="pill" href="benchmarks.html"><span class="mono">8/8</span>&nbsp;clean configs answered zero</a>
-    </p>
+<main id="main" style="border-top:0;padding:0">
 
-    <h2 id="problem" style="margin-top:56px">What goes wrong</h2>
-    <div class="explain">
-      <figure>
-        <svg viewBox="0 0 320 168" role="img" aria-label="Three grants drawn apart: read a public issue, read private files, and publish. Nothing connects them.">
-          <rect width="320" height="168" fill="#07080a"/>
-          <g>
-            <rect x="16" y="24" width="90" height="96" rx="10" fill="#121212" stroke="#FFC533"/>
-            <circle cx="34" cy="46" r="4" fill="#FFC533"/>
-            <text x="34" y="74" fill="#F4F4F6" font-size="14" font-family="ui-monospace,Menlo,Consolas,monospace">read</text>
-            <text x="34" y="94" fill="#FFC533" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace">issue</text>
-          </g>
-          <g>
-            <rect x="115" y="24" width="90" height="96" rx="10" fill="#121212" stroke="#B69EFB"/>
-            <circle cx="133" cy="46" r="4" fill="#B69EFB"/>
-            <text x="133" y="74" fill="#F4F4F6" font-size="14" font-family="ui-monospace,Menlo,Consolas,monospace">read</text>
-            <text x="133" y="94" fill="#B69EFB" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace">files</text>
-          </g>
-          <g>
-            <rect x="214" y="24" width="90" height="96" rx="10" fill="#121212" stroke="#57C1FF"/>
-            <circle cx="232" cy="46" r="4" fill="#57C1FF"/>
-            <text x="232" y="84" fill="#57C1FF" font-size="14" font-family="ui-monospace,Menlo,Consolas,monospace">publish</text>
-          </g>
-          <text x="16" y="148" fill="#A9A9AB" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">each one, you would approve</text>
-        </svg>
-        <figcaption><strong>Fine alone.</strong> Read a public issue. Read your folder. Publish. Three ordinary grants.</figcaption>
-      </figure>
-      <figure>
-        <svg viewBox="0 0 320 168" role="img" aria-label="A public issue enters the agent context. Private files leave through publish to a public repo.">
-          <rect width="320" height="168" fill="#07080a"/>
-          <line x1="78" y1="62" x2="132" y2="62" stroke="#FFC533" stroke-dasharray="2 5"/>
-          <line x1="188" y1="62" x2="236" y2="62" stroke="#FF8A8A"/>
-          <rect x="16" y="40" width="62" height="44" rx="8" fill="#121212" stroke="#FFC533"/>
-          <text x="47" y="66" text-anchor="middle" fill="#FFC533" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">issue</text>
-          <rect x="132" y="28" width="56" height="68" rx="8" fill="#121212" stroke="#57C1FF"/>
-          <text x="160" y="58" text-anchor="middle" fill="#F4F4F6" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">agent</text>
-          <text x="160" y="76" text-anchor="middle" fill="#57C1FF" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">notes</text>
-          <rect x="236" y="40" width="68" height="44" rx="8" fill="#121212" stroke="#FF8A8A"/>
-          <text x="270" y="66" text-anchor="middle" fill="#FF8A8A" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">public</text>
-          <text x="16" y="132" fill="#CDCDCD" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace">one sentence is the instruction</text>
-          <text x="16" y="152" fill="#A9A9AB" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">the folder is the payload</text>
-        </svg>
-        <figcaption><strong>Dangerous together.</strong> A stranger’s sentence rides into the agent’s notes, and your files leave with it. No tool misbehaved.</figcaption>
-      </figure>
-      <figure>
-        <svg viewBox="0 0 320 168" role="img" aria-label="Several leak routes stop at one revoked publish grant. The other work continues.">
-          <rect width="320" height="168" fill="#07080a"/>
-          <path d="M24 36 H150" stroke="#FF8A8A" stroke-opacity=".45" fill="none"/>
-          <path d="M24 62 H150" stroke="#FF8A8A" stroke-opacity=".7" fill="none"/>
-          <path d="M24 88 H150" stroke="#FF8A8A" fill="none"/>
-          <path d="M24 114 H150" stroke="#FF8A8A" stroke-opacity=".45" fill="none"/>
-          <line x1="168" y1="22" x2="168" y2="128" stroke="#59D499" stroke-width="2"/>
-          <rect x="196" y="48" width="100" height="52" rx="8" fill="#121212" stroke="#59D499"/>
-          <text x="246" y="70" text-anchor="middle" fill="#59D499" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace">revoke</text>
-          <text x="246" y="88" text-anchor="middle" fill="#F4F4F6" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">publish</text>
-          <text x="16" y="152" fill="#A9A9AB" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">3 of 4 tasks keep working</text>
-        </svg>
-        <figcaption><strong>Turn off the fewest.</strong> On the committed run, revoking <span class="mono">git.push</span> closes the route. The other work stays.</figcaption>
-      </figure>
+<section class="hero">
+  <div class="wrap hero-inner">
+    <p class="kicker"><span class="live" aria-hidden="true"></span><b>Open source</b> · MCP security</p>
+    <h1>The leak is a path.<br>Close it.</h1>
+    <p class="lede">LethalPath maps your AI agent&rsquo;s tools as a graph, finds the routes from untrusted input to public output, and computes a minimum cut &mdash; the exact permissions to revoke.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary btn-lg" href="#install">Install the CLI</a>
+      <a class="btn btn-ghost btn-lg" href="scan.html">See a real scan</a>
     </div>
-    <p class="small" style="margin-top:16px;max-width:68ch;color:var(--body)">Why it matters: switching every tool off stops the leak and also stops the agent. The useful answer is the smallest set to switch off, then a second query that shows the leak is gone.</p>
+    <p class="hero-meta"><span>Apache-2.0</span><span>Runs locally</span><span>FalkorDB 6.0.2</span></p>
   </div>
-</div>
 
-<main id="main" style="border-top:0;padding-top:8px;padding-bottom:0">
-  <div class="wrap">
-    <div class="window" data-reveal>
+  <div class="wrap hero-visual">
+    <div class="window">
       <div class="window-bar">
         <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="window-title">lethalpath scan · live path</span>
+        <span class="window-title">lethalpath scan · fs-git</span>
         <span class="pill">FalkorDB 6.0.2</span>
       </div>
       <div class="window-body">
@@ -219,218 +147,432 @@
         </div>
       </div>
     </div>
-    <p class="muted small" style="margin-top:12px">The committed fs-git run, replayed: a public issue taints the agent context, and your private folder leaves through <span class="mono">git.push</span>. The transcript is in <span class="mono">docs/live-evidence/</span>.</p>
-    <p class="small" style="margin-top:8px;max-width:68ch;color:var(--body)">Both the route and the fix run as queries on <a href="https://www.falkordb.com/">FalkorDB</a> 6.0.2 — the leak is one Cypher traversal, the fix is one <span class="mono">CALL algo.maxFlow</span>. <a href="scan.html">See the exact queries</a>.</p>
-  </div>
-
-<section>
-  <div class="wrap">
-    <div class="split-a" style="align-items:end;margin-bottom:28px">
-      <div>
-        <p class="eyebrow">One run</p>
-        <h2 style="margin-top:10px">Config in, route out, grant revoked.</h2>
-      </div>
-      <p class="lede">One run, end to end: the config goes in, the query names the route tool by tool, and one revoked grant closes it. Every line below is copied from the committed run in <span class="mono">docs/live-evidence/</span>.</p>
+    <div class="mobile-path" aria-hidden="true">
+      <p class="mp-title">one run · fs-git</p>
+      <div class="mp-row un"><span class="mp-label">public issue</span><span class="mp-note">untrusted</span></div>
+      <div class="mp-row"><span class="mp-label">github.read</span></div>
+      <div class="mp-row sink"><span class="mp-label">agent context</span><span class="mp-note">tainted</span></div>
+      <div class="mp-row"><span class="mp-label">filesystem.read</span></div>
+      <div class="mp-row pr"><span class="mp-label">private folder</span><span class="mp-note">private</span></div>
+      <div class="mp-row cut"><span class="mp-label">revoke git.push</span><span class="mp-tag">cut</span></div>
+      <div class="mp-row sk closed"><span class="mp-label">public repo</span><span class="mp-note">closed</span></div>
     </div>
-    <div class="stage">
-      <figure class="window" data-reveal>
-        <div class="window-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">scan</span></div>
-        <div class="window-body">
-          <div class="shot">
-            <div class="term">
-              <p>config    fs-git · A public issue steers the agent through the private folder out to a public repo</p>
-              <p>graph     scan_fs-git · 11 nodes · 9 edges · ready</p>
-            </div>
-            <p class="figcap">01 · config in</p>
-          </div>
-        </div>
-      </figure>
-      <figure class="window" data-reveal>
-        <div class="window-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">path</span></div>
-        <div class="window-body">
-          <div class="shot">
-            <div class="term">
-              <p>LEAK PATHS</p>
-              <p class="acc-d">  1  4 hops  project folder → filesystem.read → context → git.push → public repo</p>
-              <p class="acc-d">1 route found — every one of them is a permission you granted.</p>
-            </div>
-            <p class="figcap">02 · route found</p>
-          </div>
-        </div>
-      </figure>
-      <figure class="window" data-reveal>
-        <div class="window-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">fix</span></div>
-        <div class="window-body">
-          <div class="shot">
-            <div class="term">
-              <p>FIX  ·  CALL algo.maxFlow on FalkorDB</p>
-              <p>max-flow   2</p>
-              <p class="acc-s">cut        write side · git.push → public repo</p>
-              <p class="acc-s">revoke     git.push</p>
-              <p class="acc-s">verified   0 of 1 routes remain (leak query re-run without git.push)</p>
-              <p class="acc-s">tasks      3 of 4 keep working</p>
-            </div>
-            <p class="figcap">03 · cut verified</p>
-          </div>
-        </div>
-      </figure>
-    </div>
+    <p class="hero-caption"><span class="dot" aria-hidden="true"></span><span><b>One unedited run.</b> A public issue taints the agent context, and a private folder leaves through <span class="mono">git.push</span>. Revoking <span class="mono">git.push</span> closes the route. <a href="scan.html">See the exact queries</a>.</span></p>
   </div>
 </section>
 
-<section id="why">
+<section id="problem">
   <div class="wrap">
-    <p class="eyebrow">Why this matters</p>
-    <div class="split-a" style="margin-top:22px;align-items:start">
+    <div class="section-head">
       <div>
-        <h2>The leak needs no bug, only the arrangement.</h2>
+        <p class="eyebrow">The problem</p>
+        <h2 style="margin-top:14px">Three permissions you would approve. One path you would not.</h2>
       </div>
-      <div>
-        <p class="lede">
-          When an AI agent can read text a stranger wrote, read your private data, and send data
-          somewhere public, a hidden instruction can make it leak that data. Simon Willison calls
-          this the <a href="https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/">lethal trifecta</a>.
-        </p>
-        <p class="small mt-md" style="color:var(--body);max-width:68ch">
-          It has happened with real tools. A malicious GitHub issue made an agent copy private-repo
-          contents into a public pull request
-          (<a href="https://invariantlabs.ai/blog/mcp-github-vulnerability">Invariant Labs, May 2025</a>),
-          and a support ticket made a Cursor agent paste database tokens back into the ticket
-          (<a href="https://generalanalysis.com/blog/supabase-mcp-blog">General Analysis, July 2025</a>).
-          Neither needed a bug in the server; Invariant notes GitHub &ldquo;cannot resolve this
-          vulnerability through server-side patches.&rdquo;
-        </p>
-        <p class="small mt-md" style="color:var(--body);max-width:68ch">
-          The same pattern appears without an attacker. In a controlled study of multi-server MCP
-          agents, depending on the model, 11.5&ndash;41.3% of runs passed credentials across server
-          boundaries even when the task left room to redact them
-          (<a href="https://arxiv.org/abs/2604.27819">MCPHunt, arXiv 2604.27819</a>).
-          Meta&rsquo;s <a href="https://ai.meta.com/blog/practical-ai-agent-security/">Agents Rule of Two</a>
-          and OWASP&rsquo;s <a href="https://genai.owasp.org/llmrisk/llm062025-excessive-agency/">LLM06 Excessive Agency</a>
-          point to the same remedy: don&rsquo;t give one agent session all three abilities, and remove
-          permissions it doesn&rsquo;t need.
-        </p>
-      </div>
+      <p class="lede">No tool misbehaves. The bug is in the arrangement: one agent, one context, and three abilities that add up to exfiltration.</p>
     </div>
 
-    <div class="panel mt-lg" style="overflow:hidden">
-      <div class="tw">
-      <table>
-        <caption class="sr-only">Four published incidents, replayed as fixtures</caption>
-        <thead><tr><th>published incident</th><th>routes found</th><th>computed cut (revoke)</th><th>tasks kept</th></tr></thead>
-        <tbody>
-          <tr><td><a href="https://invariantlabs.ai/blog/mcp-github-vulnerability">GitHub MCP, 2025-05-26</a></td><td>1</td><td class="mono">github.create_pull_request</td><td>2 of 3</td></tr>
-          <tr><td><a href="https://generalanalysis.com/blog/supabase-mcp-blog">Supabase MCP, 2025-07-08</a></td><td>2</td><td class="mono">supabase.execute_sql</td><td>0 of 1</td></tr>
-          <tr><td><a href="https://invariantlabs.ai/blog/whatsapp-mcp-exploited">WhatsApp MCP, 2025-04-07</a></td><td>1</td><td class="mono">whatsapp.send_message</td><td>2 of 3</td></tr>
-          <tr><td><a href="https://www.bleepingcomputer.com/news/security/unofficial-postmark-mcp-npm-silently-stole-users-emails/">Postmark npm, 2025-09-25</a></td><td colspan="3">Out of scope: a malicious package that copied every email with no injection involved. A scan does not detect it; the fix is removing the package.</td></tr>
-        </tbody>
-      </table>
-      </div>
-      <p class="foot">Reconstructions from the write-ups, not reproductions. Each fixture is in <span class="mono">data/fixtures/incidents/</span>, with commands and limits in <span class="mono">docs/incident-replay.md</span>. Tasks kept counts workflows declared in each fixture.</p>
-    </div>
+    <div class="problem-grid">
+      <figure class="problem-card">
+        <svg viewBox="0 0 320 168" role="img" aria-label="Three grants drawn apart: read a public issue, read private files, and publish. Nothing connects them.">
+          <rect width="320" height="168" fill="#07080a"/>
+          <g>
+            <rect x="16" y="24" width="90" height="96" rx="10" fill="#121212" stroke="#FFC533"/>
+            <circle cx="34" cy="46" r="4" fill="#FFC533"/>
+            <text x="34" y="74" fill="#F4F4F6" font-size="14" font-family="ui-monospace,Menlo,Consolas,monospace">read</text>
+            <text x="34" y="94" fill="#FFC533" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace">issue</text>
+          </g>
+          <g>
+            <rect x="115" y="24" width="90" height="96" rx="10" fill="#121212" stroke="#B69EFB"/>
+            <circle cx="133" cy="46" r="4" fill="#B69EFB"/>
+            <text x="133" y="74" fill="#F4F4F6" font-size="14" font-family="ui-monospace,Menlo,Consolas,monospace">read</text>
+            <text x="133" y="94" fill="#B69EFB" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace">files</text>
+          </g>
+          <g>
+            <rect x="214" y="24" width="90" height="96" rx="10" fill="#121212" stroke="#57C1FF"/>
+            <circle cx="232" cy="46" r="4" fill="#57C1FF"/>
+            <text x="232" y="84" fill="#57C1FF" font-size="14" font-family="ui-monospace,Menlo,Consolas,monospace">publish</text>
+          </g>
+          <text x="16" y="148" fill="#A9A9AB" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">each one, you would approve</text>
+        </svg>
+        <figcaption class="body">
+          <h3>Fine alone</h3>
+          <p>Read a public issue. Read a private folder. Publish. Every grant is reasonable on its own.</p>
+        </figcaption>
+      </figure>
 
-    <div class="split-a mt-lg" style="align-items:start">
+      <figure class="problem-card">
+        <svg viewBox="0 0 320 168" role="img" aria-label="A public issue enters the agent context. Private files leave through publish to a public repo.">
+          <rect width="320" height="168" fill="#07080a"/>
+          <line x1="78" y1="62" x2="132" y2="62" stroke="#FFC533" stroke-dasharray="2 5"/>
+          <line x1="188" y1="62" x2="236" y2="62" stroke="#FF8A8A"/>
+          <rect x="16" y="40" width="62" height="44" rx="8" fill="#121212" stroke="#FFC533"/>
+          <text x="47" y="66" text-anchor="middle" fill="#FFC533" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">issue</text>
+          <rect x="132" y="28" width="56" height="68" rx="8" fill="#121212" stroke="#57C1FF"/>
+          <text x="160" y="58" text-anchor="middle" fill="#F4F4F6" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">agent</text>
+          <text x="160" y="76" text-anchor="middle" fill="#57C1FF" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">notes</text>
+          <rect x="236" y="40" width="68" height="44" rx="8" fill="#121212" stroke="#FF8A8A"/>
+          <text x="270" y="66" text-anchor="middle" fill="#FF8A8A" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">public</text>
+          <text x="16" y="132" fill="#CDCDCD" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace">one sentence is the instruction</text>
+          <text x="16" y="152" fill="#A9A9AB" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">the folder is the payload</text>
+        </svg>
+        <figcaption class="body">
+          <h3>Dangerous together</h3>
+          <p>A stranger&rsquo;s sentence rides into the agent&rsquo;s context. Your files leave with it.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="problem-card">
+        <svg viewBox="0 0 320 168" role="img" aria-label="Several leak routes stop at one revoked publish grant. The other work continues.">
+          <rect width="320" height="168" fill="#07080a"/>
+          <path d="M24 36 H150" stroke="#FF8A8A" stroke-opacity=".45" fill="none"/>
+          <path d="M24 62 H150" stroke="#FF8A8A" stroke-opacity=".7" fill="none"/>
+          <path d="M24 88 H150" stroke="#FF8A8A" fill="none"/>
+          <path d="M24 114 H150" stroke="#FF8A8A" stroke-opacity=".45" fill="none"/>
+          <line x1="168" y1="22" x2="168" y2="128" stroke="#59D499" stroke-width="2"/>
+          <rect x="196" y="48" width="100" height="52" rx="8" fill="#121212" stroke="#59D499"/>
+          <text x="246" y="70" text-anchor="middle" fill="#59D499" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace">revoke</text>
+          <text x="246" y="88" text-anchor="middle" fill="#F4F4F6" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">publish</text>
+          <text x="16" y="152" fill="#A9A9AB" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace">3 of 4 tasks keep working</text>
+        </svg>
+        <figcaption class="body">
+          <h3>The minimum cut</h3>
+          <p>Revoke one grant. The route closes; the other declared work keeps running.</p>
+        </figcaption>
+      </figure>
+    </div>
+    <p class="small muted" style="margin-top:22px">Replayed against published incidents from GitHub MCP, Supabase, WhatsApp and Postmark. <a href="benchmarks.html#incidents">See the evidence</a>.</p>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
       <div>
         <p class="eyebrow">How it works</p>
-        <p class="small mt-md" style="color:var(--body);max-width:60ch">
-          LethalPath turns your MCP config into a graph of tools, data and the agent&rsquo;s context.
-          One Cypher query lists every route from untrusted input, through the context, from private
-          data to a public destination. FalkorDB&rsquo;s max-flow then picks the cheapest permissions
-          to remove, weighted by the workflows you declare, and the same query is re-run to confirm
-          zero routes are left. You get a list of grants to revoke, not a score.
-        </p>
+        <h2 style="margin-top:14px">From config to a verified cut.</h2>
       </div>
-      <div>
-        <p class="eyebrow">Limitations</p>
-        <ul class="small" style="color:var(--body);padding-left:18px;margin-top:12px;list-style:disc">
-          <li>Tool labels come from 35 name-based rules and built-in tool lists for 11 common servers. They are not verified against server code; unknown tools are named as unlabelled, not trusted.</li>
-          <li>The test results below are on synthetic configs we generated. Accuracy on real users&rsquo; setups is not measured yet.</li>
-          <li>The runtime guard is a demo: it answers with simulated tool results and does not sit in front of real servers yet.</li>
-          <li>It finds structural routes. It does not detect malicious packages or predict whether a model will be fooled.</li>
-          <li>Prior work: MSCC also maps cross-server paths, Snyk Agent Scan flags each risky capability, and <a href="https://arxiv.org/abs/2503.18813">CaMeL</a> gives stronger guarantees by redesigning the agent. LethalPath adds the computed, verified minimum fix. See <a href="threat-model.html">Limits</a>.</li>
-        </ul>
+      <p class="lede">Three deterministic steps. There is no model in the runtime; the graph decides, and the CLI prints the receipt.</p>
+    </div>
+
+    <div class="how-grid">
+      <div class="steps">
+        <div class="step">
+          <span class="n" aria-hidden="true">01</span>
+          <div>
+            <h3>Read the config</h3>
+            <p>Point <code>scan</code> at an MCP config. LethalPath labels every tool by what it reads and writes, redacts secrets before anything reaches the graph, and names tools it cannot classify.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="n" aria-hidden="true">02</span>
+          <div>
+            <h3>Find the path</h3>
+            <p>One Cypher traversal anchors on the shared context and returns the routes from untrusted input to a public sink, with every tool on the path named.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="n" aria-hidden="true">03</span>
+          <div>
+            <h3>Cut and verify</h3>
+            <p><code>algo.maxFlow</code> computes the flow. LethalPath walks the residual graph, compares both canonical cuts, then re-runs the traversal with the revoked grants excluded.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="window">
+        <div class="window-bar">
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="window-title">one run · fs-git</span>
+        </div>
+        <div class="window-body">
+          <div class="shot">
+            <div class="term">
+              <p><span class="com">$</span> node packages/cli/dist/index.js scan</p>
+              <p>config    fs-git · public issue → private folder → public repo</p>
+              <p>graph     scan_fs-git · 11 nodes · 9 edges · ready</p>
+              <p><span class="acc-d">LEAK PATHS</span></p>
+              <p class="acc-d">  1  4 hops  project folder → filesystem.read → context → git.push → public repo</p>
+              <p><span class="com">$</span> node packages/cli/dist/index.js fix</p>
+              <p>max-flow   <span class="acc-s">2</span></p>
+              <p>cut        write side · git.push → public repo</p>
+              <p class="acc-s">revoke     git.push</p>
+              <p class="acc-s">verified   0 of 1 routes remain</p>
+              <p class="acc-s">tasks      3 of 4 keep working</p>
+            </div>
+            <p class="figcap">output copied from <span class="mono">docs/live-evidence/</span></p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<section>
+<section class="proof" id="proof">
   <div class="wrap">
-    <p class="eyebrow">Test results (synthetic)</p>
-    <div class="statrow" style="margin-top:22px" data-reveal>
+    <div class="section-head">
       <div>
-        <h3>40 configs from a seeded generator, ground truth known by construction.</h3>
-        <p class="small muted" style="margin-top:8px">Both suites ran against FalkorDB 6.0.2. The JSON is committed at <span class="mono">packages/eval/results/*.json</span>. This shows the engine is consistent, not that it is accurate on real setups.</p>
+        <p class="eyebrow">Evidence</p>
+        <h2 style="margin-top:14px">Every number has a file behind it.</h2>
       </div>
-      <div>
-        <div class="big" style="color:var(--danger)"><span class="sr-only">40 of 40 seeded scan cases passed</span><span aria-hidden="true" data-count>40/40</span></div>
-        <p class="small muted" style="margin-top:8px">seeded scan cases &mdash; every planted route found</p>
-        <p class="mono small muted" style="margin-top:10px;font-size:.68rem">detection.json</p>
+      <p class="lede">Forty seeded configs, one public config, and the committed transcripts. Nothing is rounded up. <a href="benchmarks.html">Read the evidence</a>.</p>
+    </div>
+
+    <div class="stat-band">
+      <div class="stat detection">
+        <span class="big">40/40</span>
+        <span class="label">seeded configs: every planted route found</span>
+        <span class="src">detection.json</span>
       </div>
-      <div>
-        <div class="big" style="color:var(--safe)"><span class="sr-only">40 of 40 fixes verified</span><span aria-hidden="true" data-count>40/40</span></div>
-        <p class="small muted" style="margin-top:8px">fixes verified &mdash; route closed, expected tasks kept</p>
-        <p class="mono small muted" style="margin-top:10px;font-size:.68rem">fix-quality.json</p>
+      <div class="stat fix">
+        <span class="big">40/40</span>
+        <span class="label">fix cases: cut matches; route cases verified closed</span>
+        <span class="src">fix-quality.json</span>
       </div>
+      <div class="stat clean">
+        <span class="big">8/8</span>
+        <span class="label">clean configs answered with zero routes</span>
+        <span class="src">detection.json</span>
+      </div>
+      <div class="stat routes">
+        <span class="big">567</span>
+        <span class="label">routes on a public config, closed by nine revocations</span>
+        <span class="src">docs/live-evidence/</span>
+      </div>
+    </div>
+    <p class="small muted" style="margin-top:18px">The 40 cases are synthetic and generated by us; the 567-route config is built from the official MCP server READMEs. What this proves is that the engine is consistent with its spec. <a href="threat-model.html">Read the limits</a>.</p>
+  </div>
+</section>
+
+<!-- DEMO VIDEO: when the public YouTube URL is ready, insert a 16:9 player
+     here as a full-width .window. Keep the caption "one unedited run, 3:30"
+     and do not autoplay; the hero scene is the silent demo. -->
+
+<section id="fix">
+  <div class="wrap">
+    <div class="section-head">
       <div>
-        <div class="big" style="color:var(--sink)"><span class="sr-only">8 of 8 clean configs answered with zero routes</span><span aria-hidden="true" data-count>8/8</span></div>
-        <p class="small muted" style="margin-top:8px">clean synthetic configs answered with zero routes</p>
-        <p class="mono small muted" style="margin-top:10px;font-size:.68rem">detection.json</p>
+        <p class="eyebrow">The fix</p>
+        <h2 style="margin-top:14px">A scanner tells you the risk. LethalPath tells you what to switch off.</h2>
+      </div>
+      <p class="lede"><span class="mono">algo.maxFlow</span> returns flows, not a cut. LethalPath walks the residual graph, compares both canonical cuts, and picks the one that costs fewer grants and keeps more declared tasks.</p>
+    </div>
+
+    <div class="fix-grid">
+      <div class="code"><pre><span class="kw">MATCH</span> (p:<span class="lbl">Resource</span> {sensitivity:<span class="str">'private'</span>})
+<span class="kw">WHERE</span> p.visibility <span class="kw">IS NULL OR</span> p.visibility &lt;&gt; <span class="str">'public'</span>
+<span class="kw">WITH</span> collect(p) <span class="kw">AS</span> src
+<span class="kw">MATCH</span> (s:<span class="lbl">Resource</span> {visibility:<span class="str">'public'</span>})
+<span class="kw">WHERE</span> s.sensitivity <span class="kw">IS NULL OR</span> s.sensitivity &lt;&gt; <span class="str">'private'</span>
+<span class="kw">WITH</span> src, collect(s) <span class="kw">AS</span> dst
+<span class="kw">CALL</span> <span class="fn">algo.maxFlow</span>({
+  sourceNodes: src,
+  targetNodes: dst,
+  relationshipTypes: [<span class="str">'FLOWS'</span>],
+  capacityProperty: <span class="str">'capacity'</span>
+})
+<span class="kw">YIELD</span> maxFlow, edges, edgeFlows
+<span class="kw">RETURN</span> maxFlow, edges, edgeFlows</pre></div>
+
+      <div class="panel">
+        <div class="panel-h"><span class="dot" style="background:var(--safe)"></span> fs-git · fix <span class="spacer"></span><span>committed run</span></div>
+        <div class="result">
+          <div class="result-row"><span class="k">graph</span><span class="v">scan_fs-git · 11 nodes · 9 edges</span></div>
+          <div class="result-row"><span class="k">leak paths</span><span class="v danger">1</span></div>
+          <div class="result-row"><span class="k">max flow</span><span class="v">2</span></div>
+          <div class="result-row"><span class="k">cut</span><span class="v">write side · git.push → public repo</span></div>
+          <div class="result-row"><span class="k">revoke</span><span class="v safe">git.push</span></div>
+          <div class="result-row"><span class="k">verified</span><span class="v safe">0 of 1 routes remain</span></div>
+          <div class="result-row"><span class="k">tasks</span><span class="v safe">3 of 4 keep working</span></div>
+        </div>
+        <p class="result-note">The second query re-runs the traversal without the revoked grant. Zero is the receipt. <a href="scan.html#cut">See the exact queries</a>.</p>
       </div>
     </div>
   </div>
+</section>
+
+<section id="falkordb">
+  <div class="wrap">
+    <div class="falkor">
+      <div class="falkor-head">
+        <div>
+          <p class="eyebrow">Built on FalkorDB</p>
+          <h2 style="margin-top:14px">The graph is not a store. It is the product.</h2>
+          <p class="mt-md">The leak is a reachability question: can an untrusted input reach a public sink through this agent&rsquo;s context? A vector index can rank tools; it cannot answer that. The fix is a flow problem on the same graph.</p>
+        </div>
+        <ul class="falkor-list">
+          <li><span><b>Path query.</b> One anchored traversal, bounded at five hops per segment, with the tools named on the path.</span></li>
+          <li><span><b>Fix query.</b> <span class="mono">CALL algo.maxFlow</span> on one capacity relationship type, then a residual cut in code.</span></li>
+          <li><span><b>Read-only boundary.</b> Every read uses <span class="mono">GRAPH.RO_QUERY</span>, with a 3 s timeout, a write-keyword guard and a <span class="mono">LIMIT</span> cap.</span></li>
+          <li><span><b>One graph per scan.</b> <span class="mono">scan_&lt;name&gt;</span> isolates every config on one instance.</span></li>
+        </ul>
+      </div>
+
+      <figure class="graph-figure">
+          <svg viewBox="0 0 760 310" role="img" aria-label="Graph model: an untrusted public issue and a private folder each feed a tool, both tools feed the shared agent context, and the context feeds git.push, which writes to a public repo. A green cut bar sits across the edge into git.push.">
+            <defs>
+              <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#6f7885"/>
+              </marker>
+            </defs>
+            <rect width="760" height="310" fill="#080a0d"/>
+            <!-- edges -->
+            <line x1="170" y1="67" x2="218" y2="67" stroke="#6f7885" stroke-width="1.4" marker-end="url(#arr)"/>
+            <line x1="358" y1="67" x2="414" y2="118" stroke="#6f7885" stroke-width="1.4" marker-end="url(#arr)"/>
+            <line x1="170" y1="257" x2="218" y2="257" stroke="#6f7885" stroke-width="1.4" marker-end="url(#arr)"/>
+            <line x1="384" y1="252" x2="430" y2="188" stroke="#6f7885" stroke-width="1.4" marker-end="url(#arr)"/>
+            <line x1="532" y1="153" x2="588" y2="153" stroke="#6f7885" stroke-width="1.4" marker-end="url(#arr)"/>
+            <line x1="645" y1="178" x2="645" y2="226" stroke="#6f7885" stroke-width="1.4" marker-end="url(#arr)"/>
+            <!-- the cut -->
+            <line x1="558" y1="116" x2="558" y2="190" stroke="#5bd6a2" stroke-width="3" stroke-linecap="round"/>
+            <text x="558" y="106" fill="#5bd6a2" font-size="12" font-family="monospace" text-anchor="middle">cut</text>
+            <!-- nodes -->
+            <g>
+              <rect x="20" y="38" width="150" height="58" rx="8" fill="#1a1608" stroke="#FFC533"/>
+              <text x="34" y="62" fill="#FFC533" font-size="14" font-family="monospace">public issue</text>
+              <text x="34" y="82" fill="#C9B36A" font-size="12" font-family="monospace">trust: untrusted</text>
+            </g>
+            <g>
+              <rect x="220" y="38" width="138" height="58" rx="8" fill="#121418" stroke="#2c323c"/>
+              <text x="234" y="62" fill="#D7DCE4" font-size="14" font-family="monospace">github.read</text>
+              <text x="234" y="82" fill="#A6AEBB" font-size="12" font-family="monospace">reads untrusted</text>
+            </g>
+            <g>
+              <rect x="20" y="228" width="150" height="58" rx="8" fill="#16121f" stroke="#B69EFB"/>
+              <text x="34" y="252" fill="#B69EFB" font-size="14" font-family="monospace">private folder</text>
+              <text x="34" y="272" fill="#C3B0FF" font-size="12" font-family="monospace">sensitivity: private</text>
+            </g>
+            <g>
+              <rect x="220" y="228" width="164" height="58" rx="8" fill="#121418" stroke="#2c323c"/>
+              <text x="234" y="252" fill="#D7DCE4" font-size="14" font-family="monospace">filesystem.read</text>
+              <text x="234" y="272" fill="#A6AEBB" font-size="12" font-family="monospace">reads private</text>
+            </g>
+            <g>
+              <rect x="400" y="120" width="132" height="66" rx="9" fill="#0b1418" stroke="#57C1FF"/>
+              <text x="416" y="146" fill="#57C1FF" font-size="14" font-family="monospace">agent context</text>
+              <text x="416" y="166" fill="#B9D0DE" font-size="12" font-family="monospace">shared by every tool</text>
+            </g>
+            <g>
+              <rect x="590" y="120" width="110" height="58" rx="8" fill="#121418" stroke="#2c323c"/>
+              <text x="604" y="144" fill="#D7DCE4" font-size="14" font-family="monospace">git.push</text>
+              <text x="604" y="164" fill="#A6AEBB" font-size="12" font-family="monospace">writes public</text>
+            </g>
+            <g>
+              <rect x="590" y="228" width="132" height="58" rx="8" fill="#0b1418" stroke="#57C1FF"/>
+              <text x="604" y="252" fill="#57C1FF" font-size="14" font-family="monospace">public repo</text>
+              <text x="604" y="272" fill="#B9D0DE" font-size="12" font-family="monospace">visibility: public</text>
+            </g>
+            <!-- edge labels -->
+            <text x="194" y="58" fill="#A8B0BD" font-size="11" font-family="monospace" text-anchor="middle">FLOWS</text>
+            <text x="362" y="100" fill="#A8B0BD" font-size="11" font-family="monospace" text-anchor="middle">FLOWS</text>
+            <text x="194" y="248" fill="#A8B0BD" font-size="11" font-family="monospace" text-anchor="middle">FLOWS</text>
+            <text x="392" y="222" fill="#A8B0BD" font-size="11" font-family="monospace" text-anchor="middle">FLOWS</text>
+            <text x="666" y="205" fill="#A8B0BD" font-size="11" font-family="monospace" text-anchor="middle">FLOWS</text>
+          </svg>
+          <figcaption>capacity = 1 + declared tasks · structural HOSTS edges omitted</figcaption>
+        </figure>
+      </div>
+    </div>
 </section>
 
 <section id="install">
-  <div class="wrap split" style="align-items:center;gap:48px">
-    <div data-reveal>
-      <p class="eyebrow">Install</p>
-      <h2 style="margin-top:10px">Run it locally.</h2>
-      <p class="lede" style="margin-top:14px">
-        The packages are not on npm. You need a clone of the repo, Docker (for FalkorDB),
-        Node 20 or newer, and pnpm 9. Build once, then scan.
-      </p>
-      <p class="small muted" style="margin-top:16px">Apache-2.0 · pinned to falkordb/falkordb:6.0.2 · the guard is a demo with simulated tool calls</p>
-    </div>
-    <div class="window" data-reveal>
-      <div class="window-bar">
-        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="window-title">terminal</span>
+  <div class="wrap">
+    <div class="install-grid">
+      <div>
+        <p class="eyebrow">Install</p>
+        <h2 style="margin-top:14px">Run it locally.</h2>
+        <p class="lede" style="margin-top:16px">The repo is the distribution. Clone it, start a pinned FalkorDB, build once, then scan.</p>
+        <ul class="req">
+          <li><span class="tick" aria-hidden="true">✓</span><span>Docker for FalkorDB 6.0.2</span></li>
+          <li><span class="tick" aria-hidden="true">✓</span><span>Node 20 or newer</span></li>
+          <li><span class="tick" aria-hidden="true">✓</span><span>pnpm 9</span></li>
+          <li><span class="tick" aria-hidden="true">✓</span><span>No account, no telemetry, no config uploaded</span></li>
+        </ul>
+        <div class="install-actions">
+          <a class="btn btn-primary" href="https://github.com/bhanu-dev82/lethalpath#quick-start">Read the README</a>
+          <a class="btn btn-ghost" href="https://github.com/bhanu-dev82/lethalpath">View source</a>
+        </div>
       </div>
-      <div class="code" style="border:0;border-radius:0"><pre><span class="com"># clone, start FalkorDB, build</span>
-git clone https://github.com/bhanu-dev82/lethalpath &amp;&amp; cd lethalpath
+
+      <div class="window">
+        <div class="window-bar">
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="window-title">terminal</span>
+        </div>
+        <div class="code" style="border:0;border-radius:0"><pre><span class="com"># clone and start FalkorDB 6.0.2</span>
+git clone https://github.com/bhanu-dev82/lethalpath
+cd lethalpath
 docker compose up -d
 pnpm install &amp;&amp; pnpm build
 
-<span class="com"># find every leak path, then the grants that close them</span>
+<span class="com"># find the routes, then compute the cut</span>
 node packages/cli/dist/index.js scan
-node packages/cli/dist/index.js fix
-
-<span class="com"># guard demo: simulated tool calls, no real servers behind it</span>
-pnpm --filter @lethalpath/guard demo</pre></div>
+node packages/cli/dist/index.js fix</pre></div>
+      </div>
     </div>
-    <p class="small muted" style="margin-top:14px">Every number on this site can be re-run from the repo &mdash; <a href="benchmarks.html">Benchmarks</a> shows the commands.</p>
   </div>
 </section>
+
+<section id="limits-teaser" style="padding-top:0;border-top:0">
+  <div class="wrap">
+    <div class="limits-band">
+      <div>
+        <p class="eyebrow">Limits</p>
+        <h2 style="margin-top:14px">Know the edges.</h2>
+      </div>
+      <ul class="limits-list">
+        <li><b>Labels are inferred</b> from tool names, not server code. Unmatched tools are named, never silently trusted.</li>
+        <li><b>Five hops per segment.</b> The traversal is bounded around the context. Longer routes are outside the model.</li>
+        <li><b>The guard is a demo.</b> Real MCP stdio, simulated tool results. No real GitHub, filesystem or git server sits behind it yet.</li>
+      </ul>
+    </div>
+    <p class="small" style="margin-top:26px"><a href="threat-model.html">Read the full threat model and limits →</a></p>
+  </div>
+</section>
+
 </main>
 
 <footer>
-  <div class="wrap cols">
-    <div>
-      <a class="brand" href="index.html">LethalPath</a>
-      <p class="mt-md" style="max-width:38ch">An open-source guard from <a href="https://www.devanshustudios.com/">Devanshu Studios</a>. <a href="https://www.falkordb.com/">FalkorDB</a>, the hackathon sponsor, runs the path query and the cut.</p>
-      <p class="small muted" style="margin-top:6px">Graph Hacks entry · T01 Agents That Act on Connected Data · T02 Agent Memory and Coordination</p>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2.4 4.2 6v5.6c0 4.7 3.4 8.4 7.8 9.4 4.4-1 7.8-4.7 7.8-9.4V6L12 2.4z" stroke="#FF8A8A" stroke-width="1.5"/>
+            <path d="M9.1 12.1l2 2 4-4.1" stroke="#59D499" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          LethalPath
+        </a>
+        <p>Open-source MCP security. Map the tools, find the path, compute the cut. Built by <a href="https://www.devanshustudios.com/">Devanshu Studios</a>.</p>
+      </div>
+      <div class="footer-col">
+        <h3>Product</h3>
+        <a href="index.html#how">How it works</a>
+        <a href="scan.html">Example scan</a>
+        <a href="benchmarks.html">Evidence</a>
+        <a href="combos.html">Risk patterns</a>
+        <a href="threat-model.html">Limits</a>
+      </div>
+      <div class="footer-col">
+        <h3>Resources</h3>
+        <a href="https://github.com/bhanu-dev82/lethalpath">GitHub</a>
+        <a href="https://github.com/bhanu-dev82/lethalpath#quick-start">README</a>
+        <a href="https://github.com/bhanu-dev82/lethalpath/blob/main/SECURITY.md">Security</a>
+        <a href="https://github.com/bhanu-dev82/lethalpath/blob/main/LICENSE">Apache-2.0</a>
+      </div>
+      <div class="footer-col">
+        <h3>Built with</h3>
+        <a href="https://www.falkordb.com/">FalkorDB 6.0.2</a>
+        <a href="https://www.falkordb.com/">Cypher + algo.maxFlow</a>
+        <a href="disclosure.html">AI use &amp; disclosure</a>
+      </div>
     </div>
-    <div class="navlinks">
-      <a href="scan.html">Scan</a>
-      <a href="combos.html">Combos</a>
-      <a href="benchmarks.html">Benchmarks</a>
-      <a href="threat-model.html">Limits</a>
-      <a href="disclosure.html">Disclosure</a>
+    <div class="footer-bottom">
+      <span>© 2026 LethalPath contributors</span>
+      <span>Apache-2.0 · no telemetry</span>
     </div>
   </div>
 </footer>
 
-<script src="animate.js"></script>
+<script src="animate.js?v=20261018-7"></script>
 </body>
 </html>

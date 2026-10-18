@@ -7,4 +7,5 @@ through the labeler, and the guard demo — in a single tee'd log with nothing
 trimmed between sections.
 
 Re-run it any time; each run is a new timestamped file. The logs are committed
-unmodified, including failures if there are any.
+as produced, including failures if there are any. Absolute local paths are
+normalised to `<repo>`; no output is trimmed.

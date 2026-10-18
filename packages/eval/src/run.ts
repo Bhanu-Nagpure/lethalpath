@@ -6,7 +6,7 @@
  * Run with:  node dist/run.js   (package script: pnpm evaluate)
  *
  * Every number in the JSON files is computed in this run. The note records
- * the generator (mulberry32), the seed, the mix and the date so a judge can
+ * the generator (mulberry32), the seed, the mix and the date so anyone can
  * reproduce the exact same set of cases.
  */
 

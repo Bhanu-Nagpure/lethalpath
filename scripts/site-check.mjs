@@ -157,7 +157,7 @@ for (const page of PAGES) {
 
   /* required head metadata (task: SEO / social / favicon invariants) */
   const req = {
-    "theme-color": /<meta name="theme-color" content="#07080a">/,
+    "theme-color": /<meta name="theme-color" content="#08090c">/,
     "canonical link": /<link rel="canonical" href="https:\/\/www\.devanshustudios\.com\/lethalpath\//,
     "og:type": /<meta property="og:type" content="website">/,
     "og:site_name": /<meta property="og:site_name" content="LethalPath">/,
@@ -183,7 +183,7 @@ for (const page of PAGES) {
   if (canonical !== expectedCanonical) fail(page, `canonical is "${canonical}", expected "${expectedCanonical}"`);
 
   /* nav links + aria-current tallies */
-  navLinks[page] = [...src.matchAll(/<nav>[\s\S]*?<\/nav>/g)]
+  navLinks[page] = [...src.matchAll(/<nav\b[^>]*>[\s\S]*?<\/nav>/g)]
     .flatMap(navBlock => [...navBlock[0].matchAll(/href="([^"]+)"/g)].map(x => x[1]));
   navAria[page] = [...src.matchAll(/aria-current="page"/g)].length;
 
@@ -238,7 +238,7 @@ ok("no external resources, no network calls");
 
 console.log("\n-- landmark figures (number policy: these must appear verbatim)");
 const landmarks = {
-  "index.html": ["40/40", "8/8", "FalkorDB 6.0.2", "Close it with the fewest permissions."],
+  "index.html": ["40/40", "8/8", "FalkorDB 6.0.2", "The leak is a path.", "Close it."],
   "scan.html": ["567", "one of 567 routes", "write grants", "0 remain"],
   "combos.html": ["35", "11", "50/50"],
   "benchmarks.html": ["detection.json", "fix-quality.json", "50/50 match"],

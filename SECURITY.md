@@ -5,7 +5,7 @@
 Report privately first: use GitHub's private vulnerability reporting on this
 repository (Security tab → Report a vulnerability). A fix ships before
 anything is said in the open. We aim to acknowledge within
-48 hours; for a hackathon build, that is a promise, not an SLA.
+48 hours; at this stage of the project, that is a promise, not an SLA.
 
 ## What this project stores
 

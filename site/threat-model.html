@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Threat model — LethalPath</title>
-<meta name="description" content="What LethalPath catches, what it misses on purpose, what it refuses to claim, and exactly which data leaves your machine — stated so a judge or maintainer can hold us to it.">
-<meta name="theme-color" content="#07080a">
+<title>Limits — LethalPath</title>
+<meta name="description" content="What LethalPath catches, what it misses, what it does not claim, and exactly which data leaves your machine.">
+<meta name="theme-color" content="#08090c">
 <link rel="canonical" href="https://www.devanshustudios.com/lethalpath/threat-model.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="LethalPath">
-<meta property="og:title" content="Threat model — LethalPath">
-<meta property="og:description" content="What LethalPath catches, what it misses on purpose, what it refuses to claim, and exactly which data leaves your machine — stated so a judge or maintainer can hold us to it.">
+<meta property="og:title" content="Limits — LethalPath">
+<meta property="og:description" content="What LethalPath catches, what it misses, what it does not claim, and exactly which data leaves your machine.">
 <!-- canonical host: https://www.devanshustudios.com/lethalpath/ -->
 <meta property="og:url" content="https://www.devanshustudios.com/lethalpath/threat-model.html">
 <meta property="og:image" content="https://www.devanshustudios.com/lethalpath/og.png">
@@ -19,30 +19,14 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.devanshustudios.com/lethalpath/og.png">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="style.css">
-<style>
-  .main{max-width:800px}
-  .toc{display:flex;gap:7px;flex-wrap:wrap;margin-top:22px}
-  .qa{border-left:1px solid var(--line);padding-left:17px;margin-top:26px}
-  .qa h3{color:var(--ink)}
-  .qa p{margin-top:7px;color:var(--body);font-size:.92rem}
-  .inout{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
-    border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;margin-top:22px}
-  .inout .k{background:var(--surface);padding:20px}
-  .inout h3{margin-bottom:11px;font-size:.9rem;letter-spacing:.005em}
-  .inout ul{margin:0;padding-left:18px;color:var(--body);font-size:.87rem}
-  .inout li{margin:6px 0}
-  @media (max-width:760px){.inout{grid-template-columns:1fr}}
-  .limits{margin:22px 0 0;padding:0 0 0 18px;color:var(--body)}
-  .limits li{margin:9px 0}
-</style>
+<link rel="stylesheet" href="style.css?v=20261018-7">
 </head>
 <body>
 
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site-head">
-<nav>
+<nav aria-label="Main">
   <div class="wrap">
     <a class="brand" href="index.html">
       <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -52,71 +36,51 @@
       LethalPath
     </a>
     <span class="spacer"></span>
-    <a class="nb" href="index.html">Home</a>
-    <a class="nb" href="scan.html">Scan</a>
-    <a class="nb" href="combos.html">Combos</a>
-    <a class="nb" href="benchmarks.html">Benchmarks</a>
+    <a class="nb" href="index.html">Product</a>
+    <a class="nb" href="scan.html">Example scan</a>
+    <a class="nb" href="benchmarks.html">Evidence</a>
     <a class="nb" href="threat-model.html" aria-current="page">Limits</a>
     <a class="nb" href="https://github.com/bhanu-dev82/lethalpath">GitHub</a>
+    <a class="btn btn-primary btn-sm nav-cta" href="index.html#install">Install</a>
   </div>
 </nav>
 </header>
 
 <main id="main" style="border-top:0">
-  <div class="wrap main">
-    <p class="eyebrow" data-reveal>Limits</p>
-    <h1 class="page-title" style="margin-top:14px" data-reveal>What we catch, what we miss, and what we refuse to claim</h1>
-    <p class="lede mt-md">
-      What LethalPath checks, what it does not, and which claims it does not make.
-      Each limit below is specific enough to test.
-    </p>
+  <div class="wrap page-head main-narrow">
+    <p class="eyebrow">Limits</p>
+    <h1 class="page-title" style="margin-top:14px">What it catches, what it misses, and what it will not claim.</h1>
+    <p class="lede" style="margin-top:18px">A precise threat model is part of the product. Each limit below is specific enough to test.</p>
     <div class="toc">
       <a class="pill" href="#problem">the problem</a>
       <a class="pill" href="#miss">what we miss</a>
       <a class="pill" href="#data">your data</a>
       <a class="pill" href="#limits">hard limits</a>
+      <a class="pill" href="#engine">engine facts</a>
     </div>
+  </div>
 
+  <div class="wrap main-narrow">
     <h2 class="subhead mt-sc" id="problem">The problem, stated precisely</h2>
-    <p class="mt-md" style="color:var(--body)">
-      An agent holds <strong style="color:var(--ink)">three capabilities at once</strong>: it can read
-      text an attacker controls, it can read private data, and it can write somewhere public.
-      Because every tool's output lands in the same context window, an instruction hidden in the
-      first can steer the second into the third. Simon Willison named this the
-      <em>lethal trifecta</em>.
-    </p>
-    <p class="mt-md" style="color:var(--body)">
-      The combination is what matters. Each tool behaves exactly as documented; the bug is in the
-      arrangement. That is why this is a graph problem &mdash;
-      <span class="mono">untrusted → private → public</span> is a path, and paths are what graphs answer.
-    </p>
+    <p class="mt-md" style="color:var(--body)">An agent holds <strong style="color:var(--ink)">three capabilities at once</strong>: it can read text an attacker controls, read private data, and write somewhere public. Because every tool&rsquo;s output lands in the same context window, an instruction hidden in the first can steer the second into the third. Simon Willison named this the <em>lethal trifecta</em>.</p>
+    <p class="mt-md" style="color:var(--body)">The combination is what matters. Each tool behaves exactly as documented; the bug is in the arrangement. That is why this is a graph problem &mdash; <span class="mono">untrusted → private → public</span> is a path, and paths are what graphs answer.</p>
 
     <h2 class="subhead mt-sc" id="miss">What we miss</h2>
     <div class="qa">
       <h3>Labels are inferred, not declared</h3>
-      <p>Of the servers we catalogued, essentially none declare their own trust level. We infer from
-        tool names, with one conservative fallback for anything the rules cannot classify, and we
-        score that inference against a hand-labelled set. Labelling misses are our weakest area;
-        <a href="benchmarks.html">Benchmarks</a> states exactly what we measure &mdash; and what we
-        do not.</p>
+      <p>Of the servers we catalogued, essentially none declare their own trust level. We infer from tool names, with one conservative fallback for anything the rules cannot classify, and we score that inference against a hand-labelled regression set. Labelling misses are our weakest area; <a href="benchmarks.html">Evidence</a> states exactly what we measure, and what we do not.</p>
     </div>
     <div class="qa">
       <h3>Annotations are untrusted by design</h3>
-      <p>The MCP specification says clients <em>must</em> treat tool annotations as untrusted unless
-        they come from trusted servers. We follow it. A server that lies about being read-only gets
-        no benefit of the doubt from us &mdash; but it also means we cannot simply trust what we are told.</p>
+      <p>The MCP specification says clients <em>must</em> treat tool annotations as untrusted unless they come from trusted servers. We follow it. A server that lies about being read-only gets no benefit of the doubt from us &mdash; but it also means we cannot simply trust what we are told.</p>
     </div>
     <div class="qa">
       <h3>We find paths, not payloads</h3>
-      <p>LethalPath reports that a route exists and which capabilities line it. It does not generate
-        an attack and does not attempt exploitation. A path being absent is not proof of safety; it is
-        proof that we found no route with the labels we have.</p>
+      <p>LethalPath reports that a route exists and which capabilities line it. It does not generate an attack and does not attempt exploitation. The traversal is bounded at five hops on each side of the context; longer routes are outside the model. A path being absent is not proof of safety; it is proof that we found no route with the labels we have.</p>
     </div>
     <div class="qa">
       <h3>Static analysis has a ceiling</h3>
-      <p>We reason about what tools <em>can</em> do, not what a particular model will do with them. The
-        runtime guard demo shows how to close part of that gap by tracking what entered the context;
-        today it answers with simulated tool results and sees only the calls routed through it.</p>
+      <p>We reason about what tools <em>can</em> do, not what a particular model will do with them. The runtime guard demo shows how to close part of that gap by tracking what entered the context; today it answers with simulated tool results and sees only the calls routed through it.</p>
     </div>
 
     <h2 class="subhead mt-sc" id="data">Your data</h2>
@@ -124,8 +88,9 @@
       <div class="k">
         <h3 style="color:var(--safe)">What leaves your machine</h3>
         <ul>
-          <li>Nothing. The CLI, the labeler and FalkorDB all run locally; this site shows committed runs and never receives a config</li>
-          <li>When you scan a real <span class="mono">mcp.json</span>: <span class="mono">env</span> values, headers and token-shaped server names are redacted before anything reaches the graph &mdash; the CLI prints the redaction count as a receipt</li>
+          <li>Nothing by default. The CLI, the labeler and FalkorDB all run locally; this site shows committed runs and never receives a config.</li>
+          <li>The CLI can be pointed at a remote FalkorDB with <span class="mono">--host</span>; if you do that, the graph leaves your machine. Use the default local instance for a fully local run.</li>
+          <li>When you scan a real <span class="mono">mcp.json</span>: <span class="mono">env</span> values are dropped, and secret-shaped values and token-shaped server names are redacted before anything reaches the graph. Headers and launch arguments never enter the scan config.</li>
         </ul>
       </div>
       <div class="k">
@@ -137,34 +102,25 @@
         </ul>
       </div>
     </div>
-    <p class="mt-lg" style="color:var(--body);font-size:.92rem">
-      The runtime guard records that a call happened, which tool made it, and whether its output was
-      untrusted &mdash; by hash, not by content. There is no payload in the graph to leak.
-    </p>
+    <p class="mt-lg" style="color:var(--body);font-size:.94rem">The runtime guard records that a call happened, which tool made it, and whether its output was untrusted &mdash; by hash, not by content. There is no payload in the graph to leak.</p>
 
     <h2 class="subhead mt-sc" id="limits">Hard limits, stated plainly</h2>
     <ul class="limits">
-      <li><strong style="color:var(--ink)">Not a substitute for scoped tokens.</strong> Revoking a
-        grant in the agent does not shrink what the token itself can do. Scope the token too.</li>
-      <li><strong style="color:var(--ink)">Not a scanner for server vulnerabilities.</strong> CVEs,
-        missing OAuth and shell-exec exposure are real problems covered by other tools
-        (<a href="benchmarks.html">credited on Benchmarks</a>). We cover combinations.</li>
-      <li><strong style="color:var(--ink)">Not exhaustive.</strong> We bundle label expansions for
-        11 conventional servers; a tool the rules cannot classify gets one semi-trusted fallback
-        and is named as unlabelled, so nothing is silently treated as harmless.</li>
-      <li><strong style="color:var(--ink)">Not a guarantee.</strong> A combination we rate safe can
-        become unsafe when a tool changes. Re-scan after upgrades.</li>
+      <li><strong style="color:var(--ink)">Not a substitute for scoped tokens.</strong> Revoking a grant in the agent does not shrink what the token itself can do. Scope the token too.</li>
+      <li><strong style="color:var(--ink)">Not a scanner for server vulnerabilities.</strong> CVEs, missing OAuth and shell-exec exposure are real problems covered by other tools. We cover combinations.</li>
+      <li><strong style="color:var(--ink)">Not exhaustive.</strong> We bundle label expansions for 11 conventional servers; a tool the rules cannot classify gets one semi-trusted fallback and is named as unlabelled, so nothing is silently treated as harmless.</li>
+      <li><strong style="color:var(--ink)">Not a guarantee.</strong> A combination we rate safe can become unsafe when a tool changes. Re-scan after upgrades.</li>
     </ul>
 
-    <div class="panel mt-sc">
+    <div class="panel mt-sc" id="engine">
       <div class="panel-h"><span class="dot" style="background:var(--sink)"></span> engine facts a reviewer should know</div>
       <div class="panel-b">
-        <ul class="small" style="color:var(--body);padding-left:18px;margin:0">
-          <li style="margin:7px 0">Pinned to <span class="mono">falkordb/falkordb:6.0.2</span> by tag, never <span class="mono">latest</span>.</li>
-          <li style="margin:7px 0">Every read runs on <span class="mono">GRAPH.RO_QUERY</span>, which the server enforces: writes are rejected outright, plus a write-keyword guard, a 3&nbsp;s timeout and a <span class="mono">LIMIT</span> cap.</li>
-          <li style="margin:7px 0"><span class="mono">algo.maxFlow</span> on 6.0.2 accepts exactly <strong style="color:var(--ink)">one</strong> relationship type, so capacity edges are modelled as a single <span class="mono">FLOWS</span> type.</li>
-          <li style="margin:7px 0">Shortest-path indexes are <strong style="color:var(--ink)">not available</strong> on 6.0.2. We do not use or claim them.</li>
-          <li style="margin:7px 0">The model never receives database credentials and never executes Cypher. Cypher decides; the model only suggests.</li>
+        <ul class="small" style="color:var(--body);padding-left:20px;margin:0">
+          <li style="margin:8px 0">Pinned to <span class="mono">falkordb/falkordb:6.0.2</span> by tag, never <span class="mono">latest</span>.</li>
+          <li style="margin:8px 0">Every product read runs on <span class="mono">GRAPH.RO_QUERY</span>, which the server enforces: writes are rejected outright, plus a write-keyword guard, a 3&nbsp;s timeout and a <span class="mono">LIMIT</span> cap.</li>
+          <li style="margin:8px 0"><span class="mono">algo.maxFlow</span> on 6.0.2 accepts exactly <strong style="color:var(--ink)">one</strong> relationship type, so capacity edges are modelled as a single <span class="mono">FLOWS</span> type.</li>
+          <li style="margin:8px 0">Shortest-path indexes are <strong style="color:var(--ink)">not available</strong> on 6.0.2. We do not use or claim them.</li>
+          <li style="margin:8px 0">There is <strong style="color:var(--ink)">no model in the runtime</strong>. The labeler is a deterministic rules table; the CLI is the component that talks to FalkorDB. Cypher decides; no model suggests.</li>
         </ul>
       </div>
     </div>
@@ -172,28 +128,47 @@
 </main>
 
 <footer>
-  <div class="wrap cols">
-    <div>
-      <a class="brand" href="index.html" style="font-size:.88rem">
-        <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 2.4 4.2 6v5.6c0 4.7 3.4 8.4 7.8 9.4 4.4-1 7.8-4.7 7.8-9.4V6L12 2.4z" stroke="#FF8A8A" stroke-width="1.5"/>
-          <path d="M9.1 12.1l2 2 4-4.1" stroke="#59D499" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        LethalPath
-      </a>
-      <p class="mt-md" style="max-width:38ch">Built by <a href="https://www.devanshustudios.com/">Devanshu Studios</a> for Graph Hacks. FalkorDB, the sponsor, runs the path and the cut.</p>
-      <p class="small muted" style="margin-top:6px">Graph Hacks entry &middot; T01 Agents That Act on Connected Data &middot; T02 Agent Memory and Coordination</p>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2.4 4.2 6v5.6c0 4.7 3.4 8.4 7.8 9.4 4.4-1 7.8-4.7 7.8-9.4V6L12 2.4z" stroke="#FF8A8A" stroke-width="1.5"/>
+            <path d="M9.1 12.1l2 2 4-4.1" stroke="#59D499" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          LethalPath
+        </a>
+        <p>Open-source MCP security. Map the tools, find the path, compute the cut. Built by <a href="https://www.devanshustudios.com/">Devanshu Studios</a>.</p>
+      </div>
+      <div class="footer-col">
+        <h3>Product</h3>
+        <a href="index.html#how">How it works</a>
+        <a href="scan.html">Example scan</a>
+        <a href="benchmarks.html">Evidence</a>
+        <a href="combos.html">Risk patterns</a>
+        <a href="threat-model.html">Limits</a>
+      </div>
+      <div class="footer-col">
+        <h3>Resources</h3>
+        <a href="https://github.com/bhanu-dev82/lethalpath">GitHub</a>
+        <a href="https://github.com/bhanu-dev82/lethalpath#quick-start">README</a>
+        <a href="https://github.com/bhanu-dev82/lethalpath/blob/main/SECURITY.md">Security</a>
+        <a href="https://github.com/bhanu-dev82/lethalpath/blob/main/LICENSE">Apache-2.0</a>
+      </div>
+      <div class="footer-col">
+        <h3>Built with</h3>
+        <a href="https://www.falkordb.com/">FalkorDB 6.0.2</a>
+        <a href="https://www.falkordb.com/">Cypher + algo.maxFlow</a>
+        <a href="disclosure.html">AI use &amp; disclosure</a>
+      </div>
     </div>
-    <div class="navlinks">
-      <a href="scan.html">Scan</a>
-      <a href="combos.html">Combos</a>
-      <a href="benchmarks.html">Benchmarks</a>
-      <a href="threat-model.html">Limits</a>
-      <a href="disclosure.html">Disclosure</a>
+    <div class="footer-bottom">
+      <span>© 2026 LethalPath contributors</span>
+      <span>Apache-2.0 · no telemetry</span>
     </div>
   </div>
 </footer>
 
-<script src="animate.js"></script>
+<script src="animate.js?v=20261018-7"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 
 # LethalPath
 
-*Find the MCP tool combinations that let an agent leak your data, and the fewest permissions that stop it.*
+*Find the MCP tool combinations that let an agent leak your data, and compute a minimum cut of permissions that closes them.*
 
 [![CI](https://github.com/bhanu-dev82/lethalpath/actions/workflows/ci.yml/badge.svg)](https://github.com/bhanu-dev82/lethalpath/actions/workflows/ci.yml)
 [![license: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-0B6E99?style=flat-square)](./LICENSE)
@@ -13,28 +13,24 @@
 [![pnpm 9](https://img.shields.io/badge/pnpm-9-B45309?style=flat-square)](https://pnpm.io)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](./CONTRIBUTING.md)
 
-**Powered by [FalkorDB](https://www.falkordb.com).** Both the leak search and the
-fix run as queries on a FalkorDB graph.
+**Powered by [FalkorDB](https://www.falkordb.com).** The leak search is a Cypher
+query; the fix is `CALL algo.maxFlow` plus a residual cut in TypeScript.
 
-Finds every route by which an AI agent can be tricked into leaking your data
-across its MCP servers, then computes the fewest permissions to revoke that
-close them all — without breaking your work.
+Finds modelled routes by which an AI agent can be tricked into leaking data
+across its MCP servers, then computes a minimum-capacity cut and chooses the
+cheaper of the two canonical cuts by grant count, declared-task cost, then the
+write side.
 
-Built by [Devanshu Studios](https://www.devanshustudios.com/) for
-[Graph Hacks](https://www.wemakedevs.org/hackathons/falkordb)
-(WeMakeDevs × FalkorDB, 15–18 Oct 2026). Live site:
+Built by [Devanshu Studios](https://www.devanshustudios.com/). Live site:
 [devanshustudios.com/lethalpath](https://www.devanshustudios.com/lethalpath/).
-Tracks: **T01** Agents That Act on Connected Data, and **T02** Agent Memory and
-Coordination — the guard's session memory is a graph of its own.
 
-**Sponsor, and how the sponsor is used.** FalkorDB sponsors the hackathon.
-Every scan is a FalkorDB graph
-(`scan_<name>`). The leak query is Cypher. The fix is `CALL algo.maxFlow` on
-that graph. Reads go through `GRAPH.RO_QUERY`, so a generated query cannot
-write. The guard remembers a session in a second graph (`sessions_<id>`), one
-graph per session, which is the tenant isolation. The table
-[below](#falkordb-features-this-product-calls) lists every call, including what
-we do not claim: shortest-path indexes (CCH) are documented and are not in
+**How FalkorDB is used.** Every scan is a FalkorDB graph (`scan_<name>`). The
+route query is Cypher; the fix is `CALL algo.maxFlow` on that graph, followed by
+a residual cut in TypeScript. Product reads go through `GRAPH.RO_QUERY`, so a
+generated query cannot write. The guard appends its decisions to a per-session
+audit graph (`sessions_<id>`); the block decision itself is in-process. The
+table [below](#falkordb-features-this-product-calls) lists every call, including
+what we do not claim: shortest-path indexes (CCH) are documented and are not in
 6.0.2.
 
 > Numbers appear in this README only with the file that contains them named
@@ -45,7 +41,7 @@ we do not claim: shortest-path indexes (CCH) are documented and are not in
 
 ## Contents
 
-- [The removal test](#the-removal-test)
+- [Why the graph is load-bearing](#why-the-graph-is-load-bearing)
 - [The problem](#the-problem)
 - [Quick start](#quick-start)
 - [The graph](#the-graph)
@@ -53,6 +49,7 @@ we do not claim: shortest-path indexes (CCH) are documented and are not in
 - [FalkorDB features this product calls](#falkordb-features-this-product-calls)
 - [Engine facts](#engine-facts)
 - [Results](#results)
+- [Limits](#limits)
 - [Data](#data)
 - [What we learned](#what-we-learned)
 - [Credits and prior work](#credits-and-prior-work)
@@ -60,18 +57,16 @@ we do not claim: shortest-path indexes (CCH) are documented and are not in
 
 ---
 
-## The removal test
+## Why the graph is load-bearing
 
-Rule 5: if the product still works once FalkorDB is taken out, the graph is
-decoration and the entry is ineligible. LethalPath fails that test on purpose.
+Remove the graph and the route, the cut and the receipt stop existing.
 
 | What the product does | What runs it | What happens if FalkorDB is removed |
 |---|---|---|
 | Find the leak route | `MATCH … -[:FLOWS*1..5]->(ctx)-[:FLOWS*1..5]->` — bounded segments anchored at the tainted context | There is no path. A list of tools cannot express "through this folder". |
 | Choose the permission to revoke | `CALL algo.maxFlow` then a residual cut | There is no flow, so there is no cut. `cutFromMaxFlow` has nothing to consume. |
 | Prove the fix closed it | `VERIFY_FIX`, the same traversal with `$revoked` excluded | There is no second query to re-run. The promise has no receipt. |
-| Remember what a session absorbed | the `sessions_*` graph | The guard forgets between processes and stops blocking. |
-| Refuse a write from the agent | `GRAPH.RO_QUERY` | The server-side rejection is gone. An application regex is not the same guarantee. |
+| Keep analysis read-only | `GRAPH.RO_QUERY` | The server-side rejection is gone. An application regex is not the same guarantee. |
 
 `packages/core/src/analysis/mincut.live.test.ts` is the executable version of
 this table: it opens FalkorDB 6.0.2, runs `algo.maxFlow`, and checks the cut.
@@ -93,8 +88,8 @@ docker compose up -d                     # FalkorDB 6.0.2, pinned by tag — not
 pnpm install
 pnpm build                               # every workspace package, in dependency order
 
-node packages/cli/dist/index.js scan     # builds the graph, names every route
-node packages/cli/dist/index.js fix      # algo.maxFlow → the cheapest grant to revoke
+node packages/cli/dist/index.js scan     # builds the graph, lists the routes
+node packages/cli/dist/index.js fix      # algo.maxFlow → the computed cut
 node packages/cli/dist/index.js scan data/fixtures/clean.json   # the abstention
 node packages/cli/dist/index.js scan --mcp data/fixtures/mcp-demo.json   # label a real MCP config, then scan it
 
@@ -117,7 +112,7 @@ hidden**, and secrets never leave the machine — values and token-shaped server
 names alike are redacted before anything reaches the graph. Point it at a real
 config and the graph is your own arrangement — the committed
 `data/fixtures/mcp-demo.json` prints 567 routes and a nine-grant cut that
-closes all of them.
+closes the route set.
 
 ![the scan_mcp-github-filesystem-git graph in FalkorDB Browser](./docs/browser-scan-mcp.png)
 
@@ -157,9 +152,9 @@ tasks      3 of 4 keep working
 ```
 
 The cost model is `capacity = 1 + declared tasks that use the grant`, so the
-min-cut prefers the permission that breaks the fewest workflows. The fix is
-then *verified* by re-running the leak query with the revoked grants excluded —
-zero rows is the receipt.
+min-cut prefers the permission that breaks fewer declared tasks. The fix is
+then *verified* by re-running the leak query with the revoked grants excluded:
+a count of 0 is the receipt.
 
 ## The graph
 
@@ -171,7 +166,8 @@ zero rows is the receipt.
 | `Context` | one hub per agent: what the context window can absorb |
 | `Meta` | config id, counts, and the `ready` flag — the last write of ingest |
 
-One relationship type, because `algo.maxFlow` on 6.0.2 accepts exactly one:
+One capacity relationship type, because `algo.maxFlow` on 6.0.2 accepts exactly
+one. The structural `HOSTS` edge is not passed to max-flow:
 
 ```cypher
 (a)-[:FLOWS {dir: 'feeds'|'emits', capacity, revocable, grant, taskCost}]->(b)
@@ -295,9 +291,9 @@ Every FalkorDB call this repository makes:
 |---|---|---|
 | `algo.maxFlow` | `MIN_CUT` in `paths.ts`, consumed by `cutFromMaxFlow` | The fix. One relationship type, verified on 6.0.2. |
 | Bounded variable-length segments anchored at a bound node + `relationships(path)` | `LEAK_PATH`, `VERIFY_FIX` | The laundering hop, and the receipt. |
-| `GRAPH.RO_QUERY` | `GraphDB.read` — analysis, CLI and guard reads | Cannot write, enforced by the server. |
+| `GRAPH.RO_QUERY` | `GraphDB.read` — analysis and CLI reads | Cannot write, enforced by the server. |
 | `id()` | joining `edgeFlows` back onto grants | Edge identity across two queries. |
-| Multigraph (`select_graph`) | one `scan_*` per config, `sessions_*` per session | Tenant isolation without extra infrastructure. |
+| Multigraph (`select_graph`) | one `scan_*` per config, `sessions_*` per session | One graph per scan or session; deleting a run is deleting a graph. |
 | Pinned image `falkordb/falkordb:6.0.2` | `docker-compose.yml` | The engine we verified, not whatever `:latest` is tomorrow. |
 
 We do **not** use CCH. It is documented but not present in 6.0.2.
@@ -339,9 +335,10 @@ against FalkorDB 6.0.2 at `localhost:6379` on 2026-10-17.
 Detection asks whether the scan finds the planted route — and stays silent on
 the eight clean configs. Fix-quality asks whether the cut matches the
 constructed answer, whether `VERIFY_FIX` takes the route count to zero, and
-how many declared tasks keep working. The tie cases are the ones where both
-canonical cuts close every route; they exercise the documented write-side
-tie-break.
+how many declared tasks keep working. The eight clean cases return an empty
+cut; the verification and task checks are not run on them. The tie cases are
+the ones where both canonical cuts close the route set; they exercise the
+documented write-side tie-break.
 
 These are synthetic configs from our own generator, so they show the engine is
 consistent with its spec, not that it is accurate on real users' setups.
@@ -349,8 +346,23 @@ consistent with its spec, not that it is accurate on real users' setups.
 One run on a config that is not ours: `data/fixtures/mcp-public-readmes.json`
 copies the GitHub, filesystem and git entries from the official MCP server
 READMEs. `scan --mcp` on it finds 567 routes; `fix` revokes the 9 write grants
-(every github write plus `git.push`) and the re-run finds 0. The full output is
-in `docs/live-evidence/public-readmes-2026-10-17T18:54:57Z.log`.
+(every github write plus `git.push`) and the re-run finds 0. The public-readmes
+transcript used the 6.0.1 module build; the same 40-tool config is re-run on
+the pinned 6.0.2 container in
+`docs/live-evidence/run-2026-10-17T13:52:42Z.log` and produces the same count.
+
+## Limits
+
+- **Labels are inferred** from tool names, not verified against server code. Unmatched tools are
+  named as unlabelled, never silently trusted.
+- **The traversal is bounded** at five hops on each side of the context. Longer routes are outside
+  the model.
+- **The runtime guard is a demo**: real MCP stdio, simulated tool results. No real GitHub,
+  filesystem or git server sits behind it yet.
+- **The 40-case eval is synthetic** and generated by us. It shows the engine is consistent with its
+  spec, not that it is accurate on real user setups.
+- **The label gold set is self-authored**: a regression check, not external ground truth.
+- **No CCH, no JavaScript UDF, no index.** We do not use or claim them on 6.0.2.
 
 ## Data
 
@@ -363,10 +375,10 @@ secrets.
 ## What we learned
 
 - **We planned the wrong product first.** An MCP tool *router* is a real pain,
-  but its fix does not need a graph, and it already ships elsewhere. Under these
-  rules that is a decoration and a disqualification. The replacement makes the
-  graph load-bearing: remove it and the route, the cut, and the receipt all stop
-  existing.
+  but its fix does not need a graph, and it already ships elsewhere. That made
+  it a thin wrapper around a data store, so we dropped it. The replacement makes
+  the graph load-bearing: remove it and the route, the cut, and the receipt all
+  stop existing.
 - **The docs were ahead of the engine.** The shortest-path index (CCH) is
   documented and does not run on the pinned image; same for the trailing
   `PARAMS` parameter form. We verified by execution, wrote the fallbacks (a
@@ -377,7 +389,7 @@ secrets.
   `dir` property. The final schema is simpler than the plan.
 - **The cut is not the flow.** Our first fix query expected `algo.maxFlow` to
   return a cut. It returns flows; the cut is ours to compute, and the product is
-  better for it — that code is where the "cheapest permission" logic lives.
+  better for it — that code is where the cut-selection logic lives.
 - **A guard is only as good as its refusal order.** The first version appended a
   `LIMIT` to write statements too; the fix was to refuse write keywords *before*
   dispatch, not to sanitise after. Same lesson at the server: `GRAPH.RO_QUERY`
@@ -388,7 +400,7 @@ secrets.
 ## Credits and prior work
 
 - [Devanshu Studios](https://www.devanshustudios.com/) — the studio shipping LethalPath. Live site: https://www.devanshustudios.com/lethalpath/
-- [FalkorDB](https://www.falkordb.com/) — hackathon sponsor, and the engine every query runs on. See [FalkorDB features this product calls](#falkordb-features-this-product-calls).
+- [FalkorDB](https://www.falkordb.com/) — the engine every query runs on. See [FalkorDB features this product calls](#falkordb-features-this-product-calls).
 - Simon Willison — the [lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/), the framing this product builds on.
 - Related tools and papers that informed the design are listed with links in
   [`docs/RELATED-WORK.md`](./docs/RELATED-WORK.md).

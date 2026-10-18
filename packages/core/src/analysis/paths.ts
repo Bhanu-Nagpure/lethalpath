@@ -1,6 +1,6 @@
 /**
- * The queries LethalPath exists to run: find every route, count them without
- * a display cap, compute the minimal revocation, and prove the fix.
+ * The queries LethalPath exists to run: find the modelled routes, count them without
+ * a display cap, compute the minimum cut, and prove the fix.
  *
  * All of them ran against FalkorDB 6.0.2 before being committed. The leak
  * query returned the laundering path on the fs+git fixture; the fix query

@@ -10,9 +10,9 @@ came from.
 ### Added
 
 - **CLI** (`@lethalpath/cli`) — `scan` reads a scan config, builds the graph in
-  FalkorDB and names every route an attacker could take (untrusted input →
+  FalkorDB and lists the routes an attacker could take (untrusted input →
   private data → public sink); `fix` runs `CALL algo.maxFlow`, derives the
-  residual min-cut and revokes the cheapest grant that closes them all, then
+  residual min-cut and revokes the computed cut that closes the route set, then
   re-runs the leak query as its own receipt (`VERIFY_FIX`). Configs come from
   `data/fixtures/*.json` or a real MCP config with `--mcp`; `--json` on both
   verbs. Exit 0 for an abstention, 1 for a refusal.
@@ -52,6 +52,5 @@ came from.
 ## [0.0.1] - 2026-10-16
 
 First public preview: the `scan`/`fix` CLI, the labeler, the guard, and the
-eval harness, all pinned to `falkordb/falkordb:6.0.2`. Built for Graph Hacks
-(WeMakeDevs × FalkorDB, 15–18 Oct 2026) — the README carries the removal test,
-the graph model, and the transcripts.
+eval harness, all pinned to `falkordb/falkordb:6.0.2`. The README carries the
+graph model, the load-bearing-graph table, and the transcripts.

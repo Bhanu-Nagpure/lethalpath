@@ -2,10 +2,10 @@
 /**
  * lethalpath — the verbs a person actually types.
  *
- *   scan  read a config, build the graph in FalkorDB, and name every route an
+ *   scan  read a config, build the graph in FalkorDB, and name the routes an
  *         attacker could take: untrusted input → private data → public sink.
  *   fix   run CALL algo.maxFlow on that graph, derive the residual min-cut,
- *         and print the cheapest grant to revoke plus what workflows survive.
+ *         and print the computed cut to revoke plus what workflows survive.
  *
  * Exit codes: 0 = answered (including "no route found" — that is an answer),
  * 1 = refused or failed. Reads go through the guarded client; nothing here
@@ -41,7 +41,7 @@ import { labelConfig } from "@lethalpath/labeler";
 const USAGE = `lethalpath <scan|fix> [config.json] [options]
 
   scan [config.json]   build the graph and name every leak route
-  fix  [config.json]   revoke the cheapest grant that closes them all
+  fix  [config.json]   revoke the computed cut that closes the route set
 
   config.json defaults to data/fixtures/fs-git.json
   --mcp <mcp.json>     label a real MCP config first (packages/labeler), then scan it

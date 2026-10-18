@@ -7,7 +7,7 @@
  *   1. clear — a re-scan never reads stale edges from the previous run
  *   2. build — every node, then every FLOWS edge, with
  *      capacity = 1 + taskCost so the min-cut prefers the grant that breaks
- *      the fewest workflows
+ *      fewer declared tasks
  *   3. flip (:Meta).ready — always the last write. Readers check it before
  *      analysing, so a scan can never read a half-built graph.
  *

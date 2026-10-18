@@ -14,6 +14,6 @@ test("the run output names FalkorDB before it names the fix", () => {
   assert.match(text, /FalkorDB 6\.0\.2/);
   assert.match(text, /CALL algo\.maxFlow on FalkorDB/);
   assert.match(text, /revoke git\.push/);
-  // the sponsor line is above the fix line
+  // the engine line is above the fix line
   assert.ok(text.indexOf("FalkorDB") < text.indexOf("revoke"));
 });

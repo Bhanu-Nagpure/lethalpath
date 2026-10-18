@@ -36,7 +36,7 @@ flowchart LR
   DB -. every read .-> FDB
 
   subgraph CLI["@lethalpath/cli"]
-    SCAN["scan — build, then name every route"]
+    SCAN["scan — build, then list the routes"]
     FIX["fix — revoke, then VERIFY_FIX (the receipt)"]
   end
   PATH --> SCAN
@@ -77,7 +77,7 @@ Every data movement is **one** relationship type — `FLOWS` — because
 
 `grant` on the edge is the tool name — the permission you would revoke — and
 `taskCost` counts the declared tasks that call that tool. The cost model is why
-the min-cut prefers the permission that breaks the fewest workflows: a max-flow
+the min-cut prefers the grant that breaks fewer declared tasks: a max-flow
 admits two canonical minimum cuts, and the product picks the cheaper one (fewer
 grants, fewer broken tasks, write side on a full tie).
 
@@ -97,7 +97,7 @@ grants, fewer broken tasks, write side on a full tie).
   analysis, so a scan never reads a half-built graph.
 - **`algo.maxFlow` + the residual cut.** The fix is a real minimum cut, not a
   heuristic, and `VERIFY_FIX` re-runs the traversal with `$revoked` excluded —
-  zero rows is the receipt, and a non-zero remainder exits 1 and says so.
+  a count of 0 is the receipt, and a non-zero remainder exits 1 and says so.
 - **The session hash.** The guard's audit graph stores decisions and a 16-hex
   sha256 of the canonical arguments, never the arguments. No file contents, no
   message bodies, no credentials anywhere in either graph — capability labels

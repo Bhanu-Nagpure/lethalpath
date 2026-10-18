@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The uncut run log the submission checklist asks for.
+# The uncut run log behind the README's numbers.
 #
 # Run from the repo root with FalkorDB up:
 #   scripts/evidence.sh
@@ -61,7 +61,7 @@ mkdir -p docs/live-evidence
   echo "## eval — 40 seeded cases, both suites"
   pnpm --filter @lethalpath/eval build 2>&1
   pnpm --filter @lethalpath/eval evaluate 2>&1
-} | tee "$LOG"
+} | sed "s#$(pwd)#<repo>#g" | tee "$LOG"
 
 echo
 echo "written: $LOG"

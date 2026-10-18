@@ -1,13 +1,12 @@
 /**
- * What a judge sees when the product runs.
+ * What the product prints when it runs.
  *
- * The banner names the sponsor and the pinned engine. The body names the
- * FalkorDB procedure that produced the grant. Neither is optional: a demo that
- * hides the database fails the "primary graph" rule even if the database did
- * the work.
+ * The banner names the engine the build is verified against. The body names the
+ * FalkorDB procedure that produced the grant, so the output itself says where
+ * the decision came from.
  */
 
-export const BANNER = "LethalPath  ·  powered by FalkorDB 6.0.2";
+export const BANNER = "LethalPath  ·  verified against FalkorDB 6.0.2";
 
 export function report(input: {
   injectedFrom: string;
