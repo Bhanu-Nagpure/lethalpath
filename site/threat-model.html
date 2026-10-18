@@ -62,17 +62,17 @@
 
   <div class="wrap main-narrow">
     <h2 class="subhead mt-sc" id="problem">The problem, stated precisely</h2>
-    <p class="mt-md" style="color:var(--body)">An agent holds <strong style="color:var(--ink)">three capabilities at once</strong>: it can read text an attacker controls, read private data, and write somewhere public. Because every tool&rsquo;s output lands in the same context window, an instruction hidden in the first can steer the second into the third. Simon Willison named this the <em>lethal trifecta</em>.</p>
+    <p class="mt-md" style="color:var(--body)">An agent holds <strong style="color:var(--ink)">three capabilities at once</strong>: it can read text an attacker controls, read private data, and write somewhere public. Because every tool&rsquo;s output lands in the same context window, an instruction hidden in the first can steer the second into the third. Simon Willison named this the <a href="https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/"><em>lethal trifecta</em></a>.</p>
     <p class="mt-md" style="color:var(--body)">The combination is what matters. Each tool behaves exactly as documented; the bug is in the arrangement. That is why this is a graph problem &mdash; <span class="mono">untrusted → private → public</span> is a path, and paths are what graphs answer.</p>
 
     <h2 class="subhead mt-sc" id="miss">What we miss</h2>
     <div class="qa">
       <h3>Labels are inferred, not declared</h3>
-      <p>Of the servers we catalogued, essentially none declare their own trust level. We infer from tool names, with one conservative fallback for anything the rules cannot classify, and we score that inference against a hand-labelled regression set. Labelling misses are our weakest area; <a href="benchmarks.html">Evidence</a> states exactly what we measure, and what we do not.</p>
+      <p>MCP has no standard field for a server&rsquo;s trust level, so we infer it from tool names, with one conservative fallback for anything the rules cannot classify, and we score that inference against a hand-labelled regression set. Labelling misses are our weakest area; <a href="benchmarks.html">Evidence</a> states exactly what we measure, and what we do not.</p>
     </div>
     <div class="qa">
       <h3>Annotations are untrusted by design</h3>
-      <p>The MCP specification says clients <em>must</em> treat tool annotations as untrusted unless they come from trusted servers. We follow it. A server that lies about being read-only gets no benefit of the doubt from us &mdash; but it also means we cannot simply trust what we are told.</p>
+      <p>The <a href="https://modelcontextprotocol.io/specification/2025-06-18/server/tools">MCP specification</a> says clients <em>must</em> treat tool annotations as untrusted unless they come from trusted servers. We follow it. A server that lies about being read-only gets no benefit of the doubt from us &mdash; but it also means we cannot simply trust what we are told.</p>
     </div>
     <div class="qa">
       <h3>We find paths, not payloads</h3>

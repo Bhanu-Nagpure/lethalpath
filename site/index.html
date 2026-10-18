@@ -241,6 +241,7 @@
       </figure>
     </div>
     <p class="small muted" style="margin-top:22px">Replayed against published incidents from GitHub MCP, Supabase, WhatsApp and Postmark. <a href="benchmarks.html#incidents">See the evidence</a>.</p>
+    <p class="small muted" style="margin-top:10px">It also happens with no attacker: in a controlled study, depending on the model, 11.5&ndash;41.3% of agent runs passed credentials across MCP servers when the task allowed redacting them (<a href="https://arxiv.org/abs/2604.27819">MCPHunt</a>). Meta&rsquo;s <a href="https://ai.meta.com/blog/practical-ai-agent-security/">Agents Rule of Two</a> and <a href="https://genai.owasp.org/llmrisk/llm062025-excessive-agency/">OWASP LLM06</a> recommend the same remedy: don&rsquo;t give one agent all three abilities.</p>
   </div>
 </section>
 
@@ -314,7 +315,7 @@
         <p class="eyebrow">Evidence</p>
         <h2 style="margin-top:14px">Every number has a file behind it.</h2>
       </div>
-      <p class="lede">Forty seeded configs, one public config, and the committed transcripts. Nothing is rounded up. <a href="benchmarks.html">Read the evidence</a>.</p>
+      <p class="lede">Forty seeded configs, one public config, and the committed transcripts. <a href="benchmarks.html">Read the evidence</a>.</p>
     </div>
 
     <div class="stat-band">
@@ -375,7 +376,7 @@
     <div class="section-head">
       <div>
         <p class="eyebrow">The fix</p>
-        <h2 style="margin-top:14px">A scanner tells you the risk. LethalPath tells you what to switch off.</h2>
+        <h2 style="margin-top:14px">It doesn&rsquo;t stop at the risk. It computes the permissions to remove.</h2>
       </div>
       <p class="lede"><span class="mono">algo.maxFlow</span> returns flows, not a cut. LethalPath walks the residual graph, compares both canonical cuts, and picks the one that costs fewer grants and keeps more declared tasks.</p>
     </div>
@@ -419,7 +420,7 @@
       <div class="falkor-head">
         <div>
           <p class="eyebrow">Built on FalkorDB</p>
-          <h2 style="margin-top:14px">The graph is not a store. It is the product.</h2>
+          <h2 style="margin-top:14px">The leak is a reachability question, so it runs on a graph.</h2>
           <p class="mt-md">The leak is a reachability question: can an untrusted input reach a public sink through this agent&rsquo;s context? A vector index can rank tools; it cannot answer that. The fix is a flow problem on the same graph.</p>
         </div>
         <ul class="falkor-list">
