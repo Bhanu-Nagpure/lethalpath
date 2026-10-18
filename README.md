@@ -37,7 +37,6 @@ what we do not claim: shortest-path indexes (CCH) are documented and are not in
 
 > Numbers appear in this README only with the file that contains them named
 > beside them — the eval results, the live-evidence log, or the fixture itself.
-> No exceptions.
 
 **New here? Jump to the [Quick start](#quick-start).**
 
@@ -86,6 +85,7 @@ answer, and a vector index cannot.
 ## Quick start
 
 ```bash
+git clone https://github.com/bhanu-dev82/lethalpath && cd lethalpath
 docker compose up -d                     # FalkorDB 6.0.2, pinned by tag — not :latest
 pnpm install
 pnpm build                               # every workspace package, in dependency order
@@ -133,7 +133,7 @@ three servers — 49 nodes, 120 edges. The stats bar shows the Browser's default
 ### What `scan` prints
 
 ```
-LethalPath  ·  verified against FalkorDB 6.0.2
+LethalPath  ·  built for FalkorDB 6.0.2
 
 config    fs-git · A public issue steers the agent through the private folder out to a public repo
 graph     scan_fs-git · 11 nodes · 9 edges · ready
