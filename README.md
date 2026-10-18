@@ -357,9 +357,11 @@ One run on a config that is not ours: `data/fixtures/mcp-public-readmes.json`
 copies the GitHub, filesystem and git entries from the official MCP server
 READMEs. `scan --mcp` on it finds 567 routes; `fix` revokes the 9 write grants
 (every github write plus `git.push`) and the re-run finds 0. The public-readmes
-transcript used the 6.0.1 module build; the same 40-tool config is re-run on
-the pinned 6.0.2 container in
-`docs/live-evidence/run-2026-10-17T13:52:42Z.log` and produces the same count.
+transcript used the 6.0.1 module build
+(`docs/live-evidence/public-readmes-2026-10-17T18:54:57Z.log`); a config with
+the same three servers (`data/fixtures/mcp-demo.json`) was run on the pinned
+6.0.2 container in `docs/live-evidence/run-2026-10-17T13:52:42Z.log` and gives
+the same count.
 
 ## Limits
 
