@@ -23,6 +23,8 @@ write side.
 
 Made by [Bhanu Nagpure](https://github.com/bhanu-dev82). Live site:
 [devanshustudios.com/lethalpath](https://www.devanshustudios.com/lethalpath/).
+**Demo:** [3:20 walkthrough](https://www.devanshustudios.com/lethalpath/#demo) ·
+live conductor: `bash scripts/live-demo.sh`.
 
 **How FalkorDB is used.** Every scan is a FalkorDB graph (`scan_<name>`). The
 route query is Cypher; the fix is `CALL algo.maxFlow` on that graph, followed by
